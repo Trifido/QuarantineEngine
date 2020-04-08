@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{20b90ce4-7fcb-4731-b9a0-075f875de82d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources">
+      <UniqueIdentifier>{f18ab499-84e1-499f-8eff-9754361e0e52}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="gl3w">
+      <UniqueIdentifier>{42f99867-3108-43b8-99d0-fabefaf1f2e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\inputs">
+      <UniqueIdentifier>{ae8b9a9d-bffa-43ad-91b6-9fe3b9525aaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\shaders">
+      <UniqueIdentifier>{05a1e65d-c8a5-458b-a959-c43731d011e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\debug">
+      <UniqueIdentifier>{f8ee43a8-ed1f-4050-99ce-a31c25eda547}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\libs">
+      <UniqueIdentifier>{ec730a41-ce2c-4bf7-a5a8-8b60f01c7d2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\system">
+      <UniqueIdentifier>{8a0d713c-617d-419d-9f7f-db8862035555}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libs\gl3w\GL\gl3w.c">
+      <Filter>gl3w</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui_impl_glfw.cpp">
+      <Filter>sources\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\imgui_impl_opengl3.cpp">
+      <Filter>sources\libs</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\gl3w\GL\gl3w.h">
+      <Filter>gl3w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\gl3w\GL\glcorearb.h">
+      <Filter>gl3w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyInput.h">
+      <Filter>sources\inputs</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>sources\debug</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\stb_image.h">
+      <Filter>sources\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui_impl_opengl3.h">
+      <Filter>sources\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\imgui_impl_glfw.h">
+      <Filter>sources\libs</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem.h">
+      <Filter>sources\system</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\example.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\example.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="..\..\misc\natvis\imgui.natvis">
+      <Filter>sources\libs</Filter>
+    </None>
+    <None Include="..\README.txt">
+      <Filter>sources\libs</Filter>
+    </None>
+    <None Include="shaders\example1.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\example1.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\lightingCubeFRAG.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\lightingCubeVERT.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\lightmaps.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\lightmaps.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>

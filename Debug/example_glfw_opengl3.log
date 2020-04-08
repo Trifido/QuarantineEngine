@@ -1,0 +1,94 @@
+﻿  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_widgets.cpp
+  imgui_impl_glfw.cpp
+  imgui_impl_opengl3.cpp
+  Camera.cpp
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(58,1): warning C4201:  se ha utilizado una extensión no estándar: struct/union sin especificar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(137): message :  vea la referencia a la creación de instancias de clase plantilla "glm::qua<T,Q>" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\RenderSystem.h(19,28): warning C4244:  'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_transform.inl(147,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_transform.inl(147,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Camera.cpp(51): message :  vea la referencia a la creación de instancias de plantilla de función "glm::mat<4,4,glm::f32,0> glm::lookAt<float,0>(const glm::vec<3,float,0> &,const glm::vec<3,float,0> &,const glm::vec<3,float,0> &)" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(326,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(326,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Camera.cpp(52): message :  vea la referencia a la creación de instancias de plantilla de función "glm::mat<4,4,glm::f32,0> glm::perspective<genType>(T,T,T,T)" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Camera.cpp(52): message :         with
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Camera.cpp(52): message :         [
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Camera.cpp(52): message :             genType=float,
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Camera.cpp(52): message :             T=float
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Camera.cpp(52): message :         ]
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(328,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(328,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(330,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(330,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(332,1): warning C4127:  la expresión condicional es constante
+  Light.cpp
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(332,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(58,1): warning C4201:  se ha utilizado una extensión no estándar: struct/union sin especificar
+  main.cpp
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(137): message :  vea la referencia a la creación de instancias de clase plantilla "glm::qua<T,Q>" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\RenderSystem.h(19,28): warning C4244:  'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(58,1): warning C4201:  se ha utilizado una extensión no estándar: struct/union sin especificar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(137): message :  vea la referencia a la creación de instancias de clase plantilla "glm::qua<T,Q>" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\main.cpp(252,28): warning C4101:  'EBO': variable local sin referencia
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\main.cpp(223,10): warning C4189:  'show_demo_window': la variable local se ha inicializado pero no se hace referencia a ella
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\main.cpp(252,23): warning C4101:  'VAO': variable local sin referencia
+  Model.cpp
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\main.cpp(224,10): warning C4189:  'show_another_window': la variable local se ha inicializado pero no se hace referencia a ella
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(58,1): warning C4201:  se ha utilizado una extensión no estándar: struct/union sin especificar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(137): message :  vea la referencia a la creación de instancias de clase plantilla "glm::qua<T,Q>" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(326,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(326,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :  vea la referencia a la creación de instancias de plantilla de función "glm::mat<4,4,glm::f32,0> glm::perspective<genType>(T,T,T,T)" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :         with
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :         [
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :             genType=float,
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :             T=float
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :         ]
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(328,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(328,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(330,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(330,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(332,1): warning C4127:  la expresión condicional es constante
+  Shader.cpp
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\ext\matrix_clip_space.inl(332,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(58,1): warning C4201:  se ha utilizado una extensión no estándar: struct/union sin especificar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\libs\glm\detail\type_quat.hpp(137): message :  vea la referencia a la creación de instancias de clase plantilla "glm::qua<T,Q>" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(157,70): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(157,70): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(158,70): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(158,70): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(159,72): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(159,72): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(160,74): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(160,74): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(165,70): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(165,70): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(166,68): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(166,68): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(167,68): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(167,68): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(168,70): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(168,70): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(178,70): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(178,70): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(179,72): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(179,72): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(180,68): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(180,68): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(181,68): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(181,68): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(182,70): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(182,70): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(196,68): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(196,68): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(197,68): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(197,68): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(198,70): warning C4239:  se ha utilizado una extensión no estándar: 'argumento': conversión de 'glm::vec3' a 'glm::vec3 &'
+  Texture.cpp
+  Generando código...
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Shader.cpp(198,70): message :  Una referencia que no es const solamente se puede enlazar a un valor L
+  gl3w.c
+  example_glfw_opengl3.vcxproj -> C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Debug\example_glfw_opengl3.exe
