@@ -67,6 +67,9 @@
     <ClCompile Include="Light.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -93,9 +96,6 @@
     <ClInclude Include="Shader.h">
       <Filter>sources</Filter>
     </ClInclude>
-    <ClInclude Include="libs\stb_image.h">
-      <Filter>sources\libs</Filter>
-    </ClInclude>
     <ClInclude Include="..\imgui_impl_opengl3.h">
       <Filter>sources\libs</Filter>
     </ClInclude>
@@ -116,6 +116,12 @@
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="includes\stb_image.h">
+      <Filter>sources\libs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +153,12 @@
       <Filter>sources\shaders</Filter>
     </None>
     <None Include="shaders\lightmaps.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\nanosuit.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\nanosuit.vert">
       <Filter>sources\shaders</Filter>
     </None>
   </ItemGroup>

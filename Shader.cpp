@@ -77,7 +77,7 @@ void Shader::use()
     }
 }
 
-void Shader::SetCamera(Camera* cam)
+void Shader::AddCamera(Camera* cam)
 {
     mainCamera = cam;
 }
@@ -157,11 +157,11 @@ void Shader::ActivateLights()
             this->setVec3("dirLight.ambient", lights[i]->GetAmbient());
             this->setVec3("dirLight.diffuse", lights[i]->GetDiffuse());
             this->setVec3("dirLight.specular", lights[i]->GetSpecular());
-            this->setVec3("dirLight.direction", lights[i]->GetDirection());
+            this->setVec3("dirLight.direction", lights[i]->GetDirection()); 
         }
         else if (lights[i]->GetType() == TypeLight::POINTLIGHT)
         {
-            std::string name = "pointLights[" + std::to_string(i) + "].";
+            std::string name = "pointLights[" + std::to_string(numPointLights) + "].";
             this->setVec3(name + "position", lights[i]->GetPosition());
             this->setVec3(name + "ambient", lights[i]->GetAmbient());
             this->setVec3(name + "diffuse", lights[i]->GetDiffuse());
@@ -174,7 +174,7 @@ void Shader::ActivateLights()
         }
         else if (lights[i]->GetType() == TypeLight::SPOTL)
         {
-            std::string name = "spotLights[" + std::to_string(i) + "].";
+            std::string name = "spotLights[" + std::to_string(numSpotLights) + "].";
             this->setVec3(name + "position", lights[i]->GetPosition());
             this->setVec3(name + "direction", lights[i]->GetDirection());
             this->setVec3(name + "ambient", lights[i]->GetAmbient());
@@ -190,7 +190,7 @@ void Shader::ActivateLights()
         }
         else
         {
-            std::string name = "fpsSpotLights.";
+            std::string name = "fpsSpotLight.";
             this->setVec3(name + "position", mainCamera->cameraPos);
             this->setVec3(name + "direction", mainCamera->cameraFront);
             this->setVec3(name + "ambient", lights[i]->GetAmbient());

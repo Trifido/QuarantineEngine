@@ -6,6 +6,10 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <filesystem>
 
 //#define STB_IMAGE_IMPLEMENTATION
 //#include "libs/stb_image.h"
@@ -49,8 +53,8 @@ using namespace gl;
 #include "RenderSystem.h"
 #include "KeyInput.h"
 #include "Shader.h"
-#include "Model.h"
 #include "Camera.h"
+#include "Model.h"
 //#include "Light.h"
  
 
@@ -118,17 +122,6 @@ glm::vec3 pointLightPositions[] = {
     glm::vec3(2.3f, -3.3f, -4.0f),
     glm::vec3(-4.0f,  2.0f, -12.0f),
     glm::vec3(0.0f,  0.0f, -3.0f)
-};
-
-unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
-};
-float texCoords[] = {
-    1.0f, 1.0f,   // top-right corner
-    1.0f, 0.0f,  // lower-right corner
-    0.0f, 0.0f,  // lower-left corner  
-    0.0f, 1.0f   // top-left corner
 };
 
 static void glfw_error_callback(int error, const char* description)
@@ -224,31 +217,39 @@ int main(int, char**)
     bool show_another_window = false;
     //ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+    //ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.0f); TERROR
+    //ImVec4 clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); 
 
     //CAMERA
     Camera mainCamera(1280, 720);
 
     //MODEL 3D
-    Model modelo3D, modelo3D_2;
+    /*Model modelo3D, modelo3D_2;*/
+    Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
+    //Model ourModel("C:/Users/vicen/Desktop/Vector Engine/imgui-master/examples/example_glfw_opengl3/resources/3DModels/nanosuit/nanosuit.obj");
 
     // LIGHT
     std::vector<Light*> lightsVector;
-    lightsVector.push_back(new Light(TypeLight::SPOTFPSL));
-    lightsVector.push_back(new Light(TypeLight::DIRL));
-    lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
-    lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
-    lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));
-    lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[3]));
+    //lightsVector.push_back(new Light(TypeLight::SPOTFPSL));
+    //lightsVector.push_back(new Light(TypeLight::DIRL));
+    //lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
+    //lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
+    //lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));
+    //lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[3]));
 
 
     //SHADER
-    //Shader ourShader("shaders/example.vert", "shaders/example.frag");
-    Shader lightingShader("shaders/lightingCubeVERT.vert", "shaders/lightingCubeFRAG.frag");
-    Shader cubeShader("shaders/lightmaps.vert", "shaders/lightmaps.frag");
+    //Shader lightingShader("shaders/lightingCubeVERT.vert", "shaders/lightingCubeFRAG.frag");
+    //Shader cubeShader("shaders/lightmaps.vert", "shaders/lightmaps.frag");
+    Shader nanoSuitShader("shaders/nanosuit.vert", "shaders/nanosuit.frag");
     //Añado las luces a mi shader
-    cubeShader.AddLight(lightsVector);
+    nanoSuitShader.AddLight(lightsVector);
+    nanoSuitShader.AddCamera(&mainCamera);
+    //cubeShader.AddLight(lightsVector);
+    //cubeShader.AddCamera(&mainCamera);
 
     //VBO, VAO & EBO;
+    /*
     unsigned int VBO, VAO, EBO;
     glGenBuffers(1, &VBO);
 
@@ -277,55 +278,15 @@ int main(int, char**)
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    /*
-    glGenBuffers(1, &EBO);
-    glGenVertexArrays(1, &VAO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
-
-    //Asignamos la geometría al VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    ///Asignamos los indices al EBO
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    ///Indicamos los campos de entrada del shader de vértices y el formato de los mismos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    //glEnableVertexAttribArray(1);
-    // texture coord attribute
-    //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    //glEnableVertexAttribArray(2);
-
-
-    ///TEXTURES
-    //Texture texture1("resources/container.jpg");
-    //Texture texture2("resources/awesomeface.png", GL_REPEAT, GL_LINEAR, true);
-
-    //ourShader.AddTexture(&texture1);
-    //ourShader.AddTexture(&texture2);
-
-
-    ourShader.ActivateTextures();
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
     */
 
-    Texture texture1("resources/container2.png");
-    Texture texture2("resources/container2_specular.png");
-    Texture texture3("resources/matrix.jpg");
-    cubeShader.AddTexture(&texture1, "material.diffuse");
-    cubeShader.AddTexture(&texture2, "material.specular");
-    cubeShader.AddTexture(&texture3, "material.emissive");
-
-    cubeShader.ActivateTextures();
+    //Texture texture1("resources/container2.png");
+    //Texture texture2("resources/container2_specular.png");
+    //Texture texture3("resources/matrix.jpg");
+    //cubeShader.AddTexture(&texture1, "material.diffuse");
+    //cubeShader.AddTexture(&texture2, "material.specular");
+    //cubeShader.AddTexture(&texture3, "material.emissive");
+    //cubeShader.ActivateTextures();
 
     //ACTIVAMOS EL DEPTH BUFFER
     glEnable(GL_DEPTH_TEST);
@@ -403,78 +364,14 @@ int main(int, char**)
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //Llamamos a ejecutar el shader
-        //ourShader.use();
-
         //CUBE
+        /*
         cubeShader.use();
-
-        //cubeShader.setVec3("viewPos", mainCamera.cameraPos);
-        
-        //cubeShader.setVec3("material.diffuse", 0.4f, 0.4f, 0.4f);
-        //cubeShader.setVec3("material.specular", 0.774597f, 0.774597f, 0.774597f);
-        //cubeShader.setFloat("material.shininess", 0.6f);
         cubeShader.setFloat("material.shininess", 64.0f);
-
         cubeShader.ActivateCamera();
         cubeShader.ActivateLights();
-        ////DIRECTIONAL LIGHT
-        //cubeShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        //cubeShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        //cubeShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-        //cubeShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-
-        //// point light 1
-        //cubeShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-        //cubeShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-        //cubeShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-        //cubeShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-        //cubeShader.setFloat("pointLights[0].constant", 1.0f);
-        //cubeShader.setFloat("pointLights[0].linear", 0.09);
-        //cubeShader.setFloat("pointLights[0].quadratic", 0.032);
-        //// point light 2
-        //cubeShader.setVec3("pointLights[1].position", pointLightPositions[1]);
-        //cubeShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-        //cubeShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-        //cubeShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-        //cubeShader.setFloat("pointLights[1].constant", 1.0f);
-        //cubeShader.setFloat("pointLights[1].linear", 0.09);
-        //cubeShader.setFloat("pointLights[1].quadratic", 0.032);
-        //// point light 3
-        //cubeShader.setVec3("pointLights[2].position", pointLightPositions[2]);
-        //cubeShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-        //cubeShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-        //cubeShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-        //cubeShader.setFloat("pointLights[2].constant", 1.0f);
-        //cubeShader.setFloat("pointLights[2].linear", 0.09);
-        //cubeShader.setFloat("pointLights[2].quadratic", 0.032);
-        //// point light 4
-        //cubeShader.setVec3("pointLights[3].position", pointLightPositions[3]);
-        //cubeShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-        //cubeShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-        //cubeShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-        //cubeShader.setFloat("pointLights[3].constant", 1.0f);
-        //cubeShader.setFloat("pointLights[3].linear", 0.09);
-        //cubeShader.setFloat("pointLights[3].quadratic", 0.032);
-
-        ////SPOTLIGHT
-        //cubeShader.setVec3("spotLight.position", mainCamera.cameraPos);
-        //cubeShader.setVec3("spotLight.direction", mainCamera.cameraFront);
-        //cubeShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-        //cubeShader.setVec3("spotLight.diffuse", 1.f, 1.f, 1.f);
-        //cubeShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-        //cubeShader.setFloat("spotLight.constant", 1.0f);
-        //cubeShader.setFloat("spotLight.linear", 0.09);
-        //cubeShader.setFloat("spotLight.quadratic", 0.032);
-        //cubeShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-        //cubeShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-
-        ////MAIN CAMERA UNIFORMS
-        //cubeShader.setMat4("projection", mainCamera.projection);
-        //cubeShader.setMat4("view", mainCamera.view);
 
         glBindVertexArray(cubeVAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         for (unsigned int i = 0; i < 10; i++)
         {
@@ -486,31 +383,35 @@ int main(int, char**)
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+        */
 
-        //LIGHT
+        //LIGHT      
+        //glUseProgram(lightingShader.ID);
+        //lightingShader.setMat4("projection", mainCamera.projection);
+        //lightingShader.setMat4("view", mainCamera.view);
+        //for (unsigned int i = 0; i < 4; i++)
+        //{
+        //    glm::mat4 model = glm::mat4(1.0f);
+        //    model = glm::translate(model, pointLightPositions[i]);
+        //    model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+        //    lightingShader.setMat4("model", model);
+        //    glDrawArrays(GL_TRIANGLES, 0, 36);
+        //}
+        //glBindVertexArray(lightVAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //NANOSUIT
+        nanoSuitShader.use();
+        nanoSuitShader.ActivateCamera();
+        nanoSuitShader.ActivateLights();
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+        nanoSuitShader.setMat4("model", model);
+        ourModel.Draw(nanoSuitShader);
         
-        glUseProgram(lightingShader.ID);
-
-        lightingShader.setMat4("projection", mainCamera.projection);
-        lightingShader.setMat4("view", mainCamera.view);
-
-        for (unsigned int i = 0; i < 4; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, pointLightPositions[i]);
-            model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-            lightingShader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-
-        //lightingShader.setMat4("model", modelo3D_2.model);
-
-        glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        
-
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
     }
 
@@ -519,11 +420,9 @@ int main(int, char**)
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    //glDeleteVertexArrays(1, &VAO);
-    glDeleteVertexArrays(1, &lightVAO);
-    glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteBuffers(1, &VBO);
-    //glDeleteBuffers(1, &EBO);
+    //glDeleteVertexArrays(1, &lightVAO);
+    //glDeleteVertexArrays(1, &cubeVAO);
+    //glDeleteBuffers(1, &VBO);
 
     glfwDestroyWindow(window);
     glfwTerminate();

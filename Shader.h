@@ -15,7 +15,7 @@
 #include "Texture.h"
 #include "Light.h"
 #include "Camera.h"
-#include "libs/glm/glm.hpp"
+#include "glm/glm.hpp"
 
 
 class Shader
@@ -33,7 +33,6 @@ public:
     Shader(const char* vertexPath, const char* fragmentPath);
     // use/activate the shader
     void use();
-    void SetCamera(Camera* cam);
     // utility uniform functions
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
@@ -46,6 +45,7 @@ public:
     void AddLight(Light* light);
     void AddLight(std::vector<Light*> lightVec);
     void ActivateLights();
+    void AddCamera(Camera* cam);
     void ActivateCamera();
 };
 

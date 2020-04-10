@@ -75,7 +75,7 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
 
     // phase 1: Directional lighting
-    vec3 result = CalcDirLight(dirLight, norm, viewDir);
+    vec3 result = vec3(0.0f);// = CalcDirLight(dirLight, norm, viewDir);
 
     // phase 2: Point lights
     for(int i = 0; i < numPointLights; i++)
@@ -86,7 +86,7 @@ void main()
         result += CalcSpotLight(spotLights[i], norm, FragPos, viewDir);
 
     //phase 4: FPS Spot Light
-        result += CalcSpotLight(fpsSpotLight, norm, FragPos, viewDir); 
+    result += CalcSpotLight(fpsSpotLight, norm, FragPos, viewDir); 
     
     FragColor = vec4(result, 1.0);
 } 
@@ -123,9 +123,9 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoords)) * attenuation;
     vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, TexCoords)) * attenuation;
     vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords)) * attenuation;
-    //vec3 emissive = vec3(texture(material.emissive, TexCoords)) * attenuation;
+    vec3 emissive = vec3(texture(material.emissive, TexCoords)) * attenuation;
 
-    return (ambient + diffuse + specular);// + emissive);
+    return (ambient + diffuse + specular + emissive);
 }
 
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
