@@ -5,8 +5,7 @@ Light::Light()
     type = TypeLight::POINTLIGHT;
     //Coords & Dir
     position = glm::vec3(0.0f);
-    //direction = glm::vec3(-0.2f, -1.0f, -0.3f);
-    direction = glm::vec3(0.2f, 1.0f, 0.3f);
+    direction = glm::vec3(-0.2f, -1.0f, -0.3f);
     //Color Light
     ambient = glm::vec3(0.05f);
     diffuse = glm::vec3(0.8f);

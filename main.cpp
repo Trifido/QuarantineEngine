@@ -103,6 +103,7 @@ float vertices[] = {
     -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
+
 // positions all containers
 glm::vec3 cubePositions[] = {
     glm::vec3(0.0f,  0.0f,  0.0f),
@@ -223,70 +224,41 @@ int main(int, char**)
     //CAMERA
     Camera mainCamera(1280, 720);
 
-    //MODEL 3D
-    /*Model modelo3D, modelo3D_2;*/
+    //MODEL 3D 
     Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
-    //Model ourModel("C:/Users/vicen/Desktop/Vector Engine/imgui-master/examples/example_glfw_opengl3/resources/3DModels/nanosuit/nanosuit.obj");
 
+    //Material shininess
+    ourModel.SetShininess(1.0f);
+    
     // LIGHT
     std::vector<Light*> lightsVector;
-    //lightsVector.push_back(new Light(TypeLight::SPOTFPSL));
-    //lightsVector.push_back(new Light(TypeLight::DIRL));
-    //lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
-    //lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
-    //lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));
-    //lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[3]));
-
+    lightsVector.push_back(new Light(TypeLight::SPOTFPSL));
+    lightsVector.push_back(new Light(TypeLight::DIRL));
+    lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
+    lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
+    lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));
+    lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[3]));
 
     //SHADER
-    //Shader lightingShader("shaders/lightingCubeVERT.vert", "shaders/lightingCubeFRAG.frag");
-    //Shader cubeShader("shaders/lightmaps.vert", "shaders/lightmaps.frag");
     Shader nanoSuitShader("shaders/nanosuit.vert", "shaders/nanosuit.frag");
-    //Añado las luces a mi shader
+    // - Añado las propiedas a mi shader
     nanoSuitShader.AddLight(lightsVector);
     nanoSuitShader.AddCamera(&mainCamera);
-    //cubeShader.AddLight(lightsVector);
-    //cubeShader.AddCamera(&mainCamera);
 
-    //VBO, VAO & EBO;
-    /*
-    unsigned int VBO, VAO, EBO;
-    glGenBuffers(1, &VBO);
+    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE);
+    Texture texture2("resources/container2_specular.png", TypeTexture::SPECULAR);
+    Texture texture3("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
+    Texture texture4("resources/matrix.jpg", TypeTexture::EMISSIVE);
 
-    unsigned int lightVAO, cubeVAO;
-    //CUBE
-    glGenVertexArrays(1, &cubeVAO);
+    std::vector<Texture> textures;
 
-    //Asignamos la geometría al VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    textures.push_back(texture1);
+    //textures.push_back(texture2);
+    textures.push_back(texture3);
 
-    glBindVertexArray(cubeVAO);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1); 
-    // UV attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2); 
-
-    //LIGHT
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);  
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    */
-
-    //Texture texture1("resources/container2.png");
-    //Texture texture2("resources/container2_specular.png");
-    //Texture texture3("resources/matrix.jpg");
-    //cubeShader.AddTexture(&texture1, "material.diffuse");
-    //cubeShader.AddTexture(&texture2, "material.specular");
-    //cubeShader.AddTexture(&texture3, "material.emissive");
-    //cubeShader.ActivateTextures();
+    Model cubeModel(vertices, 36, textures);
+    //Material shininess
+    cubeModel.SetShininess(12.0f);
 
     //ACTIVAMOS EL DEPTH BUFFER
     glEnable(GL_DEPTH_TEST);
@@ -364,52 +336,22 @@ int main(int, char**)
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //CUBE
-        /*
-        cubeShader.use();
-        cubeShader.setFloat("material.shininess", 64.0f);
-        cubeShader.ActivateCamera();
-        cubeShader.ActivateLights();
-
-        glBindVertexArray(cubeVAO);
-
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            cubeShader.setMat4("model", model);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        */
-
-        //LIGHT      
-        //glUseProgram(lightingShader.ID);
-        //lightingShader.setMat4("projection", mainCamera.projection);
-        //lightingShader.setMat4("view", mainCamera.view);
-        //for (unsigned int i = 0; i < 4; i++)
-        //{
-        //    glm::mat4 model = glm::mat4(1.0f);
-        //    model = glm::translate(model, pointLightPositions[i]);
-        //    model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-        //    lightingShader.setMat4("model", model);
-        //    glDrawArrays(GL_TRIANGLES, 0, 36);
-        //}
-        //glBindVertexArray(lightVAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        //NANOSUIT
-        nanoSuitShader.use();
+        //SHADER ACTIVATE PROPERTIES
         nanoSuitShader.ActivateCamera();
         nanoSuitShader.ActivateLights();
 
+        //NANOSUIT
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
         nanoSuitShader.setMat4("model", model);
         ourModel.Draw(nanoSuitShader);
+
+        //CUBE
+        model = glm::mat4(1.0f);
+        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// it's a bit too big for our scene, so scale it down
+        nanoSuitShader.setMat4("model", model);
+        //cubeModel.Draw(nanoSuitShader);
         
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
@@ -420,9 +362,7 @@ int main(int, char**)
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    //glDeleteVertexArrays(1, &lightVAO);
-    //glDeleteVertexArrays(1, &cubeVAO);
-    //glDeleteBuffers(1, &VBO);
+    ourModel.DeleteGPUInfo();
 
     glfwDestroyWindow(window);
     glfwTerminate();

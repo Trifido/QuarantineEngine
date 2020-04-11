@@ -13,11 +13,8 @@ struct Vertex
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
-};
-struct TextureComponent {
-    unsigned int id;
-    std::string type;
-    std::string path;
+    glm::vec3 Tangents;
+    glm::vec3 Bitangents;
 };
 
 class Mesh {
@@ -25,10 +22,16 @@ public:
     /*  Mesh Data  */
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<TextureComponent> textures;
+    std::vector<Texture> textures;
+    //Material info
+    float shininess;
     /*  Functions  */
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureComponent> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures);
     void Draw(Shader shader);
+    void DrawRaw(Shader shader);
+    void DelteGPUInfo();
+    void inline SetShininess(float shini) { shininess = shini; }
 private:
     /*  Render data  */
     unsigned int VAO, VBO, EBO;

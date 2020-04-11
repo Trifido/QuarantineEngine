@@ -70,11 +70,11 @@ void Shader::use()
 {
     glUseProgram(ID);
 
-    for (unsigned int i = 0; i < numTextures; i++)
-    {
-        glActiveTexture(GL_TEXTURE0+i);
-        glBindTexture(GL_TEXTURE_2D, textures.at(i)->ID);
-    }
+    //for (unsigned int i = 0; i < numTextures; i++)
+    //{
+    //    glActiveTexture(GL_TEXTURE0+i);
+    //    glBindTexture(GL_TEXTURE_2D, textures.at(i)->ID);
+    //}
 }
 
 void Shader::AddCamera(Camera* cam)
@@ -150,6 +150,8 @@ void Shader::ActivateLights()
 {
     int numPointLights = 0;
     int numSpotLights = 0;
+    int numDirLights = 0;
+    int numFPSLights = 0;
     for (unsigned int i = 0; i < lights.size(); i++)
     {
         if (lights[i]->GetType() == TypeLight::DIRL)
@@ -157,7 +159,8 @@ void Shader::ActivateLights()
             this->setVec3("dirLight.ambient", lights[i]->GetAmbient());
             this->setVec3("dirLight.diffuse", lights[i]->GetDiffuse());
             this->setVec3("dirLight.specular", lights[i]->GetSpecular());
-            this->setVec3("dirLight.direction", lights[i]->GetDirection()); 
+            this->setVec3("dirLight.direction", lights[i]->GetDirection());
+            numDirLights++;
         }
         else if (lights[i]->GetType() == TypeLight::POINTLIGHT)
         {
@@ -201,11 +204,14 @@ void Shader::ActivateLights()
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             this->setFloat(name + "cutOff", lights[i]->GetCutOff());
             this->setFloat(name + "outerCutOff", lights[i]->GetOuterCutOff());
+            numFPSLights++;
         }
     }
     //Send total number of spot and point lights
     this->setInt("numSpotLights", numSpotLights);
     this->setInt("numPointLights", numPointLights);
+    this->setInt("numDirLights", numDirLights);
+    this->setInt("numFPSLights", numFPSLights);
 }
 
 void Shader::ActivateCamera()

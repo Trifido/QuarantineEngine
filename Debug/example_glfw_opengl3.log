@@ -1,10 +1,26 @@
-﻿  main.cpp
+﻿  Model.cpp
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\detail\type_quat.hpp(58,1): warning C4201:  se ha utilizado una extensión no estándar: struct/union sin especificar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\detail\type_quat.hpp(137): message :  vea la referencia a la creación de instancias de clase plantilla "glm::qua<T,Q>" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(201,23): warning C4018:  '<': no coinciden signed/unsigned
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\ext\matrix_clip_space.inl(326,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\ext\matrix_clip_space.inl(326,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :  vea la referencia a la creación de instancias de plantilla de función "glm::mat<4,4,glm::f32,0> glm::perspective<genType>(T,T,T,T)" que se está compilando
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :         with
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :         [
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :             genType=float,
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :             T=float
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.cpp(7): message :         ]
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\ext\matrix_clip_space.inl(328,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\ext\matrix_clip_space.inl(328,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\ext\matrix_clip_space.inl(330,1): warning C4127:  la expresión condicional es constante
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\ext\matrix_clip_space.inl(330,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\ext\matrix_clip_space.inl(332,1): warning C4127:  la expresión condicional es constante
+  main.cpp
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\ext\matrix_clip_space.inl(332,1): message :  considere la posibilidad de usar la instrucción "if constexpr" en su lugar
 C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\RenderSystem.h(19,28): warning C4244:  'inicializando': conversión de 'double' a 'float'; posible pérdida de datos
 C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\detail\type_quat.hpp(58,1): warning C4201:  se ha utilizado una extensión no estándar: struct/union sin especificar
 C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\libs\glm\detail\type_quat.hpp(137): message :  vea la referencia a la creación de instancias de clase plantilla "glm::qua<T,Q>" que se está compilando
-C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.h(44,71): warning C4458:  la declaración de 'directory' oculta el miembro de clase
-C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.h(24,17): message :  vea la declaración de 'Model::directory'
-C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Model.h(44,87): warning C4100:  'gamma': parámetro formal sin referencia
-C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\main.cpp(216,10): warning C4189:  'show_demo_window': la variable local se ha inicializado pero no se hace referencia a ella
-C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\main.cpp(217,10): warning C4189:  'show_another_window': la variable local se ha inicializado pero no se hace referencia a ella
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\main.cpp(217,10): warning C4189:  'show_demo_window': la variable local se ha inicializado pero no se hace referencia a ella
+  Generando código...
+C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\main.cpp(218,10): warning C4189:  'show_another_window': la variable local se ha inicializado pero no se hace referencia a ella
   example_glfw_opengl3.vcxproj -> C:\Users\vicen\Desktop\Vector Engine\imgui-master\examples\example_glfw_opengl3\Debug\example_glfw_opengl3.exe
