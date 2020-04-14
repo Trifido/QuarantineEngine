@@ -34,10 +34,14 @@ public:
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection;
 
+    bool isSelectableModel = false;
+    bool isSelectedModel = false;
+
     Model();
     Model(char* path);
     Model(float rawData[], unsigned int numVertex, std::vector<Texture> textImages);
     void Draw(Shader shader);
+    void Draw(Shader shader, Shader outlineShader);
     void DrawRaw(Shader shader);
 
     void Rotation(float radians, glm::vec3 axis);
@@ -47,6 +51,11 @@ public:
 
     void DeleteGPUInfo();
     void SetShininess(float shini);
+    void AddTextures(std::vector<Texture> texts);
+
+    void isSelectable(bool selectable);
+    void isSelected(bool select);
+    float checkClickMouse(glm::vec3 origin, glm::vec3 mousePosition);
 };
 
 #endif

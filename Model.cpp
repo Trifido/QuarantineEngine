@@ -12,10 +12,38 @@ Model::Model(char* path)
     loadModel(path);
 }
 
+void Model::isSelectable(bool selectable) { this->isSelectableModel = selectable; }
+void Model::isSelected(bool select) { this->isSelectedModel = select; }
+
 void Model::Draw(Shader shader)
 {
+    shader.use();
     for (unsigned int i = 0; i < meshes.size(); i++)
+    {
+        shader.setMat4("model", model);
         meshes[i].Draw(shader);
+    }
+}
+
+void Model::Draw(Shader shader, Shader outlineShader)
+{
+    for (unsigned int i = 0; i < meshes.size(); i++)
+    {
+        if (!isSelectableModel || !isSelectedModel)
+        {
+            shader.use();
+            shader.setMat4("model", model);
+            meshes[i].Draw(shader);
+        }
+        else if (isSelectedModel)
+        {
+            shader.use();
+            shader.setMat4("model", model);
+            outlineShader.use();
+            outlineShader.setMat4("model", glm::scale(model, glm::vec3(1.005f, 1.005f, 1.005f)));
+            meshes[i].DrawOutline(shader, outlineShader);
+        }
+    }
 }
 
 void Model::DrawRaw(Shader shader)
@@ -56,6 +84,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
     existTangent = mesh->HasTangentsAndBitangents();
+    bool existNormal = mesh->HasNormals();
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -70,12 +99,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         vector.z = mesh->mVertices[i].z;
         vertex.Position = vector;
 
-        vector.x = mesh->mNormals[i].x;
-        vector.y = mesh->mNormals[i].y;
-        vector.z = mesh->mNormals[i].z;
-        vertex.Normal = vector;
+        if (existNormal)
+        {
+            vector.x = mesh->mNormals[i].x;
+            vector.y = mesh->mNormals[i].y;
+            vector.z = mesh->mNormals[i].z;
+            vertex.Normal = vector;
+        }
 
-        if (!existTangent)
+        if (existTangent)
         {
             vector.x = mesh->mTangents[i].x;
             vector.y = mesh->mTangents[i].y;
@@ -270,4 +302,35 @@ Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textI
     }
 
     meshes.push_back(Mesh(vertices, indices, textures_loaded));
+}
+
+void Model::AddTextures(std::vector<Texture> texts)
+{
+    textures_loaded = texts;
+    meshes.at(0).textures = textures_loaded;
+}
+
+float Model::checkClickMouse(glm::vec3 origin, glm::vec3 dir)
+{
+    //Möller–Trumbore intersection algorithm
+    if (!isSelectableModel)
+        return INFINITE;
+
+    bool existIntesection = false;
+    float intersectionDist;
+    float distancePoint = INFINITE;
+
+    for (unsigned int i = 0; i < meshes.size(); i++)
+    {
+        for (unsigned idTri = 0; idTri < meshes[i].indices.size(); idTri += 3)
+        {
+            if (meshes[i].RayIntersectsTriangle(origin, dir, idTri, intersectionDist, model))
+            {
+                if (distancePoint > intersectionDist)
+                    distancePoint = intersectionDist;
+            }
+        }
+    }
+
+    return distancePoint;
 }

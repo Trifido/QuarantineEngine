@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <fstream>
 #include <sstream>
-#include <iostream>
-#include <filesystem>
+#include <iostream> 
+#include <map>
 
 //#define STB_IMAGE_IMPLEMENTATION
 //#include "libs/stb_image.h"
@@ -55,75 +55,11 @@ using namespace gl;
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
-//#include "Light.h"
- 
+#include "RawGeometry.h"
+#include "RenderPlane.h"
+#include "FBOSystem.h"
 
-//GEOMETRY
-float vertices[] = {
-    // positions          // normals           // texture coords
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-};
-
-// positions all containers
-glm::vec3 cubePositions[] = {
-    glm::vec3(0.0f,  0.0f,  0.0f),
-    glm::vec3(2.0f,  5.0f, -15.0f),
-    glm::vec3(-1.5f, -2.2f, -2.5f),
-    glm::vec3(-3.8f, -2.0f, -12.3f),
-    glm::vec3(2.4f, -0.4f, -3.5f),
-    glm::vec3(-1.7f,  3.0f, -7.5f),
-    glm::vec3(1.3f, -2.0f, -2.5f),
-    glm::vec3(1.5f,  2.0f, -2.5f),
-    glm::vec3(1.5f,  0.2f, -1.5f),
-    glm::vec3(-1.3f,  1.0f, -1.5f)
-};
-
-glm::vec3 pointLightPositions[] = {
-    glm::vec3(0.7f,  0.2f,  2.0f),
-    glm::vec3(2.3f, -3.3f, -4.0f),
-    glm::vec3(-4.0f,  2.0f, -12.0f),
-    glm::vec3(0.0f,  0.0f, -3.0f)
-};
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -224,15 +160,40 @@ int main(int, char**)
     //CAMERA
     Camera mainCamera(1280, 720);
 
-    //MODEL 3D 
+    //POST-PROCESS RENDER PLANE
+    RenderPlane renderFinalPass;
+    renderFinalPass.SetVAORenderPlane();
+
+    //MODEL 3D
+    std::vector<Model*> sceneModels;
     Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
+    ourModel.isSelectable(true);
+    //Model headModel("./resources/3DModels/sponza/sponza.obj");
 
     //Material shininess
     ourModel.SetShininess(1.0f);
+    //headModel.SetShininess(1.0f);
+
+    //VEGETACION
+    std::vector<Texture> texturesVegetation;
+    Texture diffVeg("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    texturesVegetation.push_back(diffVeg);
+    Model vegetationM(transparentVertices, 6, texturesVegetation);
+    Model plane(planeVertices, 6, texturesVegetation);
+    plane.SetShininess(1.0f);
+    vegetationM.isSelectable(true);
+
+    std::vector<glm::vec3> vegetation;
+    vegetation.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
+    vegetation.push_back(glm::vec3(1.5f, 0.0f, 0.51f));
+    vegetation.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
+    vegetation.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
+    vegetation.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
+
     
     // LIGHT
     std::vector<Light*> lightsVector;
-    lightsVector.push_back(new Light(TypeLight::SPOTFPSL));
+    //lightsVector.push_back(new Light(TypeLight::SPOTFPSL));
     lightsVector.push_back(new Light(TypeLight::DIRL));
     lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
     lightsVector.push_back(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
@@ -241,46 +202,69 @@ int main(int, char**)
 
     //SHADER
     Shader nanoSuitShader("shaders/nanosuit.vert", "shaders/nanosuit.frag");
+    Shader outlineShader("shaders/outline.vert", "shaders/outline.frag");
+    Shader transparentShader("shaders/blending.vert", "shaders/blending.frag");
     // - Añado las propiedas a mi shader
     nanoSuitShader.AddLight(lightsVector);
     nanoSuitShader.AddCamera(&mainCamera);
+    outlineShader.AddCamera(&mainCamera);
+    transparentShader.AddCamera(&mainCamera);
 
-    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE);
-    Texture texture2("resources/container2_specular.png", TypeTexture::SPECULAR);
-    Texture texture3("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
-    Texture texture4("resources/matrix.jpg", TypeTexture::EMISSIVE);
+    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE); 
+    Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
+    Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
 
     std::vector<Texture> textures;
-
+     
     textures.push_back(texture1);
-    //textures.push_back(texture2);
+    textures.push_back(texture2);
     textures.push_back(texture3);
 
     Model cubeModel(vertices, 36, textures);
     //Material shininess
     cubeModel.SetShininess(12.0f);
+    cubeModel.isSelectable(true);
+
+    sceneModels.push_back(&ourModel);
+    sceneModels.push_back(&cubeModel);
+    sceneModels.push_back(&vegetationM);
+
+    //CREAMOS UN FRAME BUFFER OBJECT FBO
+    int width, height;
+    int lastWidth, lastHeight;
+
+    glfwGetWindowSize(window, &width, &height);
+    FBOSystem fboSystem(&width, &height);
+
+    lastWidth = width;
+    lastHeight = height;
+
+    fboSystem.InitFBOSystem();
 
     //ACTIVAMOS EL DEPTH BUFFER
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    //ACTIVAMOS EL CULLING
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+
+    //ACTIVAMOS EL BLENDING
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
-    {
-        //DELTA TIME 
-        RenderSystem::ComputeDeltaTime(); 
-
+    { 
         //ANIMATION
-        //modelo3D.Rotation(0.1f, glm::vec3(0.0f, 0.5f, 0.5f));
+        RenderSystem::ComputeDeltaTime();
+        RenderSystem::GetWindowSize(window, &width, &height);
 
         //Keyboad functions
         processInput(window);
-       
+        //Mouse functions
+        processMouseInput(window, &mainCamera, sceneModels);
 
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
         // Start the Dear ImGui frame
@@ -328,30 +312,73 @@ int main(int, char**)
         //    ImGui::End();
         //}
 
+        if (lastWidth != width || lastHeight != height)
+        {
+            fboSystem.InitFBOSystem();
+        }
+
+        lastWidth = width;
+        lastHeight = height;
+            
         // Rendering
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
+        // FIRST PASS
+        fboSystem.ActivateFBORender();
+
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         //SHADER ACTIVATE PROPERTIES
+       
+        transparentShader.use();
+        transparentShader.ActivateCamera();
+
+        nanoSuitShader.use();
         nanoSuitShader.ActivateCamera();
         nanoSuitShader.ActivateLights();
 
-        //NANOSUIT
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-        nanoSuitShader.setMat4("model", model);
-        ourModel.Draw(nanoSuitShader);
+        outlineShader.use();
+        outlineShader.ActivateCamera();
+         
 
         //CUBE
-        model = glm::mat4(1.0f);
-        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// it's a bit too big for our scene, so scale it down
-        nanoSuitShader.setMat4("model", model);
-        //cubeModel.Draw(nanoSuitShader);
+        cubeModel.model = glm::mat4(1.0f); 
+        cubeModel.model = glm::translate(cubeModel.model, glm::vec3(0.0f, 0.0f, -4.0f));
+        cubeModel.model = glm::scale(cubeModel.model, glm::vec3(4.0f, 4.0f, 4.0f));	// it's a bit too big for our scene, so scale it down
+        cubeModel.Draw(nanoSuitShader, outlineShader);
+
+        //NANOSUIT
+        
+        //ourModel.isSelected(true);
+        ourModel.model = glm::mat4(1.0f);
+        ourModel.model = glm::translate(ourModel.model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+        ourModel.model = glm::scale(ourModel.model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+        ourModel.Draw(nanoSuitShader, outlineShader);
+
+        //VEGETATION
+        std::map<float, glm::vec3> sorted;
+        for (unsigned int i = 0; i < vegetation.size(); i++)
+        {
+            float distance = glm::length(mainCamera.cameraPos - vegetation[i]);
+            sorted[distance] = vegetation[i];
+        }
+
+        for (std::map<float, glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it)
+        {
+            vegetationM.model = glm::mat4(1.0f);
+            vegetationM.model = glm::translate(vegetationM.model, it->second);
+            vegetationM.Draw(transparentShader, outlineShader);
+        }
+
+        // SECOND PASS
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        renderFinalPass.DrawFrom(fboSystem.texColorBuffer);
         
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);

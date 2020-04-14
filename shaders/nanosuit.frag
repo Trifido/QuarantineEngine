@@ -79,6 +79,11 @@ void main()
 {
     //Sample textures
 
+   // if(texture(material.diffuse[0], TexCoords).a < 1)
+   // {
+   //     discard;
+   // }
+
     // GET NORMALS
     vec3 norm;
 
@@ -114,7 +119,7 @@ void main()
         result += CalcSpotLight(fpsSpotLight, norm, FragPos, viewDir);
 
     //result = texture(material.normal[0], TexCoords).rgb;
-    
+
     FragColor = vec4(result, 1.0);
 }
 

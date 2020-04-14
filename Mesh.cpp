@@ -178,3 +178,67 @@ void Mesh::DrawRaw(Shader shader)
 
     glActiveTexture(GL_TEXTURE0);
 }
+
+void Mesh::DrawOutline(Shader shIn, Shader shOutline)
+{
+    //STENCIL TEST & DEPTH TEST
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+    glStencilMask(0x00);
+    //Stencil function
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+
+    this->Draw(shIn);
+
+    //Second Render PASS
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+    glDisable(GL_DEPTH_TEST);
+
+    this->Draw(shOutline);
+
+    glStencilMask(0xFF);
+    //glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
+}
+
+bool Mesh::RayIntersectsTriangle(glm::vec3 origin, glm::vec3 dir, unsigned int idTri, float& intersectionDist, glm::mat4 model)
+{
+    const float EPSILON = 0.0000001;
+    glm::vec3 edge1 = vertices[idTri + 1].Position - vertices[idTri].Position;
+    glm::vec3 edge2 = vertices[idTri + 2].Position - vertices[idTri].Position;
+
+    glm::vec3 h = glm::cross(dir, edge2);
+    float a = glm::dot(edge1, h);
+    if (a > -EPSILON && a < EPSILON)
+        return false;    // This ray is parallel to this triangle.
+
+    float f = 1.0 / a;
+    glm::vec3 s = origin - vertices[idTri].Position;
+    float u = f * glm::dot(s, h);
+    if (u < 0.0 || u > 1.0)
+        return false;
+
+    glm::vec3 q = glm::cross(s, edge1);
+    float v = f * glm::dot(dir, q);
+    if (v < 0.0 || (u + v) > 1.0)
+        return false;
+
+    // At this stage we can compute t to find out where the intersection point is on the line.
+    float t = f * glm::dot(edge2, q);
+    if (t > EPSILON) // ray intersection
+    {
+        glm::vec3 realOrigin = glm::vec4(origin, 1.0f) * model;
+        glm::vec3 realDir = glm::vec4(dir, 1.0f) * model;
+        intersectionDist = glm::distance(realOrigin, (realOrigin + realDir * t));
+        //intersectionDist = glm::distance(origin, (origin + dir * t));
+        return true;
+    }
+    else // This means that there is a line intersection but not a ray intersection.
+        return false;
+}

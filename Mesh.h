@@ -32,6 +32,12 @@ public:
     void DrawRaw(Shader shader);
     void DelteGPUInfo();
     void inline SetShininess(float shini) { shininess = shini; }
+
+    void DrawOutline(Shader shIn, Shader shOutline);
+
+    //RayCast
+    bool RayIntersectsTriangle(glm::vec3 rayOrigin, glm::vec3 rayVector, unsigned int idTri, float& outIntersectionPoint, glm::mat4 model);
+   
 private:
     /*  Render data  */
     unsigned int VAO, VBO, EBO;

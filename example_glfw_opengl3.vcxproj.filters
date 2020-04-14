@@ -70,6 +70,12 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="RenderPlane.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="FBOSystem.cpp">
+      <Filter>sources\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -123,6 +129,15 @@
     <ClInclude Include="includes\stb_image.h">
       <Filter>sources\libs</Filter>
     </ClInclude>
+    <ClInclude Include="RawGeometry.h">
+      <Filter>sources\inputs</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPlane.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="FBOSystem.h">
+      <Filter>sources\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\example.vert">
@@ -159,6 +174,30 @@
       <Filter>sources\shaders</Filter>
     </None>
     <None Include="shaders\nanosuit.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\depthRender.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\depthRender.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\outline.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\outline.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\blending.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\blending.vert">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\renderPass.frag">
+      <Filter>sources\shaders</Filter>
+    </None>
+    <None Include="shaders\renderPass.vert">
       <Filter>sources\shaders</Filter>
     </None>
   </ItemGroup>

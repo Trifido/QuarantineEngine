@@ -7,11 +7,12 @@ class RenderSystem
 public:
     static float deltaTime;	// Time between current frame and last frame
     static float lastFrame; // Time of last frame
-
+     
+    
     RenderSystem()
     {
         deltaTime = 0;
-        lastFrame = 0.0f;
+        lastFrame = 0.0f;  
     }
 
     static void ComputeDeltaTime()
@@ -21,6 +22,10 @@ public:
         lastFrame = currentFrame; 
     }
 
+    static void GetWindowSize(GLFWwindow* window, int* width, int* height)
+    {
+        glfwGetWindowSize(window, width, height);
+    }
 };
 
 
