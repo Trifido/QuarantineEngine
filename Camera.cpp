@@ -1,9 +1,5 @@
 #include "Camera.h"
-
-#include "RenderSystem.h"
-
-float RenderSystem::lastFrame = 0.0f;
-float RenderSystem::deltaTime = 0.0f;
+ 
 
 Camera::Camera(float width, float height)
 {
@@ -13,7 +9,7 @@ Camera::Camera(float width, float height)
     lastY = HEIGHT / 2.0f;
 }
 
-void Camera::CameraController()
+void Camera::CameraController(float deltaTime)
 {
     //isA = isS = isD = isW = false;
     EditorScroll();
@@ -24,28 +20,28 @@ void Camera::CameraController()
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('W')) ||
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('w')))
     {
-        cameraPos += cameraSpeed * RenderSystem::deltaTime * cameraFront;
+        cameraPos += cameraSpeed * deltaTime * cameraFront;
     }
 
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)) ||
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('S')) ||
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('s')))
     {
-        cameraPos -= cameraSpeed * RenderSystem::deltaTime * cameraFront;
+        cameraPos -= cameraSpeed * deltaTime * cameraFront;
     }
      
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)) ||
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('A')) ||
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('a')))
     {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * RenderSystem::deltaTime * cameraSpeed;
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * deltaTime * cameraSpeed;
     }
      
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)) ||
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('D')) ||
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('d')))
     {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * RenderSystem::deltaTime * cameraSpeed;
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * deltaTime * cameraSpeed;
     }
 
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);

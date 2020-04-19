@@ -3,8 +3,9 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include <GL/gl3w.h>
-#include <string>
+#include "HeadersRequeriments.h"
+
+
 
 enum TypeTexture
 {
@@ -12,7 +13,8 @@ enum TypeTexture
     SPECULAR,
     NORMAL,
     HEIGHT,
-    EMISSIVE
+    EMISSIVE,
+    CUBEMAP
 };
 
 class Texture
@@ -24,9 +26,11 @@ public:
     std::string path;
     TypeTexture type;
 
+    Texture() {};
     Texture(std::string imagePath, unsigned int wrap = GL_REPEAT, unsigned int filter = GL_LINEAR, bool flip = false);
     Texture(std::string imagePath, TypeTexture type, unsigned int wrap = GL_REPEAT, unsigned int filter = GL_LINEAR, bool flip = false);
-    void LoadImage(const char* imagePath, bool flip = false);
+    Texture(std::vector<std::string> imagePath, TypeTexture type, unsigned int wrap = GL_CLAMP_TO_EDGE, unsigned int filter = GL_LINEAR, bool flip = false);
+    void LoadImage(const char* imagesPath, bool flip = false);
     
 };
 

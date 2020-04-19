@@ -2,53 +2,47 @@
 
 Model::Model()
 {
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    matHandle.type = MaterialType::LIT;
 }
 
 Model::Model(char* path)
 {
+    matHandle.type = MaterialType::LIT;
     loadModel(path);
 }
 
 void Model::isSelectable(bool selectable) { this->isSelectableModel = selectable; }
 void Model::isSelected(bool select) { this->isSelectedModel = select; }
 
-void Model::Draw(Shader shader)
+void Model::Draw(bool isOutline)
 {
-    shader.use();
-    for (unsigned int i = 0; i < meshes.size(); i++)
+    if (!isOutline || !isSelectableModel || !isSelectedModel)
     {
-        shader.setMat4("model", model);
-        meshes[i].Draw(shader);
-    }
-}
-
-void Model::Draw(Shader shader, Shader outlineShader)
-{
-    for (unsigned int i = 0; i < meshes.size(); i++)
-    {
-        if (!isSelectableModel || !isSelectedModel)
+        //shader->use();
+        matHandle.shader->use();
+        for (unsigned int i = 0; i < meshes.size(); i++)
         {
-            shader.use();
-            shader.setMat4("model", model);
-            meshes[i].Draw(shader);
-        }
-        else if (isSelectedModel)
-        {
-            shader.use();
-            shader.setMat4("model", model);
-            outlineShader.use();
-            outlineShader.setMat4("model", glm::scale(model, glm::vec3(1.005f, 1.005f, 1.005f)));
-            meshes[i].DrawOutline(shader, outlineShader);
+            //(*matHandle.listMaterials.at(i)->shader)->use();
+            //(*meshes[i].material->shader)->setMat4("model", model);
+            meshes[i].material->ptrShader->setMat4("model", model);
+            meshes[i].Draw();
         }
     }
-}
+    else
+    {
+        for (unsigned int i = 0; i < meshes.size(); i++)
+        {
+            //(*meshes[i].material->shader)->use();
+            matHandle.shader->use();
+            meshes[i].material->ptrShader->setMat4("model", model);
+            //(*meshes[i].material->shader)->setMat4("model", model);
+            //(*meshes[i].material->shader2)->use();
+            matHandle.shader2->use();
+            meshes[i].material->ptrShader2->setMat4("model", glm::scale(model, glm::vec3(1.005f, 1.005f, 1.005f)));
+            meshes[i].Draw(isOutline, isSelectedModel);
+        }
+    }
 
-void Model::DrawRaw(Shader shader)
-{
-    meshes[0].Draw(shader);
 }
 
 void Model::loadModel(std::string path)
@@ -156,8 +150,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
         //AÑADIR MAS TIPOS DE TEXTURA
     }
-
-    return Mesh(vertices, indices, textures);
+     
+    return Mesh(vertices, indices, textures, matHandle);
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, TypeTexture typeName)
@@ -224,8 +218,89 @@ void Model::SetShininess(float shini)
         meshes.at(i).SetShininess(shini);
 }
 
+Model::Model(float rawData[], unsigned int numVertex)
+{
+    matHandle.type = MaterialType::LIT;
+
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    const int NUMCOMP = 8;
+    for (int i = 0; i < numVertex; i++)
+    {
+        unsigned int index = i * NUMCOMP;
+
+        Vertex vertex;
+        // process vertex positions, normals and texture coordinates
+        glm::vec3 vector;
+        vector.x = rawData[index];
+        vector.y = rawData[index + 1];
+        vector.z = rawData[index + 2];
+        vertex.Position = vector;
+
+        vector.x = rawData[index + 3];
+        vector.y = rawData[index + 4];
+        vector.z = rawData[index + 5];
+        vertex.Normal = vector;
+
+        glm::vec2 vec;
+        vec.x = rawData[index + 6];
+        vec.y = rawData[index + 7];
+        vertex.TexCoords = vec;
+
+        vertices.push_back(vertex);
+        indices.push_back(i);
+    } 
+    //Compute Tangent & BiTangents
+
+    bool isNormal = false;
+    //Check Normal
+    for (int i = 0; i < textures_loaded.size(); i++)
+        if (textures_loaded.at(i).type == TypeTexture::NORMAL)
+            isNormal = true;
+
+    if (isNormal)
+    {
+        for (unsigned int idTr = 0; idTr < numVertex; idTr += 3)
+        {
+            glm::vec3 edge1 = vertices[idTr + 1].Position - vertices[idTr].Position;
+            glm::vec3 edge2 = vertices[idTr + 2].Position - vertices[idTr].Position;
+            glm::vec2 deltaUV1 = vertices[idTr + 1].TexCoords - vertices[idTr].TexCoords;
+            glm::vec2 deltaUV2 = vertices[idTr + 2].TexCoords - vertices[idTr].TexCoords;
+
+            float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+            glm::vec3 tangent, bitangent;
+
+            if (!existTangent)
+            {
+                tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+                tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+                tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+                tangent = glm::normalize(tangent);
+
+                vertices[idTr].Tangents = tangent;
+                vertices[idTr + 1].Tangents = tangent;
+                vertices[idTr + 2].Tangents = tangent;
+
+                bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+                bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+                bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+                bitangent = glm::normalize(bitangent);
+
+                vertices[idTr].Bitangents = bitangent;
+                vertices[idTr + 1].Bitangents = bitangent;
+                vertices[idTr + 2].Bitangents = bitangent;
+            }
+        }
+    }
+    meshes.push_back(Mesh(vertices, indices, textures_loaded, matHandle));
+}
+
 Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textImages)
 {
+    matHandle.type = MaterialType::LIT;
+
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -299,15 +374,14 @@ Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textI
                 vertices[idTr + 2].Bitangents = bitangent;
             }
         }
-    }
-
-    meshes.push_back(Mesh(vertices, indices, textures_loaded));
+    } 
+    meshes.push_back(Mesh(vertices, indices, textures_loaded, matHandle));
 }
 
 void Model::AddTextures(std::vector<Texture> texts)
 {
     textures_loaded = texts;
-    meshes.at(0).textures = textures_loaded;
+    meshes.at(0).material->AddMultTextures(textures_loaded);
 }
 
 float Model::checkClickMouse(glm::vec3 origin, glm::vec3 dir)
@@ -333,4 +407,79 @@ float Model::checkClickMouse(glm::vec3 origin, glm::vec3 dir)
     }
 
     return distancePoint;
+}
+
+void Model::AddMaterial(Material* mat)
+{
+    matHandle.EditMaterial(MaterialComponent::TYPE, mat->type);
+    matHandle.EditMaterial(MaterialComponent::SHADER1, *mat->ptrShader);
+    matHandle.EditMaterial(MaterialComponent::SHADER2, *mat->ptrShader2);
+    matHandle.EditMaterial(MaterialComponent::SHININESS, mat->shininess);
+    matHandle.EditMaterial(MaterialComponent::OUTLINE_COLOR, mat->colorOutline);
+
+    if (!mat->textures.empty())
+    {
+        matHandle.EditMaterial(MaterialComponent::TEXTURE, mat->textures);
+    }
+   
+    //shader = mat->ptrShader;
+    //for (int i = 0; i < matHandle.listMaterials.size(); i++)
+    //{
+    //    (*matHandle.listMaterials.at(i)->shader) = mat->ptrShader;
+    //    (*matHandle.listMaterials.at(i)->shader2) = mat->ptrShader2;
+    //    //meshes.at(i).AddMaterial(mat);
+    //}
+}
+
+void Model::AddMaterial(Material* mat, std::vector<Texture> textures)
+{
+    matHandle.EditMaterial(MaterialComponent::TYPE, mat->type);
+    matHandle.EditMaterial(MaterialComponent::SHADER1, *mat->ptrShader);
+    matHandle.EditMaterial(MaterialComponent::SHADER2, *mat->ptrShader2);
+    matHandle.EditMaterial(MaterialComponent::SHININESS, mat->shininess);
+    matHandle.EditMaterial(MaterialComponent::OUTLINE_COLOR, mat->colorOutline);
+    matHandle.EditMaterial(MaterialComponent::TEXTURE, textures);
+
+    //shader = mat->ptrShader;
+    //for (int i = 0; i < matHandle.listMaterials.size(); i++)
+    //{
+    //    (*matHandle.listMaterials.at(i)->shader) = mat->ptrShader;
+    //    (*matHandle.listMaterials.at(i)->shader2) = mat->ptrShader2;
+    //    //meshes.at(i).AddMaterial(mat);
+    //}
+}
+
+void Model::AddShader(Shader* shader)
+{
+    for (int i = 0; i < meshes.size(); i++)
+    {
+        matHandle.listMaterials.at(i)->ptrShader = shader;
+        //(*matHandle.listMaterials.at(i)->shader) = shader;
+        //meshes.at(i).material->shader = &this->shader;
+    }
+}
+
+void Model::AddLight(std::vector<Light*> lights)
+{
+    matHandle.shader->AddLight(lights);
+    if (matHandle.type == MaterialType::OUTLINE)
+    {
+        matHandle.shader2->AddLight(lights);
+        //for (int i = 0; i < meshes.size(); i++)
+        //{
+        //    (*meshes.at(i).material->shader2)->lights = lights;
+        //}
+    }
+}
+
+void Model::AddCamera(Camera* cam)
+{
+    matHandle.shader->AddCamera(cam);
+    if (matHandle.type == MaterialType::OUTLINE)
+    {
+        matHandle.shader2->AddCamera(cam);
+
+        //for (int i = 0; i < meshes.size(); i++)
+        //    (*meshes.at(i).material->shader2)->mainCamera = cam;
+    }
 }

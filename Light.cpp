@@ -1,5 +1,7 @@
 #include "Light.h"
 
+
+
 Light::Light()
 {
     type = TypeLight::POINTLIGHT;

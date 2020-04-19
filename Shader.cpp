@@ -1,6 +1,4 @@
 #include "Shader.h"
-#include "Debug.h"
-
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
@@ -69,12 +67,6 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 void Shader::use()
 {
     glUseProgram(ID);
-
-    //for (unsigned int i = 0; i < numTextures; i++)
-    //{
-    //    glActiveTexture(GL_TEXTURE0+i);
-    //    glBindTexture(GL_TEXTURE_2D, textures.at(i)->ID);
-    //}
 }
 
 void Shader::AddCamera(Camera* cam)
@@ -105,6 +97,11 @@ void Shader::setVec3(const std::string& name, float x, float y, float z)
 void Shader::setVec3(const std::string& name, glm::vec3& pos) const
 {
     glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &pos[0]);
+}
+
+void Shader::setMat3(const std::string& name, glm::mat3& mat) const
+{
+    glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::setMat4(const std::string& name, glm::mat4& mat) const
@@ -219,4 +216,45 @@ void Shader::ActivateCamera()
     this->setVec3("viewPos", mainCamera->cameraPos);
     this->setMat4("projection", mainCamera->projection);
     this->setMat4("view", mainCamera->view);
+}
+
+void CheckVertexCompilation(unsigned int vertexShader)
+{
+    int  success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        fprintf(stderr, "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n");
+        fprintf(stderr, infoLog);
+    }
+}
+
+void CheckFragmentCompilation(unsigned int fragShader)
+{
+    int  success;
+    char infoLog[512];
+    glGetShaderiv(fragShader, GL_COMPILE_STATUS, &success);
+
+    if (!success)
+    {
+        glGetShaderInfoLog(fragShader, 512, NULL, infoLog);
+        fprintf(stderr, "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n");
+        fprintf(stderr, infoLog);
+    }
+}
+
+void CheckProgramLink(unsigned int shaderProgram)
+{
+    int  success;
+    char infoLog[512];
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        fprintf(stderr, "ERROR::LINK_SHADER_PROGRAM\n");
+        fprintf(stderr, infoLog);
+    }
 }

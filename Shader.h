@@ -5,18 +5,18 @@
 
 //#include <GL/gl3w.h> // include glad to get all the required OpenGL headers
 
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <vector>
-#include <stdlib.h>
+#include "HeadersRequeriments.h"
+
 
 #include "Texture.h"
 #include "Light.h"
 #include "Camera.h"
-#include "glm/glm.hpp"
 
+//#include <GL/gl3w.h>
+
+void CheckVertexCompilation(unsigned int vertexShader);
+void CheckFragmentCompilation(unsigned int fragShader);
+void CheckProgramLink(unsigned int shaderProgram);
 
 class Shader
 {
@@ -39,6 +39,7 @@ public:
     void setFloat(const std::string& name, float value) const;
     void setVec3(const std::string& name, float x, float y, float z);
     void setVec3(const std::string& name, glm::vec3& pos) const;
+    void setMat3(const std::string& name, glm::mat3& mat) const;
     void setMat4(const std::string& name, glm::mat4& mat) const;
     void AddTexture(Texture* tex, const std::string& name = NULL);
     void ActivateTextures();

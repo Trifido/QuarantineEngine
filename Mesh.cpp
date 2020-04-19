@@ -1,10 +1,12 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, MaterialHandle& matHandle)
 {
     this->vertices = vertices;
     this->indices = indices;
-    this->textures = textures;
+    material=new Material(matHandle.shader);
+    material->AddMultTextures(textures);
+    matHandle.AddMaterialToList(material);
 
     setupMesh();
 }
@@ -45,64 +47,64 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }
 
-void Mesh::Draw(Shader shader)
+void Mesh::Draw(bool isOutline, bool isActive)
 {
-    unsigned int diffuseNr = 0;
-    unsigned int specularNr = 0;
-    unsigned int normalNr = 0;
-    unsigned int heightNr = 0;
-    unsigned int emissiveNr = 0;
-    
-    for (unsigned int i = 0; i < textures.size(); i++)
+    if (!isOutline || !isActive)
     {
-        //glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-        // retrieve texture number (the N in diffuse_textureN)
+        material->AssignRenderTextures();
 
-        std::string name;
-
-        switch (textures[i].type)
+        // draw mesh
+        glBindVertexArray(VAO);
+        if (material->isAmbientReflective)
         {
-            default:
-            case TypeTexture::DIFFUSE:
-                name = "material.diffuse[" + std::to_string(diffuseNr++) + "]";
-                break;
-            case TypeTexture::SPECULAR:
-                name = "material.specular[" + std::to_string(specularNr++) + "]";
-                break;
-            case TypeTexture::NORMAL:
-                name = "material.normal[" + std::to_string(normalNr++) + "]";
-                break;
-            case TypeTexture::HEIGHT:
-                name = "material.height[" + std::to_string(heightNr++) + "]";
-                break;
-            case TypeTexture::EMISSIVE:
-                name = "material.emissive[" + std::to_string(emissiveNr++) + "]";
-                break;
+            //glActiveTexture(GL_TEXTURE0);
+            //glBindTexture(GL_TEXTURE_CUBE_MAP, material->skyboxTexture->ID);
         }
+        //glPolygonMode(GL_FRONT, GL_FILL);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].ID);
-
-        shader.use();
-        shader.setInt((name).c_str(), i);
+        glActiveTexture(GL_TEXTURE0);
     }
+    else if (isActive)
+    {
+        //STENCIL TEST & DEPTH TEST
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-    shader.setInt("material.num_diffuse", diffuseNr);
-    shader.setInt("material.num_specular", specularNr);
-    shader.setInt("material.num_normal", normalNr);
-    shader.setInt("num_normal", normalNr);
-    shader.setInt("material.num_height", heightNr);
-    shader.setInt("material.num_emissive", emissiveNr);
-    shader.setFloat("material.shininess", shininess);
+        glStencilMask(0x00);
+        //Stencil function
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
 
-    shader.use();
-    // draw mesh
-    glBindVertexArray(VAO);
-    //glPolygonMode(GL_FRONT, GL_FILL);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+        material->AssignRenderTextures();
+        // draw mesh
+        glBindVertexArray(VAO);
+        //glPolygonMode(GL_FRONT, GL_FILL);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
+        //Second Render PASS
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+
+        material->ptrShader2->use();
+        material->ptrShader2->ActivateCamera();
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        glActiveTexture(GL_TEXTURE0);
+
+        glStencilMask(0xFF);
+        //glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_STENCIL_TEST);
+    }
 }
 
 void Mesh::DelteGPUInfo()
@@ -112,63 +114,19 @@ void Mesh::DelteGPUInfo()
     glDeleteBuffers(1, &EBO);
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, MaterialHandle& matHandle)
 {
     this->vertices = vertices;
-    //this->indices = indices;
-    this->textures = textures;
-
+    material = new Material(matHandle.shader);
+    material->AddMultTextures(textures);
+    matHandle.AddMaterialToList(material);
     setupMesh();
 }
 
 void Mesh::DrawRaw(Shader shader)
 {
+    material->AssignRenderTextures();
 
-    unsigned int diffuseNr = 0;
-    unsigned int specularNr = 0;
-    unsigned int normalNr = 0;
-    unsigned int heightNr = 0;
-    unsigned int emissiveNr = 0;
-    
-    for (unsigned int i = 0; i < textures.size(); i++)
-    {
-        std::string name;
-
-        switch (textures[i].type)
-        {
-            default:
-            case TypeTexture::DIFFUSE:
-                name = "material.diffuse[" + std::to_string(diffuseNr++) + "]";
-                break;
-            case TypeTexture::SPECULAR:
-                name = "material.specular[" + std::to_string(specularNr++) + "]";
-                break;
-            case TypeTexture::NORMAL:
-                name = "material.normal[" + std::to_string(normalNr++) + "]";
-                break;
-            case TypeTexture::HEIGHT:
-                name = "material.height[" + std::to_string(heightNr++) + "]";
-                break;
-            case TypeTexture::EMISSIVE:
-                name = "material.emissive[" + std::to_string(emissiveNr++) + "]";
-                break;
-        }
-
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].ID);
-
-        shader.use();
-        shader.setInt((name).c_str(), i);
-    }
-
-    shader.setInt("material.num_diffuse", diffuseNr);
-    shader.setInt("material.num_specular", specularNr);
-    shader.setInt("material.num_normal", normalNr);
-    shader.setInt("material.num_height", heightNr);
-    shader.setInt("material.num_emissive", emissiveNr);
-    shader.setFloat("material.shininess", shininess);
-
-    shader.use();
     // draw mesh
     glBindVertexArray(VAO);
     //glPolygonMode(GL_FRONT, GL_FILL);
@@ -192,14 +150,16 @@ void Mesh::DrawOutline(Shader shIn, Shader shOutline)
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glStencilMask(0xFF);
 
-    this->Draw(shIn);
+    //this->Draw(shIn);
+    this->Draw();
 
     //Second Render PASS
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilMask(0x00);
     glDisable(GL_DEPTH_TEST);
 
-    this->Draw(shOutline);
+    //this->Draw(shOutline);
+    this->Draw();
 
     glStencilMask(0xFF);
     //glStencilFunc(GL_ALWAYS, 1, 0xFF);

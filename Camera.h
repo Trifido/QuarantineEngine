@@ -2,9 +2,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "HeadersRequeriments.h"
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
@@ -12,7 +10,6 @@
 class Camera
 {
 private: 
-   
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
     const float cameraSpeed = 10.0f;
 
@@ -23,8 +20,6 @@ private:
     float lastY = 720.0 / 2.0;
     float fov = 45.0f;
 
-
-    
 public:
     float WIDTH, HEIGHT;
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -34,7 +29,7 @@ public:
     glm::mat4 MVP;
     glm::mat4 VP;
     Camera(float width, float height);
-    void CameraController();
+    void CameraController(float deltaTime);
     void EditorScroll();
     void EditorRotate();
 };

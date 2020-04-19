@@ -2,11 +2,8 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "glm/glm.hpp"
-#include "Shader.h"
-#include "includes/stb_image.h"
-#include <string>
-#include <vector>
+#include "Material.h"
+#include "MaterialHandle.h"
 
 struct Vertex
 {
@@ -22,21 +19,22 @@ public:
     /*  Mesh Data  */
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
     //Material info
-    float shininess;
+    Material *material;
     /*  Functions  */
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-    Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures);
-    void Draw(Shader shader);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, MaterialHandle &matHandle);
+    Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, MaterialHandle& matHandle);
+    void Draw(bool isOutline=false, bool isActive=false);
     void DrawRaw(Shader shader);
     void DelteGPUInfo();
-    void inline SetShininess(float shini) { shininess = shini; }
+    void inline SetShininess(float shini) { material->shininess = shini; }
 
     void DrawOutline(Shader shIn, Shader shOutline);
 
     //RayCast
     bool RayIntersectsTriangle(glm::vec3 rayOrigin, glm::vec3 rayVector, unsigned int idTri, float& outIntersectionPoint, glm::mat4 model);
+
+    //void AddMaterial(Material* mat) { material = mat; }
    
 private:
     /*  Render data  */

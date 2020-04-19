@@ -1,5 +1,4 @@
 #include "Texture.h"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "includes\stb_image.h"
 
@@ -33,6 +32,33 @@ Texture::Texture(std::string imagePath, TypeTexture type, unsigned int wrap, uns
     // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+}
+
+Texture::Texture(std::vector<std::string> imagesPath, TypeTexture type, unsigned int wrap, unsigned int filter, bool flip)
+{
+    //LOAD CUBEMAP
+    glGenTextures(1, &ID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
+
+    for (unsigned int i = 0; i < imagesPath.size(); i++)
+    {
+        unsigned char* data = stbi_load(imagesPath[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Cubemap texture failed to load at path: " << imagesPath[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, wrap);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, wrap);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, wrap);
 }
 
 void Texture::LoadImage(const char* imagePath, bool flip)
