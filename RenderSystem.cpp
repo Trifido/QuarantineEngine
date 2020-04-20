@@ -86,6 +86,9 @@ void RenderSystem::RenderOutLineModels()
 
 void RenderSystem::PreRender()
 {
+    //UNIFORM BUFFER OBJECT
+    uboSytem = new UBOSystem();
+
     //SKYBOX
     skybox = new Skybox();
     skybox->AddCamera(cameras.at(0));
@@ -110,8 +113,16 @@ void RenderSystem::PreRender()
                 transparentModels.push_back(models.at(i));
                 break;
         }
+        //SET UBO BINDING SHADER
+        uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shader->ID, "Matrices");
+        if(models.at(i)->matHandle.type == MaterialType::OUTLINE)
+            uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shader2->ID, "Matrices");
     }
 
+    //CREAMOS UBO para VIEW & PROJECTION
+    uboSytem->CreateBuffer(sizeof(glm::mat4) * 2, 0);
+
+    //AÑADIMOS LUCES
     for (unsigned int i = 0; i < models.size(); i++)
     {
         models.at(i)->AddLight(lights);
@@ -176,6 +187,10 @@ void RenderSystem::StartRender()
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        //UBO CAMERA
+        uboSytem->StoreData(cameras.at(0)->projection, sizeof(glm::mat4));
+        uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
 
         ///RENDER OUTLINE MODELS
         RenderOutLineModels();

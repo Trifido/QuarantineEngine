@@ -179,6 +179,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="UBOSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h" />
@@ -205,6 +206,7 @@
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="UBOSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\misc\natvis\imgui.natvis" />
@@ -227,6 +229,8 @@
     <None Include="shaders\outline.vert" />
     <None Include="shaders\reflective.frag" />
     <None Include="shaders\reflective.vert" />
+    <None Include="shaders\refractive.frag" />
+    <None Include="shaders\refractive.vert" />
     <None Include="shaders\renderPass.frag" />
     <None Include="shaders\renderPass.vert" />
     <None Include="shaders\skybox.frag" />

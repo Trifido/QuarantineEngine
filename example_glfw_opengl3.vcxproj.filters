@@ -109,6 +109,9 @@
     <ClCompile Include="SkyBox.cpp">
       <Filter>sources\Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="UBOSystem.cpp">
+      <Filter>sources\system</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -183,6 +186,9 @@
     <ClInclude Include="SkyBox.h">
       <Filter>sources\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="UBOSystem.h">
+      <Filter>sources\system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\misc\natvis\imgui.natvis">
@@ -255,6 +261,12 @@
       <Filter>sources\shaders\standar</Filter>
     </None>
     <None Include="shaders\reflective.vert">
+      <Filter>sources\shaders\standar</Filter>
+    </None>
+    <None Include="shaders\refractive.frag">
+      <Filter>sources\shaders\standar</Filter>
+    </None>
+    <None Include="shaders\refractive.vert">
       <Filter>sources\shaders\standar</Filter>
     </None>
   </ItemGroup>

@@ -51,6 +51,12 @@ void MaterialHandle::EditMaterial(MaterialComponent component, float value)
             listMaterials.at(i)->shininess = value;
         }
         break;
+    case MaterialComponent::REFRACTIVE_INDEX:
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->refractiveIndex = value;
+        }
+        break;
     default:
         printf("ERROR::CHANGE_VALUE::RUN_FAILED\n");
         break;
@@ -117,9 +123,13 @@ void MaterialHandle::EditMaterial(MaterialComponent component, bool value)
     this->isAmbientReflective = value;
     switch (component)
     {
-        case MaterialComponent::AREFLECTIVE:
+        case MaterialComponent::A_REFLECTIVE:
             for (int i = 0; i < listMaterials.size(); i++)
                 listMaterials.at(i)->isAmbientReflective = value;
+            break;
+        case MaterialComponent::A_REFRACTIVE:
+            for (int i = 0; i < listMaterials.size(); i++)
+                listMaterials.at(i)->isAmbientRefractive = value;
             break;
     }
 }

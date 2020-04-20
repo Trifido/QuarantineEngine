@@ -21,8 +21,10 @@ enum MaterialComponent
     SHADER2,
     TEXTURE,
     SHININESS,
+    REFRACTIVE_INDEX,
     OUTLINE_COLOR,
-    AREFLECTIVE
+    A_REFLECTIVE,
+    A_REFRACTIVE
 };
 
 class Material
@@ -34,7 +36,9 @@ public:
     std::vector<Texture> textures;
     Texture* skyboxTexture;
     float shininess;
+    float refractiveIndex;
     bool isAmbientReflective = false;
+    bool isAmbientRefractive = false;
     glm::vec4 colorOutline;
 
     Material();

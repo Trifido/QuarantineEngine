@@ -86,13 +86,14 @@ int main(int, char**)
     Shader* sh2 = new Shader("shaders/nanosuit.vert", "shaders/nanosuit.frag");
     Shader* outlineShader = new Shader("shaders/outline.vert", "shaders/outline.frag");
     Shader* transparentShader = new Shader("shaders/blending.vert", "shaders/blending.frag");
+    Shader* refractiveShader = new Shader("shaders/refractive.vert", "shaders/refractive.frag");
+    Shader* refractiveNanoShader = new Shader("shaders/refractive.vert", "shaders/refractive.frag");
     Shader* reflectiveShader = new Shader("shaders/reflective.vert", "shaders/reflective.frag");
-    Shader* reflectiveShader2 = new Shader("shaders/reflective.vert", "shaders/reflective.frag");
     
 
     ///MATERIALES
-    Material *cubeMaterial = new Material(reflectiveShader, outlineShader, textures);
-    Material *nanosuitMaterial = new Material(reflectiveShader2);
+    Material *cubeMaterial = new Material(refractiveShader, outlineShader, textures);
+    Material *nanosuitMaterial = new Material(refractiveNanoShader);
     cubeMaterial->shininess = 12.0f;
 
     Material* transpVegi = new Material(transparentShader);
@@ -110,7 +111,8 @@ int main(int, char**)
     ///--NANOSUIT
     Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
     ourModel.AddMaterial(nanosuitMaterial);
-    ourModel.matHandle.EditMaterial(MaterialComponent::AREFLECTIVE, true);
+    ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
+    ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
     ourModel.ScaleTo(glm::vec3(0.2f));
     ourModel.TranslationTo(glm::vec3(0.0f, -7.75f, 0.0f));
     renderkernel.AddModel(&ourModel);
@@ -118,8 +120,9 @@ int main(int, char**)
     ///--CUBE
     Model cubeModel(vertices, 36, textures);
     cubeModel.isSelectable(true);
-    cubeModel.AddMaterial(cubeMaterial);
-    cubeModel.matHandle.EditMaterial(MaterialComponent::AREFLECTIVE, true);
+    cubeModel.AddMaterial(cubeMaterial); 
+    cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
+    cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
     cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, -4.0f));
     cubeModel.ScaleTo(glm::vec3(4.0f));
     renderkernel.AddModel(&cubeModel);
@@ -128,7 +131,7 @@ int main(int, char**)
     Model vegetation(transparentVertices, 6);
     vegetation.TranslationTo(glm::vec3(1.0f, -1.0f, 0.0f));
     vegetation.AddMaterial(transpVegi);
-    //renderkernel.AddModel(&vegetation);
+    renderkernel.AddModel(&vegetation);
 
     // LIGHT 
     renderkernel.AddLight(new Light(TypeLight::DIRL));

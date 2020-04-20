@@ -55,11 +55,7 @@ void Mesh::Draw(bool isOutline, bool isActive)
 
         // draw mesh
         glBindVertexArray(VAO);
-        if (material->isAmbientReflective)
-        {
-            //glActiveTexture(GL_TEXTURE0);
-            //glBindTexture(GL_TEXTURE_CUBE_MAP, material->skyboxTexture->ID);
-        }
+
         //glPolygonMode(GL_FRONT, GL_FILL);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

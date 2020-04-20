@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "Model.h"
 #include "FBOSystem.h"
+#include "UBOSystem.h"
 #include "RenderPlane.h"
 #include "KeyInput.h"
 #include "SkyBox.h"
@@ -25,6 +26,7 @@ private:
     GLFWwindow* window;
     ImVec4* clear_color;
     FBOSystem* fboSystem;
+    UBOSystem* uboSytem;
     RenderPlane renderFinalPass;
     int width, height;
     int lastWidth, lastHeight;

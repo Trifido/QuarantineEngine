@@ -81,7 +81,6 @@ uniform samplerCube skybox;
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-vec3 CalcAmbientReflection(vec3 fragPos, vec3 normal, vec3 viewPos);
 
 void main()
 {
@@ -126,11 +125,17 @@ void main()
     if(numFPSLights > 0)
         result += CalcSpotLight(fpsSpotLight, norm, FragPos, viewDir);
 
-    //Phase 5: AMBIENT REFLECTION
-    if(material.isAmbientReflective == 1.0)
-        result += CalcAmbientReflection(FragPos, norm, viewPos);
+    //result = texture(material.normal[0], TexCoords).rgb;
 
     FragColor = vec4(result, 1.0);
+
+    if(material.isAmbientRefractive == 1)
+    {
+        float ratio = 1.00 / material.refractiveIndex;
+        vec3 I = normalize(FragPos - viewPos);
+        vec3 R = refract(I, norm, ratio);
+        FragColor = vec4(texture(skybox, R).rgb, 1.0);
+    }
 }
 
 
@@ -187,13 +192,11 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
         } 
     }
 
-    vec3 ambient  = light.ambient * resultDiffuse;
-    vec3 diffuse  = light.diffuse * diff * resultDiffuse;
+    vec3 ambient  = light.ambient  * resultDiffuse;
+    vec3 diffuse  = light.diffuse  * diff * resultDiffuse;
     vec3 specular = light.specular * spec * resultSpecular;
     vec3 emissive = resultEmissive;
-
     return (ambient + diffuse + specular + emissive);
-
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
@@ -252,9 +255,9 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     }
 
     // combine results
-    vec3 ambient  = light.ambient * attenuation * resultDiffuse;
-    vec3 diffuse  = light.diffuse * attenuation * diff * resultDiffuse;
-    vec3 specular = light.specular * attenuation * spec * resultSpecular;
+    vec3 ambient  = light.ambient  * resultDiffuse * attenuation;
+    vec3 diffuse  = light.diffuse  * diff * resultDiffuse * attenuation;
+    vec3 specular = light.specular * spec * resultSpecular * attenuation;
     vec3 emissive = resultEmissive * attenuation;
 
     return (ambient + diffuse + specular + emissive);
@@ -321,19 +324,11 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     }
 
 
-    vec3 ambient  = light.ambient * attenuation * resultDiffuse;
-    vec3 diffuse  = light.diffuse * attenuation * diff * resultDiffuse;
-    vec3 specular = light.specular * attenuation * spec * resultSpecular ;
-    vec3 emissive = resultEmissive * attenuation;
-
-    return (ambient + diffuse + specular + emissive);
-}
-
-vec3 CalcAmbientReflection(vec3 fragPos, vec3 normal, vec3 viewPos)
-{
-    vec3 I = normalize(fragPos - viewPos);
-    vec3 R = reflect(I, normalize(normal));
-    vec3 reflCol = texture(skybox, R).rgb;
-    vec3 reflTex = texture(material.height[0], TexCoords).rgb;
-    return reflCol * reflTex;
+    vec3 ambient = light.ambient * resultDiffuse;
+    vec3 diffuse = light.diffuse * diff * resultDiffuse;
+    vec3 specular = light.specular * spec * resultSpecular;
+    ambient *= attenuation * intensity;
+    diffuse *= attenuation * intensity;
+    specular *= attenuation * intensity;
+    return (ambient + diffuse + specular);
 }

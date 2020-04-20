@@ -100,8 +100,10 @@ void Material::AssignRenderTextures()
     ptrShader->setInt("material.num_emissive", emissiveNr);
     ptrShader->setFloat("material.shininess", shininess);
     ptrShader->setBool("material.isAmbientReflective", isAmbientReflective);
+    ptrShader->setBool("material.isAmbientRefractive", isAmbientRefractive);
+    ptrShader->setFloat("material.refractiveIndex", refractiveIndex);
 
-    if (isAmbientReflective)
+    if (isAmbientReflective || isAmbientRefractive)
     {
         glActiveTexture(GL_TEXTURE0 + textures.size());
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture->ID);
