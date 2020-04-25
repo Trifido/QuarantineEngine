@@ -2,11 +2,13 @@
 
 Model::Model()
 {
+    model_type = ModelType::REGULAR_M;
     matHandle.type = MaterialType::LIT;
 }
 
 Model::Model(char* path)
 {
+    model_type = ModelType::REGULAR_M;
     matHandle.type = MaterialType::LIT;
     loadModel(path);
 }
@@ -18,13 +20,15 @@ void Model::Draw(bool isOutline)
 {
     if (!isOutline || !isSelectableModel || !isSelectedModel)
     {
-        //shader->use();
         matHandle.shader->use();
         for (unsigned int i = 0; i < meshes.size(); i++)
         {
-            //(*matHandle.listMaterials.at(i)->shader)->use();
-            //(*meshes[i].material->shader)->setMat4("model", model);
-            meshes[i].material->ptrShader->setMat4("model", model);
+            if (matHandle.type != MaterialType::INSTANCE)
+            {
+                meshes[i].material->ptrShader->setMat4("model", model);
+                if (meshes[i].material->type == MaterialType::NORMALS)
+                    meshes[i].material->ptrShader2->setMat4("model", model);
+            }
             meshes[i].Draw();
         }
     }
@@ -32,11 +36,8 @@ void Model::Draw(bool isOutline)
     {
         for (unsigned int i = 0; i < meshes.size(); i++)
         {
-            //(*meshes[i].material->shader)->use();
             matHandle.shader->use();
             meshes[i].material->ptrShader->setMat4("model", model);
-            //(*meshes[i].material->shader)->setMat4("model", model);
-            //(*meshes[i].material->shader2)->use();
             matHandle.shader2->use();
             meshes[i].material->ptrShader2->setMat4("model", glm::scale(model, glm::vec3(1.005f, 1.005f, 1.005f)));
             meshes[i].Draw(isOutline, isSelectedModel);
@@ -58,6 +59,50 @@ void Model::loadModel(std::string path)
     directory = path.substr(0, path.find_last_of('/'));
 
     processNode(scene->mRootNode, scene);
+}
+
+void Model::SetIntanceModelMatrix()
+{
+    modelMatrices = new glm::mat4[matHandle.MAX_INSTANCES];
+    srand(glfwGetTime()); // initialize random seed	
+    float radius = 150.0;
+    float offset = 25.0f;
+    for (unsigned int i = 0; i < matHandle.numInstances; i++)
+    {
+        glm::mat4 model_ins = this->model;
+        // 1. translation: displace along circle with 'radius' in range [-offset, offset]
+        float angle = (float)i / (float)matHandle.numInstances * 360.0f;
+        float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float x = sin(angle) * radius + displacement;
+        displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float y = displacement * 0.4f; // keep height of asteroid field smaller compared to width of x and z
+        displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float z = cos(angle) * radius + displacement;
+        model_ins = glm::translate(model_ins, glm::vec3(x, y, z));
+
+        // 2. scale: Scale between 0.05 and 0.25f
+        float scale = (rand() % 20) / 100.0f + 0.05;
+        model_ins = glm::scale(model_ins, glm::vec3(scale));
+
+        // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
+        float rotAngle = (rand() % 360);
+        model_ins = glm::rotate(model_ins, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
+
+        // 4. now add to list of matrices
+        modelMatrices[i] = model_ins;
+    }
+
+    // configure instanced array
+    // -------------------------
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, matHandle.numInstances * sizeof(glm::mat4), &modelMatrices[0], GL_STREAM_DRAW);
+
+    for (int i = 0; i < meshes.size(); i++)
+    {
+        meshes.at(i).SetIntanceMesh();
+    }
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -218,83 +263,122 @@ void Model::SetShininess(float shini)
         meshes.at(i).SetShininess(shini);
 }
 
-Model::Model(float rawData[], unsigned int numVertex)
+void Model::SetInstanceModel(unsigned int ID)
 {
+    for (unsigned int i = 0; i < meshes.size(); i++)
+        meshes.at(i).setUpInstanceMesh(ID);
+}
+
+Model::Model(float rawData[], unsigned int numVertex, unsigned int offset, ModelType model_type, glm::vec2* instances)
+{
+    this->model_type = model_type;
     matHandle.type = MaterialType::LIT;
 
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-
-    const int NUMCOMP = 8;
-    for (int i = 0; i < numVertex; i++)
+    if (model_type == ModelType::REGULAR_M)
     {
-        unsigned int index = i * NUMCOMP;
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
 
-        Vertex vertex;
-        // process vertex positions, normals and texture coordinates
-        glm::vec3 vector;
-        vector.x = rawData[index];
-        vector.y = rawData[index + 1];
-        vector.z = rawData[index + 2];
-        vertex.Position = vector;
-
-        vector.x = rawData[index + 3];
-        vector.y = rawData[index + 4];
-        vector.z = rawData[index + 5];
-        vertex.Normal = vector;
-
-        glm::vec2 vec;
-        vec.x = rawData[index + 6];
-        vec.y = rawData[index + 7];
-        vertex.TexCoords = vec;
-
-        vertices.push_back(vertex);
-        indices.push_back(i);
-    } 
-    //Compute Tangent & BiTangents
-
-    bool isNormal = false;
-    //Check Normal
-    for (int i = 0; i < textures_loaded.size(); i++)
-        if (textures_loaded.at(i).type == TypeTexture::NORMAL)
-            isNormal = true;
-
-    if (isNormal)
-    {
-        for (unsigned int idTr = 0; idTr < numVertex; idTr += 3)
+        unsigned int NUMCOMP = offset;
+        for (int i = 0; i < numVertex; i++)
         {
-            glm::vec3 edge1 = vertices[idTr + 1].Position - vertices[idTr].Position;
-            glm::vec3 edge2 = vertices[idTr + 2].Position - vertices[idTr].Position;
-            glm::vec2 deltaUV1 = vertices[idTr + 1].TexCoords - vertices[idTr].TexCoords;
-            glm::vec2 deltaUV2 = vertices[idTr + 2].TexCoords - vertices[idTr].TexCoords;
+            unsigned int index = i * NUMCOMP;
 
-            float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+            Vertex vertex;
+            // process vertex positions, normals and texture coordinates
+            glm::vec3 vector;
+            vector.x = rawData[index];
+            vector.y = rawData[index + 1];
+            vector.z = rawData[index + 2];
+            vertex.Position = vector;
 
-            glm::vec3 tangent, bitangent;
+            vector.x = rawData[index + 3];
+            vector.y = rawData[index + 4];
+            vector.z = rawData[index + 5];
+            vertex.Normal = vector;
 
-            if (!existTangent)
+            glm::vec2 vec;
+            vec.x = rawData[index + 6];
+            vec.y = rawData[index + 7];
+            vertex.TexCoords = vec;
+
+            vertices.push_back(vertex);
+            indices.push_back(i);
+        }
+        //Compute Tangent & BiTangents
+
+        bool isNormal = false;
+        //Check Normal
+        for (int i = 0; i < textures_loaded.size(); i++)
+            if (textures_loaded.at(i).type == TypeTexture::NORMAL)
+                isNormal = true;
+
+        if (isNormal)
+        {
+            for (unsigned int idTr = 0; idTr < numVertex; idTr += 3)
             {
-                tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-                tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-                tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-                tangent = glm::normalize(tangent);
+                glm::vec3 edge1 = vertices[idTr + 1].Position - vertices[idTr].Position;
+                glm::vec3 edge2 = vertices[idTr + 2].Position - vertices[idTr].Position;
+                glm::vec2 deltaUV1 = vertices[idTr + 1].TexCoords - vertices[idTr].TexCoords;
+                glm::vec2 deltaUV2 = vertices[idTr + 2].TexCoords - vertices[idTr].TexCoords;
 
-                vertices[idTr].Tangents = tangent;
-                vertices[idTr + 1].Tangents = tangent;
-                vertices[idTr + 2].Tangents = tangent;
+                float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 
-                bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-                bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-                bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-                bitangent = glm::normalize(bitangent);
+                glm::vec3 tangent, bitangent;
 
-                vertices[idTr].Bitangents = bitangent;
-                vertices[idTr + 1].Bitangents = bitangent;
-                vertices[idTr + 2].Bitangents = bitangent;
+                if (!existTangent)
+                {
+                    tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+                    tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+                    tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+                    tangent = glm::normalize(tangent);
+
+                    vertices[idTr].Tangents = tangent;
+                    vertices[idTr + 1].Tangents = tangent;
+                    vertices[idTr + 2].Tangents = tangent;
+
+                    bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+                    bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+                    bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+                    bitangent = glm::normalize(bitangent);
+
+                    vertices[idTr].Bitangents = bitangent;
+                    vertices[idTr + 1].Bitangents = bitangent;
+                    vertices[idTr + 2].Bitangents = bitangent;
+                }
             }
         }
+        meshes.push_back(Mesh(vertices, indices, textures_loaded, matHandle));
     }
-    meshes.push_back(Mesh(vertices, indices, textures_loaded, matHandle));
+    else
+    { 
+        std::vector<ProceduralVertex> vertices;
+        std::vector<unsigned int> indices;
+
+        unsigned int NUMCOMP = offset;
+        for (int i = 0; i < numVertex; i++)
+        {
+            unsigned int index = i * NUMCOMP;
+
+            ProceduralVertex vertex;
+            // process vertex positions, normals and texture coordinates
+            glm::vec2 vector;
+            glm::vec3 vectorColor;
+            vector.x = rawData[index];
+            vector.y = rawData[index + 1];
+            vertex.Position = vector;
+
+            vectorColor.x = rawData[index + 2];
+            vectorColor.y = rawData[index + 3];
+            vectorColor.z = rawData[index + 4];
+            vertex.Color = vectorColor;
+
+            vertices.push_back(vertex);
+            indices.push_back(i);
+        }
+
+        meshes.push_back(Mesh(vertices, indices, matHandle, instances));
+    }
 }
 
 Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textImages)
@@ -475,7 +559,7 @@ void Model::AddLight(std::vector<Light*> lights)
 void Model::AddCamera(Camera* cam)
 {
     matHandle.shader->AddCamera(cam);
-    if (matHandle.type == MaterialType::OUTLINE)
+    if (matHandle.type == MaterialType::OUTLINE || matHandle.type == MaterialType::NORMALS)
     {
         matHandle.shader2->AddCamera(cam);
 

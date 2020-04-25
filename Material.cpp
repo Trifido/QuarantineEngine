@@ -3,36 +3,55 @@
 Material::Material()
 {
     type = MaterialType::LIT;
-    ptrShader = new Shader("shaders/nanosuit.vert", "shaders/nanosuit.frag");
+    drawtype = DrawMode::DTRIANGLES;
+    ptrShader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
+    numInstances = 0;
 }
 
 Material::Material(Shader* shader)
 {
     type = MaterialType::LIT;
+    drawtype = DrawMode::DTRIANGLES;
     ptrShader = shader;
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
+    numInstances = 0;
+}
+
+Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
+{
+    type = mattype;
+    drawtype = DrawMode::DTRIANGLES;
+    ptrShader = shader;
+    ptrShader2 = shader2;
+    shininess = 1.0f;
+    colorOutline = glm::vec4(1.0f);
+    numInstances = 0;
 }
 
 Material::Material(Shader* shader, std::vector<Texture> textures)
 {
     type = MaterialType::LIT;
+    drawtype = DrawMode::DTRIANGLES;
     ptrShader = shader;
     this->textures = textures;
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
+    numInstances = 0;
 }
 
 Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> textures)
 {
     type = MaterialType::OUTLINE;
+    drawtype = DrawMode::DTRIANGLES;
     ptrShader = shader;
     ptrShader2 = shader2;
     this->textures = textures;
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
+    numInstances = 0;
 }
 
 void Material::AddShader(Shader* sh)

@@ -219,6 +219,17 @@
     <None Include="shaders\example.vert" />
     <None Include="shaders\example1.frag" />
     <None Include="shaders\example1.vert" />
+    <None Include="shaders\geometryShader.frag" />
+    <None Include="shaders\geometryShader.gm" />
+    <None Include="shaders\geometryShader.vert" />
+    <None Include="shaders\geometryShaderNano.gm" />
+    <None Include="shaders\geometryShaderNormal.frag" />
+    <None Include="shaders\geometryShaderNormal.gm" />
+    <None Include="shaders\geometryShaderNormal.vert" />
+    <None Include="shaders\instancing.frag" />
+    <None Include="shaders\instancing.vert" />
+    <None Include="shaders\instancing_quads.frag" />
+    <None Include="shaders\instancing_quads.vert" />
     <None Include="shaders\lightingCubeFRAG.frag" />
     <None Include="shaders\lightingCubeVERT.vert" />
     <None Include="shaders\lightmaps.frag" />
@@ -235,6 +246,8 @@
     <None Include="shaders\renderPass.vert" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
+    <None Include="shaders\standardLighting.frag" />
+    <None Include="shaders\standardLighting.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

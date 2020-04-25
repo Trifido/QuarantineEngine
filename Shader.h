@@ -16,6 +16,7 @@
 
 void CheckVertexCompilation(unsigned int vertexShader);
 void CheckFragmentCompilation(unsigned int fragShader);
+void CheckGeometryCompilation(unsigned int geoShader);
 void CheckProgramLink(unsigned int shaderProgram);
 
 class Shader
@@ -31,6 +32,7 @@ public:
 
     // constructor reads and builds the shader
     Shader(const char* vertexPath, const char* fragmentPath);
+    Shader(const char* vertexPath, const char* geomtryPath, const char* fragmentPath);
     // use/activate the shader
     void use();
     // utility uniform functions

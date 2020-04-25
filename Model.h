@@ -10,10 +10,17 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+enum ModelType
+{
+    REGULAR_M,
+    PROCEDURAL_M,
+    INSTANCE_M
+};
 
 class Model
 {
 private:
+    ModelType model_type;
     std::vector<Mesh> meshes;
     std::vector<Texture> textures_loaded;
     std::string directory;
@@ -23,18 +30,21 @@ private:
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TypeTexture typeName);
+
 public:
     MaterialHandle matHandle;
     glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4* modelMatrices;
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection; 
 
     bool isSelectableModel = false;
     bool isSelectedModel = false;
+    //bool isProcedural = false;
 
     Model();
-    Model(char* path);
-    Model(float rawData[], unsigned int numVertex);
+    Model(char* path); 
+    Model(float rawData[], unsigned int numVertex, unsigned int offset = 8, ModelType model_type = ModelType::REGULAR_M, glm::vec2* instances = NULL);
     Model(float rawData[], unsigned int numVertex, std::vector<Texture> textImages);
     void Draw(bool isOutline=false);
 
@@ -46,6 +56,9 @@ public:
     void DeleteGPUInfo();
     void SetShininess(float shini);
     void AddTextures(std::vector<Texture> texts);
+
+    void SetInstanceModel(unsigned int ID);
+    void SetIntanceModelMatrix();
 
     void isSelectable(bool selectable);
     void isSelected(bool select);

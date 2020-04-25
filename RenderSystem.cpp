@@ -102,6 +102,7 @@ void RenderSystem::PreRender()
         switch (models.at(i)->matHandle.type)
         {
             default:
+            case MaterialType::INSTANCE:
             case MaterialType::LIT:
             case MaterialType::UNLIT: 
                 solidModels.push_back(models.at(i));
@@ -120,7 +121,7 @@ void RenderSystem::PreRender()
     }
 
     //CREAMOS UBO para VIEW & PROJECTION
-    uboSytem->CreateBuffer(sizeof(glm::mat4) * 2, 0);
+    uboSytem->CreateBuffer((sizeof(glm::mat4) * 2) + sizeof(float), 0);
 
     //AÑADIMOS LUCES
     for (unsigned int i = 0; i < models.size(); i++)
@@ -141,6 +142,9 @@ void RenderSystem::PreRender()
 
     fboSystem->InitFBOSystem();
 
+    //Cambiamos el numero de instancias en GPU del modelo
+    models.at(1)->matHandle.EditMaterial(MaterialComponent::NUM_INSTANCES, 10000.0f);
+
     ///ACTIVAMOS EL DEPTH BUFFER
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -157,6 +161,16 @@ void RenderSystem::StartRender()
         //ANIMATION
         ComputeDeltaTime();
         GetWindowSize(window, &width, &height);
+
+        //Set GPU instances
+        for (int i = 0; i < models.size(); i++)
+        {
+            if (models.at(i)->matHandle.isChangeNumInstances)
+            {
+                models.at(i)->SetIntanceModelMatrix();
+                models.at(i)->matHandle.isChangeNumInstances = false;
+            }
+        }
 
         //Keyboad functions
         inputSystem.processInput(window); 
@@ -191,6 +205,7 @@ void RenderSystem::StartRender()
         //UBO CAMERA
         uboSytem->StoreData(cameras.at(0)->projection, sizeof(glm::mat4));
         uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
+        uboSytem->StoreData(glfwGetTime(), sizeof(float), sizeof(glm::mat4) * 2);
 
         ///RENDER OUTLINE MODELS
         RenderOutLineModels();

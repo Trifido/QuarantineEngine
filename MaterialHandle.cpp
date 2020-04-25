@@ -2,12 +2,14 @@
 
 MaterialHandle::MaterialHandle()
 {
+    this->numInstances = 0;
     this->type = MaterialType::LIT;
-    this->shader = new Shader("shaders/nanosuit.vert", "shaders/nanosuit.frag");
+    this->shader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
 }
 
 MaterialHandle::MaterialHandle(Shader* sh)
 {
+    this->numInstances = 0;
     this->type = MaterialType::LIT;
     this->shader = sh;
 }
@@ -57,6 +59,19 @@ void MaterialHandle::EditMaterial(MaterialComponent component, float value)
             listMaterials.at(i)->refractiveIndex = value;
         }
         break;
+    case MaterialComponent::NUM_INSTANCES:
+        if (numInstances != (int)value && (int)value > 0)
+        {
+            numInstances = value;
+            isChangeNumInstances = true;
+
+            //Cambiamos el numero de instancias
+            for (int i = 0; i < listMaterials.size(); i++)
+            {
+                listMaterials.at(i)->numInstances = this->numInstances;
+            }
+        }
+        break;
     default:
         printf("ERROR::CHANGE_VALUE::RUN_FAILED\n");
         break;
@@ -79,20 +94,39 @@ void MaterialHandle::EditMaterial(MaterialComponent component, glm::vec4 value)
     }
 }
 
-void MaterialHandle::EditMaterial(MaterialComponent component, MaterialType type)
+void MaterialHandle::EditMaterial(MaterialComponent component, MaterialType type, int numInstances)
 {
     this->type = type;
 
     if (component == MaterialComponent::TYPE)
     {
+        if (type == MaterialType::INSTANCE)
+            this->numInstances = numInstances;
+
         for (int i = 0; i < listMaterials.size(); i++)
         {
             listMaterials.at(i)->type = type;
+            listMaterials.at(i)->numInstances = this->numInstances;
         }
     }
     else
     {
         printf("ERROR::CHANGE_TYPE::RUN_FAILED\n");
+    }
+}
+
+void MaterialHandle::EditMaterial(MaterialComponent component, DrawMode type)
+{
+    if (component == MaterialComponent::DRAW_MODE)
+    {
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->drawtype = type;
+        }
+    }
+    else
+    {
+        printf("ERROR::CHANGE_DRAW_MODE::RUN_FAILED\n");
     }
 }
 
@@ -120,10 +154,10 @@ void MaterialHandle::EditMaterial(MaterialComponent component, std::vector<Textu
 
 void MaterialHandle::EditMaterial(MaterialComponent component, bool value)
 {
-    this->isAmbientReflective = value;
     switch (component)
     {
         case MaterialComponent::A_REFLECTIVE:
+            this->isAmbientReflective = value;
             for (int i = 0; i < listMaterials.size(); i++)
                 listMaterials.at(i)->isAmbientReflective = value;
             break;

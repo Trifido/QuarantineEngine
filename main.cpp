@@ -68,40 +68,50 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImVec4* clear_color = new ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+    //ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
     //RENDER SYSTEM
     RenderSystem renderkernel(window, clear_color);
 
     ///TEXTURES
-    std::vector<Texture> textures;
-    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE);
-    Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
-    Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
-    Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-    textures.push_back(texture1);
-    textures.push_back(texture2);
-    textures.push_back(texture3);
+    //std::vector<Texture> textures;
+    //Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE);
+    //Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
+    //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
+    //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    //textures.push_back(texture1);
+    //textures.push_back(texture2);
+    //textures.push_back(texture3);
 
     ///SHADERS
-    Shader* sh2 = new Shader("shaders/nanosuit.vert", "shaders/nanosuit.frag");
-    Shader* outlineShader = new Shader("shaders/outline.vert", "shaders/outline.frag");
-    Shader* transparentShader = new Shader("shaders/blending.vert", "shaders/blending.frag");
-    Shader* refractiveShader = new Shader("shaders/refractive.vert", "shaders/refractive.frag");
-    Shader* refractiveNanoShader = new Shader("shaders/refractive.vert", "shaders/refractive.frag");
-    Shader* reflectiveShader = new Shader("shaders/reflective.vert", "shaders/reflective.frag");
-    
-
+    //Shader* outlineShader = new Shader("shaders/outline.vert", "shaders/outline.frag");
+    //Shader* transparentShader = new Shader("shaders/blending.vert", "shaders/blending.frag");
+    //Shader* refractiveShader = new Shader("shaders/refractive.vert", "shaders/refractive.frag");
+    //Shader* refractiveNanoShader = new Shader("shaders/refractive.vert", "shaders/refractive.frag");
+    //Shader* reflectiveShader = new Shader("shaders/reflective.vert", "shaders/reflective.frag");
+    ////Shader* geometryShader = new Shader("shaders/geometryShader.vert", "shaders/geometryShader.gm", "shaders/geometryShader.frag");
+    //Shader* geometryShader2 = new Shader("shaders/nanosuit.vert", "shaders/geometryShaderNano.gm", "shaders/nanosuit.frag");
+    //Shader* geometryShaderNormal = new Shader("shaders/geometryShaderNormal.vert", "shaders/geometryShaderNormal.gm", "shaders/geometryShaderNormal.frag");
+    //Shader* instanceShader = new Shader("shaders/instancing_quads.vert", "shaders/instancing_quads.frag");
+    Shader* standardShader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
+    Shader* instancingShader = new Shader("shaders/instancing.vert", "shaders/instancing.frag");
     ///MATERIALES
+    /*
     Material *cubeMaterial = new Material(refractiveShader, outlineShader, textures);
-    Material *nanosuitMaterial = new Material(refractiveNanoShader);
+    Material *nanosuitMaterial = new Material(geometryShader2);
+    Material* transpVegi = new Material(transparentShader);
+    Material* normalMaterial = new Material(standardShader, geometryShaderNormal, MaterialType::NORMALS);
+    Material* instanceMaterial = new Material(instanceShader);
+    //Material* geoMaterial = new Material(geometryShader);
     cubeMaterial->shininess = 12.0f;
 
-    Material* transpVegi = new Material(transparentShader);
     textures.clear();
     textures.push_back(texture4);
     transpVegi->AddMultTextures(textures);
     transpVegi->type = MaterialType::TRANSP;
-    transpVegi->shininess = 12.0f;
+    transpVegi->shininess = 12.0f;*/
+
+    Material* mat_asteroid = new Material(instancingShader);
 
     ///CAMERA
     Camera mainCamera(1280, 720);
@@ -109,15 +119,17 @@ int main(int, char**)
 
     ///MODEL 3D
     ///--NANOSUIT
-    Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
-    ourModel.AddMaterial(nanosuitMaterial);
-    ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
-    ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
+   
+    //Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
+    /*ourModel.AddMaterial(normalMaterial);
+    //ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
+    //ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
     ourModel.ScaleTo(glm::vec3(0.2f));
-    ourModel.TranslationTo(glm::vec3(0.0f, -7.75f, 0.0f));
-    renderkernel.AddModel(&ourModel);
-
+    ourModel.TranslationTo(glm::vec3(0.0f, -7.75f, 0.0f));*/
+    //renderkernel.AddModel(&ourModel);
+    
     ///--CUBE
+    /*
     Model cubeModel(vertices, 36, textures);
     cubeModel.isSelectable(true);
     cubeModel.AddMaterial(cubeMaterial); 
@@ -125,13 +137,57 @@ int main(int, char**)
     cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
     cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, -4.0f));
     cubeModel.ScaleTo(glm::vec3(4.0f));
-    renderkernel.AddModel(&cubeModel);
-
+    //renderkernel.AddModel(&cubeModel);
+    */
     ///--VEGETATION
-    Model vegetation(transparentVertices, 6);
+    /*
+    Model vegetation(transparentVertices, 6, 8);
     vegetation.TranslationTo(glm::vec3(1.0f, -1.0f, 0.0f));
     vegetation.AddMaterial(transpVegi);
-    renderkernel.AddModel(&vegetation);
+    //renderkernel.AddModel(&vegetation);
+    */
+    ///--GEOMETRY
+    /*
+    //Model geometryModel(points, 4, 5, true);
+    //geometryModel.AddMaterial(geoMaterial);
+    //geometryModel.matHandle.EditMaterial(MaterialComponent::DRAW_MODE, DrawMode::DPOINTS);
+    //renderkernel.AddModel(&geometryModel);
+    */
+    ///--INSTANCES
+    /*
+    // generate a list of 100 quad locations/translation-vectors
+    // ---------------------------------------------------------
+    glm::vec2 translations[100];
+    int index = 0;
+    float offset = 0.1f;
+    for (int y = -10; y < 10; y += 2)
+    {
+        for (int x = -10; x < 10; x += 2)
+        {
+            glm::vec2 translation;
+            translation.x = (float)x / 10.0f + offset;
+            translation.y = (float)y / 10.0f + offset;
+            translations[index++] = translation;
+        }
+    }
+
+    Model instanceModel(quadVertices, 6, 5, ModelType::INSTANCE_M, translations);
+    instanceModel.AddMaterial(instanceMaterial);
+    instanceModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::INSTANCE);
+    renderkernel.AddModel(&instanceModel);
+    */
+
+    //--Planet
+    Model planet("./resources/3DModels/planet/planet.obj");
+    planet.ScaleTo(glm::vec3(10.0f));
+    planet.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
+    renderkernel.AddModel(&planet);
+    //--Asteroid
+    Model asteroid("./resources/3DModels/asteroid/rock.obj");
+    asteroid.AddMaterial(mat_asteroid);
+    asteroid.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::INSTANCE, 1000); 
+    asteroid.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
+    renderkernel.AddModel(&asteroid);
 
     // LIGHT 
     renderkernel.AddLight(new Light(TypeLight::DIRL));

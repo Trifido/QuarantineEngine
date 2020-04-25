@@ -44,8 +44,14 @@
     <Filter Include="sources\shaders\postprocess">
       <UniqueIdentifier>{d7269e3d-4c98-402b-8132-3b30d47ca508}</UniqueIdentifier>
     </Filter>
-    <Filter Include="sources\shaders\standar">
+    <Filter Include="sources\shaders\geometry">
+      <UniqueIdentifier>{f8cde15a-6a9e-4df6-8a8f-cb0c9327c4b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\shaders\standard">
       <UniqueIdentifier>{be91e756-33d5-43ff-ae94-adf1aaa74553}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\shaders\instance">
+      <UniqueIdentifier>{743c51b4-4250-45ea-a1f4-b7a064ce59b2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -245,29 +251,68 @@
     <None Include="shaders\renderPass.vert">
       <Filter>sources\shaders\postprocess</Filter>
     </None>
-    <None Include="shaders\nanosuit.vert">
-      <Filter>sources\shaders\standar</Filter>
-    </None>
-    <None Include="shaders\nanosuit.frag">
-      <Filter>sources\shaders\standar</Filter>
-    </None>
     <None Include="shaders\skybox.frag">
-      <Filter>sources\shaders\standar</Filter>
+      <Filter>sources\shaders\standard</Filter>
     </None>
     <None Include="shaders\skybox.vert">
-      <Filter>sources\shaders\standar</Filter>
+      <Filter>sources\shaders\standard</Filter>
     </None>
     <None Include="shaders\reflective.frag">
-      <Filter>sources\shaders\standar</Filter>
+      <Filter>sources\shaders\standard</Filter>
     </None>
     <None Include="shaders\reflective.vert">
-      <Filter>sources\shaders\standar</Filter>
+      <Filter>sources\shaders\standard</Filter>
     </None>
     <None Include="shaders\refractive.frag">
-      <Filter>sources\shaders\standar</Filter>
+      <Filter>sources\shaders\standard</Filter>
     </None>
     <None Include="shaders\refractive.vert">
-      <Filter>sources\shaders\standar</Filter>
+      <Filter>sources\shaders\standard</Filter>
+    </None>
+    <None Include="shaders\geometryShader.frag">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\geometryShader.gm">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\geometryShader.vert">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\geometryShaderNano.gm">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\standardLighting.frag">
+      <Filter>sources\shaders\standard</Filter>
+    </None>
+    <None Include="shaders\standardLighting.vert">
+      <Filter>sources\shaders\standard</Filter>
+    </None>
+    <None Include="shaders\nanosuit.vert">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\nanosuit.frag">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\geometryShaderNormal.frag">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\geometryShaderNormal.gm">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\geometryShaderNormal.vert">
+      <Filter>sources\shaders\geometry</Filter>
+    </None>
+    <None Include="shaders\instancing_quads.frag">
+      <Filter>sources\shaders\instance</Filter>
+    </None>
+    <None Include="shaders\instancing_quads.vert">
+      <Filter>sources\shaders\instance</Filter>
+    </None>
+    <None Include="shaders\instancing.frag">
+      <Filter>sources\shaders\instance</Filter>
+    </None>
+    <None Include="shaders\instancing.vert">
+      <Filter>sources\shaders\instance</Filter>
     </None>
   </ItemGroup>
 </Project>
