@@ -62,19 +62,19 @@ glm::vec3 cubePositions[] = {
     glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
-//glm::vec3 pointLightPositions[] = {
-//    glm::vec3(0.7f,  0.2f,  2.0f),
-//    glm::vec3(2.3f, -3.3f, -4.0f),
-//    glm::vec3(-4.0f,  2.0f, -12.0f),
-//    glm::vec3(0.0f,  0.0f, -3.0f)
-//};
-
 glm::vec3 pointLightPositions[] = {
-    glm::vec3(20.7f,  20.2f,  22.0f),
-    glm::vec3(22.3f, -23.3f, -24.0f),
-    glm::vec3(-24.0f,  22.0f, -32.0f),
-    glm::vec3(20.0f,  20.0f, -23.0f)
+    glm::vec3(0.7f,  0.2f,  2.0f),
+    glm::vec3(2.3f, -3.3f, -4.0f),
+    glm::vec3(-4.0f,  2.0f, -12.0f),
+    glm::vec3(0.0f,  0.0f, -3.0f)
 };
+
+//glm::vec3 pointLightPositions[] = {
+//    glm::vec3(20.7f,  20.2f,  22.0f),
+//    glm::vec3(22.3f, -23.3f, -24.0f),
+//    glm::vec3(-24.0f,  22.0f, -32.0f),
+//    glm::vec3(20.0f,  20.0f, -23.0f)
+//};
 
 float planeVertices[] = {
     // positions          // texture Coords 

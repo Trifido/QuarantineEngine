@@ -135,7 +135,7 @@ void RenderSystem::PreRender()
 
     //CREAMOS UN FRAME BUFFER OBJECT FBO
     glfwGetWindowSize(window, &width, &height);
-    fboSystem = new FBOSystem(&width, &height);
+    fboSystem = new FBOSystem(&width, &height, 4);
 
     lastWidth = width;
     lastHeight = height;
@@ -143,11 +143,14 @@ void RenderSystem::PreRender()
     fboSystem->InitFBOSystem();
 
     //Cambiamos el numero de instancias en GPU del modelo
-    models.at(1)->matHandle.EditMaterial(MaterialComponent::NUM_INSTANCES, 10000.0f);
+    //models.at(1)->matHandle.EditMaterial(MaterialComponent::NUM_INSTANCES, 10000.0f);
+
+    ///ACTIVAMOS EL ANTIALIASING
+    glEnable(GL_MULTISAMPLE);
 
     ///ACTIVAMOS EL DEPTH BUFFER
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_LESS);
 
     ///ACTIVAMOS EL CULLING
     //glEnable(GL_CULL_FACE);
@@ -165,7 +168,7 @@ void RenderSystem::StartRender()
         //Set GPU instances
         for (int i = 0; i < models.size(); i++)
         {
-            if (models.at(i)->matHandle.isChangeNumInstances)
+            if (models.at(i)->matHandle.isChangeNumInstances && models.at(i)->matHandle.type == MaterialType::INSTANCE)
             {
                 models.at(i)->SetIntanceModelMatrix();
                 models.at(i)->matHandle.isChangeNumInstances = false;
@@ -214,10 +217,13 @@ void RenderSystem::StartRender()
         RenderSolidModels();
 
         ///RENDER SKYBOX
-        RenderSkyBox();
+        //RenderSkyBox();
 
         ///RENDER TRANSPARENT MATERIALS
         RenderTransparentModels();
+
+        //SET FBO MULTISAMPLING
+        fboSystem->SetMultiSamplingFrameBuffer();
 
         // SECOND PASS
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default

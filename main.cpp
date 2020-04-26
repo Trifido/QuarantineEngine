@@ -74,13 +74,13 @@ int main(int, char**)
     RenderSystem renderkernel(window, clear_color);
 
     ///TEXTURES
-    //std::vector<Texture> textures;
-    //Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE);
-    //Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
-    //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
-    //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-    //textures.push_back(texture1);
-    //textures.push_back(texture2);
+    std::vector<Texture> textures;
+    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE);
+    Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
+    Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
+    Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    textures.push_back(texture1);
+    textures.push_back(texture2);
     //textures.push_back(texture3);
 
     ///SHADERS
@@ -94,7 +94,7 @@ int main(int, char**)
     //Shader* geometryShaderNormal = new Shader("shaders/geometryShaderNormal.vert", "shaders/geometryShaderNormal.gm", "shaders/geometryShaderNormal.frag");
     //Shader* instanceShader = new Shader("shaders/instancing_quads.vert", "shaders/instancing_quads.frag");
     Shader* standardShader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
-    Shader* instancingShader = new Shader("shaders/instancing.vert", "shaders/instancing.frag");
+    //Shader* instancingShader = new Shader("shaders/instancing.vert", "shaders/instancing.frag");
     ///MATERIALES
     /*
     Material *cubeMaterial = new Material(refractiveShader, outlineShader, textures);
@@ -111,8 +111,7 @@ int main(int, char**)
     transpVegi->type = MaterialType::TRANSP;
     transpVegi->shininess = 12.0f;*/
 
-    Material* mat_asteroid = new Material(instancingShader);
-
+    //Material* mat_asteroid = new Material(instancingShader);
     ///CAMERA
     Camera mainCamera(1280, 720);
     renderkernel.AddCamera(&mainCamera);
@@ -129,16 +128,16 @@ int main(int, char**)
     //renderkernel.AddModel(&ourModel);
     
     ///--CUBE
-    /*
+    
     Model cubeModel(vertices, 36, textures);
-    cubeModel.isSelectable(true);
-    cubeModel.AddMaterial(cubeMaterial); 
-    cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
-    cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
+    //cubeModel.isSelectable(true);
+    cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
     cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, -4.0f));
     cubeModel.ScaleTo(glm::vec3(4.0f));
-    //renderkernel.AddModel(&cubeModel);
-    */
+    renderkernel.AddModel(&cubeModel);
+    
     ///--VEGETATION
     /*
     Model vegetation(transparentVertices, 6, 8);
@@ -177,21 +176,21 @@ int main(int, char**)
     renderkernel.AddModel(&instanceModel);
     */
 
-    //--Planet
-    Model planet("./resources/3DModels/planet/planet.obj");
-    planet.ScaleTo(glm::vec3(10.0f));
-    planet.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
-    renderkernel.AddModel(&planet);
-    //--Asteroid
-    Model asteroid("./resources/3DModels/asteroid/rock.obj");
-    asteroid.AddMaterial(mat_asteroid);
-    asteroid.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::INSTANCE, 1000); 
-    asteroid.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
-    renderkernel.AddModel(&asteroid);
+    ///--Planet
+    //Model planet("./resources/3DModels/planet/planet.obj");
+    //planet.ScaleTo(glm::vec3(10.0f));
+    //planet.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
+    //renderkernel.AddModel(&planet);
+    ///--Asteroid
+    //Model asteroid("./resources/3DModels/asteroid/rock.obj");
+    //asteroid.AddMaterial(mat_asteroid);
+    //asteroid.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::INSTANCE, 1000); 
+    //asteroid.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
+    //renderkernel.AddModel(&asteroid);
 
     // LIGHT 
     renderkernel.AddLight(new Light(TypeLight::DIRL));
-    //renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));
+    renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));
     renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
     renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
     renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));

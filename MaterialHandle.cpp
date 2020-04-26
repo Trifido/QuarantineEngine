@@ -3,6 +3,7 @@
 MaterialHandle::MaterialHandle()
 {
     this->numInstances = 0;
+    this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
     this->shader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
 }
@@ -10,6 +11,7 @@ MaterialHandle::MaterialHandle()
 MaterialHandle::MaterialHandle(Shader* sh)
 {
     this->numInstances = 0;
+    this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
     this->shader = sh;
 }

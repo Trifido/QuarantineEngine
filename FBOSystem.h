@@ -6,6 +6,7 @@ class FBOSystem
 {
 private:
     unsigned int framebuffer;
+    unsigned int multiSampFramebuffer;
     // generate texture
     
     //render buffer object
@@ -13,10 +14,14 @@ private:
     //screen size
     int *width, *height;
 public:
+    bool isAntiAliasing;
+    unsigned int samples;
     unsigned int texColorBuffer;
-    FBOSystem(int *width, int *height);
+    unsigned int textureColorBufferMultiSampled;
+    FBOSystem(int *width, int *height, int numSamples = 0);
     void InitFBOSystem();
     void ActivateFBORender();
+    void SetMultiSamplingFrameBuffer();
     unsigned int &GetRenderedTexture() { return texColorBuffer; }
 };
 
