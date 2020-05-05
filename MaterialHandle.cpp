@@ -5,7 +5,8 @@ MaterialHandle::MaterialHandle()
     this->numInstances = 0;
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
-    this->shader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
+    this->shader = new Shader("shaders/standardShadow.vert", "shaders/standardShadow.frag");
+    this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
 }
 
 MaterialHandle::MaterialHandle(Shader* sh)
@@ -14,6 +15,7 @@ MaterialHandle::MaterialHandle(Shader* sh)
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
     this->shader = sh;
+    this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
 }
 
 void MaterialHandle::AddMaterialToList(Material* mat)
@@ -21,22 +23,29 @@ void MaterialHandle::AddMaterialToList(Material* mat)
     listMaterials.push_back(mat);
 }
 
-void MaterialHandle::EditMaterial(MaterialComponent component, Shader& sh)
+void MaterialHandle::EditMaterial(MaterialComponent component, Shader* sh)
 {
     switch (component)
     {
     case MaterialComponent::SHADER1:
-        shader = &sh;
+        shader = sh;
         for (int i = 0; i < listMaterials.size(); i++)
         {
             listMaterials.at(i)->ptrShader = shader;
         }
         break;
     case MaterialComponent::SHADER2:
-        shader2 = &sh;
+        shader2 = sh;
         for (int i = 0; i < listMaterials.size(); i++)
         {
             listMaterials.at(i)->ptrShader2 = shader2;
+        }
+        break;
+    case MaterialComponent::SHADER_SHADOW:
+        shaderShadow = sh;
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->ptrShaderShadow = shaderShadow;
         }
         break;
     default:
@@ -154,6 +163,15 @@ void MaterialHandle::EditMaterial(MaterialComponent component, std::vector<Textu
     }
 }
 
+void MaterialHandle::ActivateShadowMap(unsigned int idTexShadow)
+{
+    shader->use();
+    for (int i = 0; i < listMaterials.size(); i++)
+    {
+        listMaterials.at(i)->ActivateShadowTexture(idTexShadow);
+    }
+}
+
 void MaterialHandle::EditMaterial(MaterialComponent component, bool value)
 {
     switch (component)
@@ -166,6 +184,10 @@ void MaterialHandle::EditMaterial(MaterialComponent component, bool value)
         case MaterialComponent::A_REFRACTIVE:
             for (int i = 0; i < listMaterials.size(); i++)
                 listMaterials.at(i)->isAmbientRefractive = value;
+            break;
+        case MaterialComponent::BLINN:
+            for (int i = 0; i < listMaterials.size(); i++)
+                listMaterials.at(i)->isBlinnShading = value;
             break;
     }
 }

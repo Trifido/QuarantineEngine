@@ -55,12 +55,31 @@ void RenderSystem::RenderSkyBox()
     skybox->Render();
 }
 
+void RenderSystem::RenderShadowMap()
+{
+    glCullFace(GL_FRONT);
+    for (int i = 0; i < models.size(); i++)
+    { 
+        models[i]->DrawShadow(lights.at(0)->lightSpaceMatrix);
+    }
+    glCullFace(GL_BACK);
+}
+
 void RenderSystem::RenderSolidModels()
 {
     for (int i = 0; i < solidModels.size(); i++)
     {
-        solidModels[i]->Draw(true);
+        if (solidModels[i]->CAST_SHADOW)
+        {
+            solidModels[i]->matHandle.ActivateShadowMap(fboSystemShadowMap->texDepthMap);
+            solidModels[i]->DrawCastShadow(lights.at(0));
+        }
+        else
+        {
+            solidModels[i]->Draw();
+        }
     }
+    
 }
 
 void RenderSystem::RenderTransparentModels()
@@ -136,24 +155,22 @@ void RenderSystem::PreRender()
     //CREAMOS UN FRAME BUFFER OBJECT FBO
     glfwGetWindowSize(window, &width, &height);
     fboSystem = new FBOSystem(&width, &height, 4);
-
+    fboSystemShadowMap = new FBOSystem(&width, &height);
+    fboSystemShadowMap->ActivateShadowMap();
     lastWidth = width;
-    lastHeight = height;
-
+    lastHeight = height; 
     fboSystem->InitFBOSystem();
+    fboSystemShadowMap->InitFBOSystem();
 
     //Cambiamos el numero de instancias en GPU del modelo
     //models.at(1)->matHandle.EditMaterial(MaterialComponent::NUM_INSTANCES, 10000.0f);
 
-    ///ACTIVAMOS EL ANTIALIASING
-    glEnable(GL_MULTISAMPLE);
-
     ///ACTIVAMOS EL DEPTH BUFFER
-    //glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_LESS);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     ///ACTIVAMOS EL CULLING
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     //glCullFace(GL_BACK);
 }
 
@@ -198,35 +215,38 @@ void RenderSystem::StartRender()
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
 
-        // FIRST PASS
+        // FIRST PASS -> RENDER DEPTH TO TEXTURE
+        fboSystemShadowMap->ActivateFBODepthMapRender();
+        glViewport(0, 0, 4096, 4096);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        //Render Shadow Map
+        RenderShadowMap();
+        
+        /// SECOND PASS -> RENDER LIGHTING TO TEXTURE
         fboSystem->ActivateFBORender();
-
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-        //UBO CAMERA
+        /////UBO CAMERA
         uboSytem->StoreData(cameras.at(0)->projection, sizeof(glm::mat4));
         uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
         uboSytem->StoreData(glfwGetTime(), sizeof(float), sizeof(glm::mat4) * 2);
 
         ///RENDER OUTLINE MODELS
         RenderOutLineModels();
-
         ///RENDER SOLID MATERIALS
         RenderSolidModels();
-
         ///RENDER SKYBOX
-        //RenderSkyBox();
-
+        RenderSkyBox();
         ///RENDER TRANSPARENT MATERIALS
         RenderTransparentModels();
 
-        //SET FBO MULTISAMPLING
+        ///SET FBO MULTISAMPLING
         fboSystem->SetMultiSamplingFrameBuffer();
 
-        // SECOND PASS
+        /// THIRD PASS POST-PROCESS
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+        glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -242,7 +262,10 @@ void RenderSystem::StartRender()
 void RenderSystem::UpdateFBO()
 {
     if (lastWidth != width || lastHeight != height)
+    {
+        fboSystemShadowMap->InitFBOSystem();
         fboSystem->InitFBOSystem();
+    }
 
     lastWidth = width;
     lastHeight = height;

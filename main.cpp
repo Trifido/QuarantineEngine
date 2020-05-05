@@ -77,11 +77,14 @@ int main(int, char**)
     std::vector<Texture> textures;
     Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE);
     Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
-    Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
-    Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
+    //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
     textures.push_back(texture1);
-    textures.push_back(texture2);
+    //textures.push_back(texture2);
     //textures.push_back(texture3);
+    Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE);
+    std::vector<Texture> textures_floor;
+    textures_floor.push_back(textureFloor);
 
     ///SHADERS
     //Shader* outlineShader = new Shader("shaders/outline.vert", "shaders/outline.frag");
@@ -93,8 +96,9 @@ int main(int, char**)
     //Shader* geometryShader2 = new Shader("shaders/nanosuit.vert", "shaders/geometryShaderNano.gm", "shaders/nanosuit.frag");
     //Shader* geometryShaderNormal = new Shader("shaders/geometryShaderNormal.vert", "shaders/geometryShaderNormal.gm", "shaders/geometryShaderNormal.frag");
     //Shader* instanceShader = new Shader("shaders/instancing_quads.vert", "shaders/instancing_quads.frag");
-    Shader* standardShader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
+    //Shader* standardShader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     //Shader* instancingShader = new Shader("shaders/instancing.vert", "shaders/instancing.frag");
+    //Shader* renderShader = new Shader("shaders/standardShadow.vert", "shaders/standardShadow.frag");
     ///MATERIALES
     /*
     Material *cubeMaterial = new Material(refractiveShader, outlineShader, textures);
@@ -109,35 +113,54 @@ int main(int, char**)
     textures.push_back(texture4);
     transpVegi->AddMultTextures(textures);
     transpVegi->type = MaterialType::TRANSP;
-    transpVegi->shininess = 12.0f;*/
-
+    transpVegi->shininess = 12.0f;
     //Material* mat_asteroid = new Material(instancingShader);
+    */ 
+    
     ///CAMERA
     Camera mainCamera(1280, 720);
     renderkernel.AddCamera(&mainCamera);
 
     ///MODEL 3D
-    ///--NANOSUIT
-   
-    //Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
+    ///--NANOSUIT  
+    Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
+    //Model ourModel("./resources/3DModels/darksouls/fallen.obj"); 
+    //ourModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
     /*ourModel.AddMaterial(normalMaterial);
     //ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
-    ourModel.ScaleTo(glm::vec3(0.2f));
-    ourModel.TranslationTo(glm::vec3(0.0f, -7.75f, 0.0f));*/
-    //renderkernel.AddModel(&ourModel);
+    */
+    ourModel.ScaleTo(glm::vec3(0.1f));
+    ourModel.TranslationTo(glm::vec3(0.0f, -5.0f, 20.0f));
+    renderkernel.AddModel(&ourModel);
     
-    ///--CUBE
-    
+    ///--CUBE   
     Model cubeModel(vertices, 36, textures);
+    cubeModel.TranslationTo(glm::vec3(0.0f, 1.5f, 0.0));
+    cubeModel.ScaleTo(glm::vec3(0.5f));
+    renderkernel.AddModel(&cubeModel);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
     //cubeModel.isSelectable(true);
-    cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
-    cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, -4.0f));
-    cubeModel.ScaleTo(glm::vec3(4.0f));
-    renderkernel.AddModel(&cubeModel);
-    
+    Model cubeModel2(vertices, 36, textures);
+    cubeModel2.TranslationTo(glm::vec3(2.0f, -0.248f, 1.0));
+    cubeModel2.ScaleTo(glm::vec3(0.5f));
+    renderkernel.AddModel(&cubeModel2);
+    Model cubeModel3(vertices, 36, textures);
+    cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0));
+    cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+    cubeModel3.ScaleTo(glm::vec3(0.25f));
+    renderkernel.AddModel(&cubeModel3);
+
+    ///--FLOOR
+    Model floorModel(floorVertices, 6, textures_floor);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 64.0f);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::BLINN, true);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
+    renderkernel.AddModel(&floorModel);
+
     ///--VEGETATION
     /*
     Model vegetation(transparentVertices, 6, 8);
@@ -188,13 +211,24 @@ int main(int, char**)
     //asteroid.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
     //renderkernel.AddModel(&asteroid);
 
-    // LIGHT 
-    renderkernel.AddLight(new Light(TypeLight::DIRL));
-    renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));
-    renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
-    renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
-    renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));
-    renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[3]));
+    // LIGHT
+    Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(0.0f, 4.0f, -1.0f));
+    dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
+    renderkernel.AddLight(dirLight);
+    //renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));
+    //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
+    //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
+    //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));
+    //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[3]));
+
+    //renderkernel.lights.at(0)->SetSpecular(glm::vec3(0.25f));
+    //renderkernel.lights.at(1)->SetSpecular(glm::vec3(0.5f));
+    //renderkernel.lights.at(2)->SetSpecular(glm::vec3(0.75f));
+    //renderkernel.lights.at(3)->SetSpecular(glm::vec3(1.0f));
+    //renderkernel.lights.at(0)->SetDiffuse(glm::vec3(0.25f));
+    //renderkernel.lights.at(1)->SetDiffuse(glm::vec3(0.5f));
+    //renderkernel.lights.at(2)->SetDiffuse(glm::vec3(0.75f));
+    //renderkernel.lights.at(3)->SetDiffuse(glm::vec3(1.0f));
 
     //FBO
     renderkernel.PreRender();

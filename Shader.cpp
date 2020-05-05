@@ -295,8 +295,6 @@ void Shader::ActivateLights()
 void Shader::ActivateCamera()
 {
     this->setVec3("viewPos", mainCamera->cameraPos);
-    //this->setMat4("projection", mainCamera->projection);
-    //this->setMat4("view", mainCamera->view);
 }
 
 void CheckVertexCompilation(unsigned int vertexShader)

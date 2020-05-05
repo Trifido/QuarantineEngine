@@ -45,7 +45,7 @@ void Camera::CameraController(float deltaTime)
     }
 
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-    projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 10000.0f);
+    projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
     VP = view * projection;
 }
 

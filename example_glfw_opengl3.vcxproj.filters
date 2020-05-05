@@ -53,6 +53,9 @@
     <Filter Include="sources\shaders\instance">
       <UniqueIdentifier>{743c51b4-4250-45ea-a1f4-b7a064ce59b2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sources\shaders\shadow">
+      <UniqueIdentifier>{339bfd84-cdef-4bb5-a80c-8eea4f6a26c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -313,6 +316,24 @@
     </None>
     <None Include="shaders\instancing.vert">
       <Filter>sources\shaders\instance</Filter>
+    </None>
+    <None Include="shaders\shadow.frag">
+      <Filter>sources\shaders\shadow</Filter>
+    </None>
+    <None Include="shaders\shadow.vert">
+      <Filter>sources\shaders\shadow</Filter>
+    </None>
+    <None Include="shaders\depthRenderShadow.frag">
+      <Filter>sources\shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\depthRenderShadow.vert">
+      <Filter>sources\shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\standardShadow.frag">
+      <Filter>sources\shaders\shadow</Filter>
+    </None>
+    <None Include="shaders\standardShadow.vert">
+      <Filter>sources\shaders\shadow</Filter>
     </None>
   </ItemGroup>
 </Project>

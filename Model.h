@@ -32,6 +32,7 @@ private:
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TypeTexture typeName);
 
 public:
+    bool CAST_SHADOW = true;
     MaterialHandle matHandle;
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4* modelMatrices;
@@ -47,6 +48,8 @@ public:
     Model(float rawData[], unsigned int numVertex, unsigned int offset = 8, ModelType model_type = ModelType::REGULAR_M, glm::vec2* instances = NULL);
     Model(float rawData[], unsigned int numVertex, std::vector<Texture> textImages);
     void Draw(bool isOutline=false);
+    void DrawShadow(glm::mat4 VPShadow);
+    void Model::DrawCastShadow(Light* light, bool isOutline = false);
 
     void Rotation(float radians, glm::vec3 axis);
     void TranslationTo(glm::vec3 position);
@@ -62,6 +65,7 @@ public:
 
     void isSelectable(bool selectable);
     void isSelected(bool select);
+    void SetCastShadow(bool value);
     float checkClickMouse(glm::vec3 origin, glm::vec3 mousePosition);
 
     void AddMaterial(Material* mat);

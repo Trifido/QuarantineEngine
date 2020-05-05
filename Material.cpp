@@ -54,6 +54,24 @@ Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> texture
     numInstances = 0;
 }
 
+void Material::CopyMaterial(Material mat)
+{
+    type = mat.type;
+    drawtype = mat.drawtype;
+    ptrShader = mat.ptrShader;
+    ptrShader2 = mat.ptrShader2;
+    ptrShaderShadow = mat.ptrShaderShadow;
+    this->textures = mat.textures;
+    shininess = mat.shininess;
+    colorOutline = mat.colorOutline;
+    numInstances = mat.numInstances;
+    skyboxTexture = mat.skyboxTexture;
+    refractiveIndex = mat.refractiveIndex;
+    isAmbientReflective = mat.isAmbientReflective;
+    isAmbientRefractive = mat.isAmbientRefractive;
+    isBlinnShading = mat.isBlinnShading;
+}
+
 void Material::AddShader(Shader* sh)
 {
     ptrShader = sh;
@@ -63,6 +81,16 @@ void Material::AddTexture(Texture texture)
 {
     textures.push_back(texture);
 }
+
+void Material::ActivateShadowTexture(unsigned int idTexShadow)
+{
+    glActiveTexture(GL_TEXTURE0 + textures.size());
+    glBindTexture(GL_TEXTURE_2D, idTexShadow);
+
+    ptrShader->use();
+    ptrShader->setInt("shadowMap", textures.size());
+}
+
 void Material::AddMultTextures(std::vector<Texture> texturesIN)
 {  
     for (int i = 0; i < texturesIN.size(); i++)
@@ -118,6 +146,7 @@ void Material::AssignRenderTextures()
     ptrShader->setInt("material.num_height", heightNr);
     ptrShader->setInt("material.num_emissive", emissiveNr);
     ptrShader->setFloat("material.shininess", shininess);
+    ptrShader->setBool("material.blinn", isBlinnShading);
     ptrShader->setBool("material.isAmbientReflective", isAmbientReflective);
     ptrShader->setBool("material.isAmbientRefractive", isAmbientRefractive);
     ptrShader->setFloat("material.refractiveIndex", refractiveIndex);

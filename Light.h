@@ -4,6 +4,19 @@
 
 #include "HeadersRequeriments.h"
 
+enum LightComponent {
+    LIGHT_NEAR_EFFECT,
+    LIGHT_FAR_EFFECT,
+    LIGHT_POSITION,
+    LIGHT_DIRECTION,
+    LIGHT_DIFFUSE,
+    LIGHT_SPECULAR,
+    LIGHT_AMBIENT,
+    LIGHT_LINEAR,
+    LIGHT_QUADRATIC,
+    LIGHT_PROJSHADOW
+};
+
 enum TypeLight {
     POINTLIGHT = 0,
     DIRL = 1,
@@ -28,7 +41,15 @@ private:
     float quadratic;
 
     TypeLight type;
+
+    float near_plane;
+    float far_plane;
+    glm::vec4 projDimension;
+    glm::mat4 lightProjection;
+    glm::mat4 lightView;
+    
 public:
+    glm::mat4 lightSpaceMatrix;
     Light();
     Light(TypeLight newType);
     Light(TypeLight newType, glm::vec3 newPos);
@@ -42,6 +63,9 @@ public:
     void inline SetOuterCutOff(float newout) { outerCutOff = newout; }
     void inline SetLinear(float newLinear) { linear = newLinear; }
     void inline SetQuadratic(float newQuad) { quadratic = newQuad; }
+    void EditLightComponent(LightComponent lc, glm::vec3 value);
+    void EditLightComponent(LightComponent lc, glm::vec4 value);
+    void EditLightComponent(LightComponent lc, float value);
 
     glm::vec3 inline GetPosition() { return this->position; }
     glm::vec3 inline GetDirection() { return this->direction; }

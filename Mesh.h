@@ -33,6 +33,7 @@ public:
     Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, MaterialHandle& matHandle);
     Mesh(std::vector<ProceduralVertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle, glm::vec2* instances = NULL);
     void Draw(bool isOutline=false, bool isActive=false);
+    void DrawShadow();
     void DelteGPUInfo();
     void inline SetShininess(float shini) { material->shininess = shini; }
 

@@ -22,8 +22,10 @@ enum MaterialComponent
     TYPE,
     SHADER1,
     SHADER2,
+    SHADER_SHADOW,
     TEXTURE,
     SHININESS,
+    BLINN,
     NUM_INSTANCES,
     REFRACTIVE_INDEX,
     OUTLINE_COLOR,
@@ -47,12 +49,14 @@ public:
     MaterialType type;
     Shader* ptrShader;
     Shader* ptrShader2;
+    Shader* ptrShaderShadow;
     std::vector<Texture> textures;
     Texture* skyboxTexture;
     float shininess;
     float refractiveIndex;
     bool isAmbientReflective = false;
     bool isAmbientRefractive = false;
+    bool isBlinnShading = true;
     glm::vec4 colorOutline;
     DrawMode drawtype;
     int numInstances;
@@ -62,9 +66,11 @@ public:
     Material(Shader* shader, Shader* shader2, MaterialType mattype = MaterialType::LIT);
     Material(Shader* shader, std::vector<Texture> textures);
     Material(Shader* shader, Shader* shader2, std::vector<Texture> textures);
+    void CopyMaterial(Material mat);
 
     void AddShader(Shader* sh);
     void AddTexture(Texture texture);
+    void ActivateShadowTexture(unsigned int idTexShadow);
     void AddMultTextures(std::vector<Texture> texturesIN);
     void AssignRenderTextures();
 };

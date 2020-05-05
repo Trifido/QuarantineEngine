@@ -5,6 +5,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     this->vertices = vertices;
     this->indices = indices;
     material=new Material(matHandle.shader);
+    material->ptrShaderShadow = matHandle.shaderShadow;
     material->AddMultTextures(textures);
     matHandle.AddMaterialToList(material);
 
@@ -15,7 +16,8 @@ Mesh::Mesh(std::vector<ProceduralVertex> vertices, std::vector<unsigned int> ind
 {
     this->proceduralVertices = vertices;
     this->indices = indices;
-    material = new Material(matHandle.shader); 
+    material = new Material(matHandle.shader);
+    material->ptrShaderShadow = matHandle.shaderShadow;
     matHandle.AddMaterialToList(material);
 
     setupProceduralMesh(instances);
@@ -30,7 +32,6 @@ void Mesh::setupProceduralMesh(glm::vec2* instances)
     glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 100, instances, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 
 
     glGenVertexArrays(1, &VAO);
@@ -165,6 +166,11 @@ void Mesh::Draw(bool isOutline, bool isActive)
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
     }
+}
+
+void Mesh::DrawShadow()
+{
+    SetRenderMode();
 }
 
 void Mesh::DelteGPUInfo()

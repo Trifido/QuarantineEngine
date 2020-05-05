@@ -26,6 +26,7 @@ private:
     GLFWwindow* window;
     ImVec4* clear_color;
     FBOSystem* fboSystem;
+    FBOSystem* fboSystemShadowMap;
     UBOSystem* uboSytem;
     RenderPlane renderFinalPass;
     int width, height;
@@ -63,6 +64,7 @@ public:
 
     void StartRender();
     void RenderSkyBox();
+    void RenderShadowMap();
     void RenderSolidModels();
     void RenderOutLineModels();
     void RenderTransparentModels();
