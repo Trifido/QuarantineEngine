@@ -61,6 +61,7 @@ void Material::CopyMaterial(Material mat)
     ptrShader = mat.ptrShader;
     ptrShader2 = mat.ptrShader2;
     ptrShaderShadow = mat.ptrShaderShadow;
+    ptrShaderPointShadow = mat.ptrShaderPointShadow;
     this->textures = mat.textures;
     shininess = mat.shininess;
     colorOutline = mat.colorOutline;
@@ -82,13 +83,16 @@ void Material::AddTexture(Texture texture)
     textures.push_back(texture);
 }
 
-void Material::ActivateShadowTexture(unsigned int idTexShadow)
+void Material::ActivateShadowTexture(unsigned int idTexShadow, bool isOmni)
 {
-    glActiveTexture(GL_TEXTURE0 + textures.size());
-    glBindTexture(GL_TEXTURE_2D, idTexShadow);
-
     ptrShader->use();
     ptrShader->setInt("shadowMap", textures.size());
+
+    glActiveTexture(GL_TEXTURE0 + textures.size());
+    if (isOmni)
+        glBindTexture(GL_TEXTURE_CUBE_MAP, idTexShadow);
+    else
+        glBindTexture(GL_TEXTURE_2D, idTexShadow);
 }
 
 void Material::AddMultTextures(std::vector<Texture> texturesIN)

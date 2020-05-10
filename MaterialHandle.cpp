@@ -5,8 +5,9 @@ MaterialHandle::MaterialHandle()
     this->numInstances = 0;
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
-    this->shader = new Shader("shaders/standardShadow.vert", "shaders/standardShadow.frag");
+    this->shader = new Shader("shaders/standardPointShadow.vert", "shaders/standardPointShadow.frag");
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
+    this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag"); //"shaders/pointShadow.gm", 
 }
 
 MaterialHandle::MaterialHandle(Shader* sh)
@@ -16,6 +17,7 @@ MaterialHandle::MaterialHandle(Shader* sh)
     this->type = MaterialType::LIT;
     this->shader = sh;
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
+    this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
 }
 
 void MaterialHandle::AddMaterialToList(Material* mat)
@@ -46,6 +48,13 @@ void MaterialHandle::EditMaterial(MaterialComponent component, Shader* sh)
         for (int i = 0; i < listMaterials.size(); i++)
         {
             listMaterials.at(i)->ptrShaderShadow = shaderShadow;
+        }
+        break;
+    case MaterialComponent::SHADER_POINT_SHADOW:
+        shaderPointShadow = sh;
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->ptrShaderPointShadow = shaderPointShadow;
         }
         break;
     default:
@@ -163,12 +172,12 @@ void MaterialHandle::EditMaterial(MaterialComponent component, std::vector<Textu
     }
 }
 
-void MaterialHandle::ActivateShadowMap(unsigned int idTexShadow)
+void MaterialHandle::ActivateShadowMap(unsigned int idTexShadow, bool isOmni)
 {
     shader->use();
     for (int i = 0; i < listMaterials.size(); i++)
     {
-        listMaterials.at(i)->ActivateShadowTexture(idTexShadow);
+        listMaterials.at(i)->ActivateShadowTexture(idTexShadow, isOmni);
     }
 }
 

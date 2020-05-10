@@ -49,6 +49,7 @@ public:
     Model(float rawData[], unsigned int numVertex, std::vector<Texture> textImages);
     void Draw(bool isOutline=false);
     void DrawShadow(glm::mat4 VPShadow);
+    void DrawShadow(std::vector<glm::mat4>& shadowTransforms, glm::vec3& lightPos, float far_plane);
     void Model::DrawCastShadow(Light* light, bool isOutline = false);
 
     void Rotation(float radians, glm::vec3 axis);

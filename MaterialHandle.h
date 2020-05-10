@@ -14,6 +14,7 @@ public:
     Shader* shader;
     Shader* shader2;
     Shader* shaderShadow;
+    Shader* shaderPointShadow;
     bool isAmbientReflective;
     bool isChangeNumInstances;
     int numInstances;
@@ -29,7 +30,7 @@ public:
     void EditMaterial(MaterialComponent component, MaterialType type, int numInstances=0);
     void EditMaterial(MaterialComponent component, DrawMode type);
     void EditMaterial(MaterialComponent component, std::vector<Texture> textures, unsigned int id = NULL);
-    void ActivateShadowMap(unsigned int idTexShadow);
+    void ActivateShadowMap(unsigned int idTexShadow, bool isOmni = false);
 };
 
 #endif

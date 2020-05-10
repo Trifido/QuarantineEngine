@@ -6,6 +6,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     this->indices = indices;
     material=new Material(matHandle.shader);
     material->ptrShaderShadow = matHandle.shaderShadow;
+    material->ptrShaderPointShadow = matHandle.shaderPointShadow;
     material->AddMultTextures(textures);
     matHandle.AddMaterialToList(material);
 
@@ -18,6 +19,7 @@ Mesh::Mesh(std::vector<ProceduralVertex> vertices, std::vector<unsigned int> ind
     this->indices = indices;
     material = new Material(matHandle.shader);
     material->ptrShaderShadow = matHandle.shaderShadow;
+    material->ptrShaderPointShadow = matHandle.shaderPointShadow;
     matHandle.AddMaterialToList(material);
 
     setupProceduralMesh(instances);

@@ -23,6 +23,7 @@ enum MaterialComponent
     SHADER1,
     SHADER2,
     SHADER_SHADOW,
+    SHADER_POINT_SHADOW,
     TEXTURE,
     SHININESS,
     BLINN,
@@ -50,6 +51,7 @@ public:
     Shader* ptrShader;
     Shader* ptrShader2;
     Shader* ptrShaderShadow;
+    Shader* ptrShaderPointShadow;
     std::vector<Texture> textures;
     Texture* skyboxTexture;
     float shininess;
@@ -70,7 +72,7 @@ public:
 
     void AddShader(Shader* sh);
     void AddTexture(Texture texture);
-    void ActivateShadowTexture(unsigned int idTexShadow);
+    void ActivateShadowTexture(unsigned int idTexShadow, bool isOmni = false);
     void AddMultTextures(std::vector<Texture> texturesIN);
     void AssignRenderTextures();
 };

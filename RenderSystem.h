@@ -65,6 +65,7 @@ public:
     void StartRender();
     void RenderSkyBox();
     void RenderShadowMap();
+    void RenderOmniShadowMap();
     void RenderSolidModels();
     void RenderOutLineModels();
     void RenderTransparentModels();

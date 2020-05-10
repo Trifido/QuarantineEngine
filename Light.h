@@ -14,7 +14,8 @@ enum LightComponent {
     LIGHT_AMBIENT,
     LIGHT_LINEAR,
     LIGHT_QUADRATIC,
-    LIGHT_PROJSHADOW
+    LIGHT_PROJSHADOW,
+    LIGHT_ASPECT
 };
 
 enum TypeLight {
@@ -47,12 +48,14 @@ private:
     glm::vec4 projDimension;
     glm::mat4 lightProjection;
     glm::mat4 lightView;
+    float aspect;
     
 public:
     glm::mat4 lightSpaceMatrix;
+    std::vector<glm::mat4> lightSpaceMatrices;
     Light();
     Light(TypeLight newType);
-    Light(TypeLight newType, glm::vec3 newPos);
+    Light(TypeLight nType, glm::vec3 newPos);
     void inline SetPosition(glm::vec3& newPos) { position = newPos; }
     void inline SetDirection(glm::vec3& newDir) { direction = newDir; }
     void inline SetDiffuse(glm::vec3& newDiff) { diffuse = newDiff; }
@@ -78,6 +81,11 @@ public:
     float inline GetConstant() { return this->constant; }
     float inline GetLinear() { return this->linear; }
     float inline GetQuadratic() { return this->quadratic; }
+    float inline GetFarplane() { return this->far_plane; }
+private:
+    void ComputeShadowProjection();
+    void ComputeShadowCubeMapProjection();
+    void Init();
 };
 
 #endif

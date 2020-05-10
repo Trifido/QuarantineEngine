@@ -123,16 +123,16 @@ int main(int, char**)
 
     ///MODEL 3D
     ///--NANOSUIT  
-    Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
+    //Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
     //Model ourModel("./resources/3DModels/darksouls/fallen.obj"); 
     //ourModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
     /*ourModel.AddMaterial(normalMaterial);
     //ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
     */
-    ourModel.ScaleTo(glm::vec3(0.1f));
-    ourModel.TranslationTo(glm::vec3(0.0f, -5.0f, 20.0f));
-    renderkernel.AddModel(&ourModel);
+    //ourModel.ScaleTo(glm::vec3(0.1f));
+    //ourModel.TranslationTo(glm::vec3(0.0f, -5.0f, 20.0f));
+    //renderkernel.AddModel(&ourModel);
     
     ///--CUBE   
     Model cubeModel(vertices, 36, textures);
@@ -159,6 +159,7 @@ int main(int, char**)
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 64.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::BLINN, true);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
+    floorModel.ScaleTo(glm::vec3(2.0, 1.0, 2.0));
     renderkernel.AddModel(&floorModel);
 
     ///--VEGETATION
@@ -212,9 +213,9 @@ int main(int, char**)
     //renderkernel.AddModel(&asteroid);
 
     // LIGHT
-    Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(0.0f, 4.0f, -1.0f));
-    dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
-    renderkernel.AddLight(dirLight);
+    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 4.0f, -1.0f));
+    //dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
+    renderkernel.AddLight(pointLight);
     //renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));

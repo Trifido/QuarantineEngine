@@ -59,7 +59,15 @@ void Model::DrawCastShadow(Light* light, bool isOutline)
         {
             if (matHandle.type != MaterialType::INSTANCE)
             {
-                meshes[i].material->ptrShader->setMat4("lightSpaceMatrix", light->lightSpaceMatrix);
+                if (light->GetType() == TypeLight::DIRL)
+                {
+                    meshes[i].material->ptrShader->setMat4("lightSpaceMatrix", light->lightSpaceMatrix);
+                }
+                else
+                {
+                    meshes[i].material->ptrShader->setFloat("far_plane", light->GetFarplane());
+                }
+
                 meshes[i].material->ptrShader->setVec3("positionLight", light->GetPosition());
                 meshes[i].material->ptrShader->setMat4("model", model);
                 if (meshes[i].material->type == MaterialType::NORMALS)
@@ -92,6 +100,24 @@ void Model::DrawShadow(glm::mat4 VPShadow)
             meshes[i].material->ptrShaderShadow->use();
             meshes[i].material->ptrShaderShadow->setMat4("model", model);
             meshes[i].material->ptrShaderShadow->setMat4("lightSpaceMatrix", VPShadow);
+            meshes[i].DrawShadow();
+        }
+    }
+}
+
+void Model::DrawShadow(std::vector<glm::mat4> &shadowTransforms, glm::vec3 &lightPos, float far_plane)
+{
+    if (CAST_SHADOW)
+    {
+        matHandle.shaderPointShadow->use();
+        for (unsigned int i = 0; i < meshes.size(); i++)
+        {
+            meshes[i].material->ptrShaderPointShadow->use();
+            meshes[i].material->ptrShaderPointShadow->setMat4("model", model);
+            for (unsigned int j = 0; j < 6; ++j)
+                meshes[i].material->ptrShaderPointShadow->setMat4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
+            meshes[i].material->ptrShaderPointShadow->setFloat("far_plane", far_plane);
+            meshes[i].material->ptrShaderPointShadow->setVec3("lightPos", lightPos);
             meshes[i].DrawShadow();
         }
     }
