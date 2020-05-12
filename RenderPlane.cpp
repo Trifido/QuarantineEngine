@@ -3,6 +3,7 @@
 RenderPlane::RenderPlane()
 {
     gammaValue = 1.0f;
+    exposureValue = 1.0f;
     screenRenderShader = new Shader("shaders/renderPass.vert", "shaders/renderPass.frag");
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
 }
@@ -33,13 +34,12 @@ void RenderPlane::SetVAORenderPlane()
     screenRenderShader->use();
     screenRenderShader->setInt("screenTexture", 0);
     screenRenderShader->setFloat("gamma", gammaValue);
+    screenRenderShader->setFloat("exposure", exposureValue);
 }
 
 void RenderPlane::DrawFrom(unsigned int & textureColorbuffer)
 {
     screenRenderShader->use();
-    //screenRenderShader->setFloat("near_plane", 1.0f);
-    //screenRenderShader->setFloat("far_plane", 7.5f);
 
     glBindVertexArray(quadVAO);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane

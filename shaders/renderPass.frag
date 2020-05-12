@@ -5,8 +5,14 @@ in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
 uniform float gamma; 
+uniform float exposure;
 
 void main()
 {
-    FragColor.rgb = pow(texture(screenTexture, TexCoords).rgb, vec3(1.0/gamma));
+    vec3 hdrColor = texture(screenTexture, TexCoords).rgb;
+    // Exposure tone mapping
+    vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
+    // gamma correction 
+    mapped = pow(mapped, vec3(1.0 / gamma));
+    FragColor = vec4(mapped, 1.0);
 } 

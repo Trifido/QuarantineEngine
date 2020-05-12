@@ -122,7 +122,9 @@ void RenderSystem::PreRender()
     skybox->AddCamera(cameras.at(0));
 
     //POST-PROCESS GAMMA
-    renderFinalPass.SetGamma(1.0f);
+    renderFinalPass.SetGamma(2.2f);
+    //TONE MAPPING
+    renderFinalPass.SetExposure(1.0f);
 
     //SET REFLECTIVE MATERIALS
     SetAmbientReflectiveMaterials();
