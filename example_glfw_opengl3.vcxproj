@@ -240,6 +240,11 @@
     <None Include="shaders\nanosuit.vert" />
     <None Include="shaders\outline.frag" />
     <None Include="shaders\outline.vert" />
+    <None Include="shaders\parallaxMapping.frag" />
+    <None Include="shaders\parallaxMapping.vert" />
+    <None Include="shaders\pointShadow.frag" />
+    <None Include="shaders\pointShadow.gm" />
+    <None Include="shaders\pointShadow.vert" />
     <None Include="shaders\reflective.frag" />
     <None Include="shaders\reflective.vert" />
     <None Include="shaders\refractive.frag" />
@@ -252,6 +257,8 @@
     <None Include="shaders\skybox.vert" />
     <None Include="shaders\standardLighting.frag" />
     <None Include="shaders\standardLighting.vert" />
+    <None Include="shaders\standardPointShadow.frag" />
+    <None Include="shaders\standardPointShadow.vert" />
     <None Include="shaders\standardShadow.frag" />
     <None Include="shaders\standardShadow.vert" />
   </ItemGroup>

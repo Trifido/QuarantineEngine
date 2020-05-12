@@ -56,6 +56,15 @@
     <Filter Include="sources\shaders\shadow">
       <UniqueIdentifier>{339bfd84-cdef-4bb5-a80c-8eea4f6a26c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sources\shaders\shadow\directional">
+      <UniqueIdentifier>{a4eeded3-1ca1-424a-9649-2ea76199b38f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\shaders\shadow\point">
+      <UniqueIdentifier>{a3e0abdb-c7c2-4afe-ae41-cff3c5518f6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\shaders\parallax">
+      <UniqueIdentifier>{f6bc4f8c-9a59-4208-9761-57a63e96e400}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -317,23 +326,44 @@
     <None Include="shaders\instancing.vert">
       <Filter>sources\shaders\instance</Filter>
     </None>
-    <None Include="shaders\shadow.frag">
-      <Filter>sources\shaders\shadow</Filter>
-    </None>
-    <None Include="shaders\shadow.vert">
-      <Filter>sources\shaders\shadow</Filter>
-    </None>
     <None Include="shaders\depthRenderShadow.frag">
       <Filter>sources\shaders\postprocess</Filter>
     </None>
     <None Include="shaders\depthRenderShadow.vert">
       <Filter>sources\shaders\postprocess</Filter>
     </None>
-    <None Include="shaders\standardShadow.frag">
-      <Filter>sources\shaders\shadow</Filter>
-    </None>
     <None Include="shaders\standardShadow.vert">
-      <Filter>sources\shaders\shadow</Filter>
+      <Filter>sources\shaders\shadow\directional</Filter>
+    </None>
+    <None Include="shaders\shadow.frag">
+      <Filter>sources\shaders\shadow\directional</Filter>
+    </None>
+    <None Include="shaders\shadow.vert">
+      <Filter>sources\shaders\shadow\directional</Filter>
+    </None>
+    <None Include="shaders\standardShadow.frag">
+      <Filter>sources\shaders\shadow\directional</Filter>
+    </None>
+    <None Include="shaders\pointShadow.frag">
+      <Filter>sources\shaders\shadow\point</Filter>
+    </None>
+    <None Include="shaders\pointShadow.gm">
+      <Filter>sources\shaders\shadow\point</Filter>
+    </None>
+    <None Include="shaders\pointShadow.vert">
+      <Filter>sources\shaders\shadow\point</Filter>
+    </None>
+    <None Include="shaders\standardPointShadow.frag">
+      <Filter>sources\shaders\shadow\point</Filter>
+    </None>
+    <None Include="shaders\standardPointShadow.vert">
+      <Filter>sources\shaders\shadow\point</Filter>
+    </None>
+    <None Include="shaders\parallaxMapping.frag">
+      <Filter>sources\shaders\parallax</Filter>
+    </None>
+    <None Include="shaders\parallaxMapping.vert">
+      <Filter>sources\shaders\parallax</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 
 RenderPlane::RenderPlane()
 {
+    gammaValue = 1.0f;
     screenRenderShader = new Shader("shaders/renderPass.vert", "shaders/renderPass.frag");
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
 }
@@ -31,6 +32,7 @@ void RenderPlane::SetVAORenderPlane()
 
     screenRenderShader->use();
     screenRenderShader->setInt("screenTexture", 0);
+    screenRenderShader->setFloat("gamma", gammaValue);
 }
 
 void RenderPlane::DrawFrom(unsigned int & textureColorbuffer)

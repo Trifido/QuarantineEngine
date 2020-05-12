@@ -26,6 +26,7 @@ enum MaterialComponent
     SHADER_POINT_SHADOW,
     TEXTURE,
     SHININESS,
+    P_DISPLACEMENT,
     BLINN,
     NUM_INSTANCES,
     REFRACTIVE_INDEX,
@@ -56,6 +57,7 @@ public:
     Texture* skyboxTexture;
     float shininess;
     float refractiveIndex;
+    float parallax_displacement;
     bool isAmbientReflective = false;
     bool isAmbientRefractive = false;
     bool isBlinnShading = true;

@@ -92,6 +92,12 @@ void MaterialHandle::EditMaterial(MaterialComponent component, float value)
             }
         }
         break;
+    case MaterialComponent::P_DISPLACEMENT:
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->parallax_displacement = value;
+        }
+        break;
     default:
         printf("ERROR::CHANGE_VALUE::RUN_FAILED\n");
         break;

@@ -57,12 +57,10 @@ void RenderSystem::RenderSkyBox()
 
 void RenderSystem::RenderShadowMap()
 {
-    glCullFace(GL_FRONT);
     for (int i = 0; i < models.size(); i++)
     { 
         models[i]->DrawShadow(lights.at(0)->lightSpaceMatrix);
-    }
-    glCullFace(GL_BACK);
+    } 
 }
 
 void RenderSystem::RenderOmniShadowMap()
@@ -122,6 +120,9 @@ void RenderSystem::PreRender()
     //SKYBOX
     skybox = new Skybox();
     skybox->AddCamera(cameras.at(0));
+
+    //POST-PROCESS GAMMA
+    renderFinalPass.SetGamma(1.0f);
 
     //SET REFLECTIVE MATERIALS
     SetAmbientReflectiveMaterials();
@@ -195,9 +196,9 @@ void RenderSystem::StartRender()
         ComputeDeltaTime();
         GetWindowSize(window, &width, &height);
 
-        glm::vec3 tempPos = lights.at(0)->GetPosition();
-        tempPos.x = sin(glfwGetTime() * 0.5) * 3.0;
-        lights.at(0)->EditLightComponent(LightComponent::LIGHT_POSITION, tempPos);
+        //glm::vec3 tempPos = lights.at(0)->GetPosition();
+        //tempPos.x = sin(glfwGetTime() * 0.5) * 3.0;
+        //lights.at(0)->EditLightComponent(LightComponent::LIGHT_POSITION, tempPos);
 
         //Set GPU instances
         for (int i = 0; i < models.size(); i++)
@@ -234,13 +235,15 @@ void RenderSystem::StartRender()
 
         // FIRST PASS -> RENDER DEPTH TO TEXTURE - DIRECTIONAL LIGHT
         fboSystemShadowMap->ActivateFBODepthCubeMapRender();
-        glViewport(0, 0, 4096, 4096);
+        glViewport(0, 0, 1024, 1024);
         glClear(GL_DEPTH_BUFFER_BIT);
+        glCullFace(GL_FRONT);
         //Render Directional Shadow Map
         //RenderShadowMap();
         // FIRST PASS -> RENDER DEPTH TO TEXTURE - POINT LIGHT
         RenderOmniShadowMap();
-  
+        glCullFace(GL_BACK);
+
         /// SECOND PASS -> RENDER LIGHTING TO TEXTURE
         fboSystem->ActivateFBORender();
         glViewport(0, 0, display_w, display_h);

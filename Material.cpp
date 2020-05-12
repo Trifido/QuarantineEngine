@@ -8,6 +8,7 @@ Material::Material()
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
+    parallax_displacement = 0.0f;
 }
 
 Material::Material(Shader* shader)
@@ -18,6 +19,7 @@ Material::Material(Shader* shader)
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
+    parallax_displacement = 0.0f;
 }
 
 Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
@@ -28,7 +30,8 @@ Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
     ptrShader2 = shader2;
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
-    numInstances = 0;
+    numInstances = 0; 
+    parallax_displacement = 0.0f;
 }
 
 Material::Material(Shader* shader, std::vector<Texture> textures)
@@ -40,6 +43,7 @@ Material::Material(Shader* shader, std::vector<Texture> textures)
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
+    parallax_displacement = 0.0f;
 }
 
 Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> textures)
@@ -52,6 +56,7 @@ Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> texture
     shininess = 1.0f;
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
+    parallax_displacement = 0.0f;
 }
 
 void Material::CopyMaterial(Material mat)
@@ -71,6 +76,7 @@ void Material::CopyMaterial(Material mat)
     isAmbientReflective = mat.isAmbientReflective;
     isAmbientRefractive = mat.isAmbientRefractive;
     isBlinnShading = mat.isBlinnShading;
+    parallax_displacement = mat.parallax_displacement;
 }
 
 void Material::AddShader(Shader* sh)
@@ -154,6 +160,7 @@ void Material::AssignRenderTextures()
     ptrShader->setBool("material.isAmbientReflective", isAmbientReflective);
     ptrShader->setBool("material.isAmbientRefractive", isAmbientRefractive);
     ptrShader->setFloat("material.refractiveIndex", refractiveIndex);
+    ptrShader->setFloat("material.heightScale", parallax_displacement);
 
     if (isAmbientReflective || isAmbientRefractive)
     {

@@ -15,8 +15,8 @@ FBOSystem::FBOSystem(int *width, int *height, int numSamples)
     else
         this->samples = 1;
 
-    this->widthDepthMap = new int(4096);
-    this->heightDepthMap = new int(4096);
+    this->widthDepthMap = new int(1024);
+    this->heightDepthMap = new int(1024);
     this->isShadowMap = false;
     this->isShadowCubeMap = false;
 }

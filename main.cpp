@@ -80,11 +80,19 @@ int main(int, char**)
     //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
     //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
     textures.push_back(texture1);
-    //textures.push_back(texture2);
+    textures.push_back(texture2);
     //textures.push_back(texture3);
     Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE);
     std::vector<Texture> textures_floor;
     textures_floor.push_back(textureFloor);
+
+    Texture parallaxDiff("./resources/materials/stoneFloor/Arc_Pavement_001_basecolor.jpg", TypeTexture::DIFFUSE);
+    Texture parallaxNorm("./resources/materials/stoneFloor/Arc_Pavement_001_normal.jpg", TypeTexture::NORMAL);
+    Texture parallaxDisp("./resources/materials/stoneFloor/Arc_Pavement_001_height.png", TypeTexture::HEIGHT);
+    std::vector<Texture> textures_parallax;
+    textures_parallax.push_back(parallaxDiff);
+    textures_parallax.push_back(parallaxNorm);
+    textures_parallax.push_back(parallaxDisp);
 
     ///SHADERS
     //Shader* outlineShader = new Shader("shaders/outline.vert", "shaders/outline.frag");
@@ -135,31 +143,36 @@ int main(int, char**)
     //renderkernel.AddModel(&ourModel);
     
     ///--CUBE   
-    Model cubeModel(vertices, 36, textures);
-    cubeModel.TranslationTo(glm::vec3(0.0f, 1.5f, 0.0));
-    cubeModel.ScaleTo(glm::vec3(0.5f));
-    renderkernel.AddModel(&cubeModel);
+    //Model cubeModel(vertices, 36, textures);
+    //cubeModel.TranslationTo(glm::vec3(0.0f, 1.5f, 0.0));
+    //cubeModel.ScaleTo(glm::vec3(0.5f));
+    //renderkernel.AddModel(&cubeModel);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
     //cubeModel.isSelectable(true);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
-    Model cubeModel2(vertices, 36, textures);
-    cubeModel2.TranslationTo(glm::vec3(2.0f, -0.248f, 1.0));
-    cubeModel2.ScaleTo(glm::vec3(0.5f));
-    renderkernel.AddModel(&cubeModel2);
-    Model cubeModel3(vertices, 36, textures);
-    cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0));
-    cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-    cubeModel3.ScaleTo(glm::vec3(0.25f));
-    renderkernel.AddModel(&cubeModel3);
+    //Model cubeModel2(vertices, 36, textures);
+    //cubeModel2.TranslationTo(glm::vec3(2.0f, -0.248f, 1.0));
+    //cubeModel2.ScaleTo(glm::vec3(0.5f));
+    //renderkernel.AddModel(&cubeModel2);
+    //Model cubeModel3(vertices, 36, textures);
+    //cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0));
+    //cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+    //cubeModel3.ScaleTo(glm::vec3(0.25f));
+    //renderkernel.AddModel(&cubeModel3);
 
     ///--FLOOR
-    Model floorModel(floorVertices, 6, textures_floor);
+    Model floorModel(floorVertices, 6, textures_parallax);
+    Shader* sh = new Shader("shaders/parallaxMapping.vert", "shaders/parallaxMapping.frag");
+    Material* mat = new Material(sh);
+    //mat->AddMultTextures(textures_parallax);
+    floorModel.AddMaterial(mat);
+    floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.05f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 64.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::BLINN, true);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
-    floorModel.ScaleTo(glm::vec3(2.0, 1.0, 2.0));
+    floorModel.ScaleTo(glm::vec3(0.5, 1.0, 0.5));
     renderkernel.AddModel(&floorModel);
 
     ///--VEGETATION
@@ -213,7 +226,7 @@ int main(int, char**)
     //renderkernel.AddModel(&asteroid);
 
     // LIGHT
-    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 4.0f, -1.0f));
+    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 3.5f, 0.0f));
     //dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
     renderkernel.AddLight(pointLight);
     //renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));

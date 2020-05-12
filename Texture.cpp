@@ -67,7 +67,8 @@ void Texture::LoadImage(const char* imagePath, bool flip)
     unsigned char* data = stbi_load(imagePath, &width, &height, &nrChannels, 0);
 
     GLenum internalFormat, format;
-    
+    format = GL_RGBA;
+
     if (nrChannels == 1)
         format = GL_RED;
     else if (nrChannels == 3)
@@ -75,7 +76,10 @@ void Texture::LoadImage(const char* imagePath, bool flip)
     else if (nrChannels == 4)
         format = GL_RGBA;
     bool aux = false;
-    if (type == TypeTexture::DIFFUSE) //
+
+    internalFormat = format;
+
+    if (type == TypeTexture::DIFFUSE) 
     {
         if (nrChannels == 1)
             internalFormat = GL_RED;
@@ -84,14 +88,10 @@ void Texture::LoadImage(const char* imagePath, bool flip)
         else if (nrChannels == 4)
             internalFormat = GL_SRGB_ALPHA;
     }
-    else
-    {
-        internalFormat = format;
-    }
 
     if (data)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else

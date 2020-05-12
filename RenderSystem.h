@@ -32,6 +32,8 @@ private:
     int width, height;
     int lastWidth, lastHeight;
 
+    float gamma;
+
     void UpdateFBO();
     void Clean();
 public:

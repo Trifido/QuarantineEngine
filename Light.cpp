@@ -37,7 +37,7 @@ void Light::EditLightComponent(LightComponent lc, glm::vec3 value)
         }
         else
         {
-            ComputeShadowCubeMapProjection();
+            ComputeShadowProjection();
         }
         break;
     case LIGHT_DIRECTION:
@@ -117,13 +117,15 @@ void Light::ComputeShadowProjection()
     }
     else
     {
-        lightProjection = glm::perspective(glm::radians(90.0f), aspect, near_plane, far_plane);
+        lightProjection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 100.0f);//near_plane, far_plane);
         ComputeShadowCubeMapProjection();
     }
 }
 
 void Light::ComputeShadowCubeMapProjection()
 {
+    if (!lightSpaceMatrices.empty())
+        lightSpaceMatrices.clear();
     lightSpaceMatrices.push_back(lightProjection * glm::lookAt(position, position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
     lightSpaceMatrices.push_back(lightProjection * glm::lookAt(position, position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
     lightSpaceMatrices.push_back(lightProjection * glm::lookAt(position, position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
