@@ -200,7 +200,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
     existTangent = mesh->HasTangentsAndBitangents();
-    bool existNormal = mesh->HasNormals();
+    existNormal = mesh->HasNormals();
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
@@ -384,14 +384,13 @@ Model::Model(float rawData[], unsigned int numVertex, unsigned int offset, Model
             indices.push_back(i);
         }
         //Compute Tangent & BiTangents
-
-        bool isNormal = false;
+         
         //Check Normal
-        for (int i = 0; i < textures_loaded.size(); i++)
-            if (textures_loaded.at(i).type == TypeTexture::NORMAL)
-                isNormal = true;
+        //for (int i = 0; i < textures_loaded.size(); i++)
+        //    if (textures_loaded.at(i).type == TypeTexture::NORMAL)
+        //        existNormal = true;
 
-        if (isNormal)
+        if (!existNormal)
         {
             for (unsigned int idTr = 0; idTr < numVertex; idTr += 3)
             {
@@ -425,6 +424,7 @@ Model::Model(float rawData[], unsigned int numVertex, unsigned int offset, Model
                     vertices[idTr + 2].Bitangents = bitangent;
                 }
             }
+            existNormal = existTangent = true;
         }
         meshes.push_back(Mesh(vertices, indices, textures_loaded, matHandle));
     }
@@ -496,13 +496,12 @@ Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textI
     textures_loaded = textImages;
     //Compute Tangent & BiTangents
 
-    bool isNormal = false; 
     //Check Normal
-    for (int i = 0; i < textures_loaded.size(); i++)
-        if (textures_loaded.at(i).type == TypeTexture::NORMAL)
-            isNormal = true;
+    //for (int i = 0; i < textures_loaded.size(); i++)
+    //    if (textures_loaded.at(i).type == TypeTexture::NORMAL)
+    //        existNormal = true;
 
-    if (isNormal)
+    if (!existNormal)
     {
         for (unsigned int idTr = 0; idTr < numVertex; idTr += 3)
         {
@@ -536,6 +535,7 @@ Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textI
                 vertices[idTr + 2].Bitangents = bitangent;
             }
         }
+        existNormal = existTangent = true;
     } 
     meshes.push_back(Mesh(vertices, indices, textures_loaded, matHandle));
 }
@@ -583,6 +583,15 @@ void Model::AddMaterial(Material* mat)
     {
         matHandle.EditMaterial(MaterialComponent::TEXTURE, mat->textures);
     }
+
+    //for (int i = 0; i < mat->textures.size(); i++)
+    //{
+    //    if (mat->textures.at(i).type == TypeTexture::NORMAL && !existNormal)
+    //    {
+    //        existNormal = true;
+    //        break;
+    //    }
+    //}
 }
 
 void Model::AddMaterial(Material* mat, std::vector<Texture> textures)
@@ -593,6 +602,15 @@ void Model::AddMaterial(Material* mat, std::vector<Texture> textures)
     matHandle.EditMaterial(MaterialComponent::SHININESS, mat->shininess);
     matHandle.EditMaterial(MaterialComponent::OUTLINE_COLOR, mat->colorOutline);
     matHandle.EditMaterial(MaterialComponent::TEXTURE, textures);
+
+    //for (int i = 0; i < textures.size(); i++)
+    //{
+    //    if (textures.at(i).type == TypeTexture::NORMAL && !existNormal)
+    //    {
+
+    //        break;
+    //    }
+    //}
 }
 
 void Model::AddShader(Shader* shader)

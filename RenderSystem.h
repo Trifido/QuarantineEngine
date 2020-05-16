@@ -22,16 +22,21 @@ private:
     std::vector<Model*> solidModels;
     std::vector<Model*> outLineModels;
     std::vector<Model*> transparentModels;
+    std::vector<Light*> shadowCastDirLights;
+    std::vector<Light*> shadowCastOmniLights;
     KeyInput inputSystem;
     GLFWwindow* window;
     ImVec4* clear_color;
     FBOSystem* fboSystem;
-    FBOSystem* fboSystemShadowMap;
+    //FBOSystem* fboSystemShadowMap;
     UBOSystem* uboSytem;
-    RenderPlane renderFinalPass;
+    RenderPlane renderPass;
     int width, height;
     int lastWidth, lastHeight;
-
+    const unsigned int LIMIT_DIR_CAST_SHADOW = 5;
+    const unsigned int LIMIT_OMNI_CAST_SHADOW = 5;
+    unsigned int num_dir_cast_shadow;
+    unsigned int num_omni_cast_shadow;
     float gamma;
 
     void UpdateFBO();
@@ -66,8 +71,8 @@ public:
 
     void StartRender();
     void RenderSkyBox();
-    void RenderShadowMap();
-    void RenderOmniShadowMap();
+    void RenderDirectionalShadowMap();
+    void RenderOmnidirectionalShadowMap();
     void RenderSolidModels();
     void RenderOutLineModels();
     void RenderTransparentModels();

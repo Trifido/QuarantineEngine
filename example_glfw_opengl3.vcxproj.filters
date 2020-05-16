@@ -65,6 +65,9 @@
     <Filter Include="sources\shaders\parallax">
       <UniqueIdentifier>{f6bc4f8c-9a59-4208-9761-57a63e96e400}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sources\shaders\bloom">
+      <UniqueIdentifier>{97e533c4-ae8b-4570-9c1a-e685b47a559f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -128,6 +131,9 @@
       <Filter>sources\Geometry</Filter>
     </ClCompile>
     <ClCompile Include="UBOSystem.cpp">
+      <Filter>sources\system</Filter>
+    </ClCompile>
+    <ClCompile Include="FBO.cpp">
       <Filter>sources\system</Filter>
     </ClCompile>
   </ItemGroup>
@@ -205,6 +211,9 @@
       <Filter>sources\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="UBOSystem.h">
+      <Filter>sources\system</Filter>
+    </ClInclude>
+    <ClInclude Include="FBO.h">
       <Filter>sources\system</Filter>
     </ClInclude>
   </ItemGroup>
@@ -364,6 +373,18 @@
     </None>
     <None Include="shaders\parallaxMapping.vert">
       <Filter>sources\shaders\parallax</Filter>
+    </None>
+    <None Include="shaders\standardBloom.frag">
+      <Filter>sources\shaders\bloom</Filter>
+    </None>
+    <None Include="shaders\standardBloom.vert">
+      <Filter>sources\shaders\bloom</Filter>
+    </None>
+    <None Include="shaders\blurPass.frag">
+      <Filter>sources\shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\finalBloom.frag">
+      <Filter>sources\shaders\postprocess</Filter>
     </None>
   </ItemGroup>
 </Project>

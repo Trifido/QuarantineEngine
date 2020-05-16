@@ -2,37 +2,32 @@
 #ifndef FBOSYSTEM_H
 #define FBOSYSTEM_H
 
+#include "FBO.h"
+
 class FBOSystem
 {
 private:
-    unsigned int framebuffer;
-    unsigned int multiSampFramebuffer;
-    unsigned int depthMapFBO;
-    unsigned int depthCubeMapFBO;
-    // generate texture
-    bool isShadowMap;
-    bool isShadowCubeMap;
-    //render buffer object
-    unsigned int rbo;
-    //screen size
+    FBO* omniFBO;
+    FBO* dirFBO;
+    FBO* colorFBO;
+    FBO* mrtFBO;
+    FBO* pingpongFBO;
     int *width, *height;
 public:
-    int* widthDepthMap, * heightDepthMap;
-    bool isAntiAliasing;
-    unsigned int samples;
-    unsigned int texColorBuffer;
-    unsigned int textureColorBufferMultiSampled;
-    unsigned int texDepthMap;
-    unsigned int texDepthCubeMap;
-    FBOSystem(int *width, int *height, int numSamples = 0);
-    void InitFBOSystem();
-    void ActivateFBORender();
-    void ActivateFBODepthMapRender();
-    void ActivateFBODepthCubeMapRender();
-    void SetMultiSamplingFrameBuffer();
-    unsigned int &GetRenderedTexture() { return texColorBuffer; }
-    void inline ActivateShadowMap() { isShadowMap = true; }
-    void inline ActivateShadowCubeMap() { isShadowCubeMap = true; }
+    FBOSystem(int *width, int *height);
+    void AddFBO(FBO* fbo);
+    void OmniShadowPass(unsigned int idPass);
+    void DirShadowPass(unsigned int idPass);
+    void PingPongPass(unsigned int idPass);
+    void MRTPass();
+    void FinalPass();
+    void MultisamplingPass();
+    unsigned int GetFinalRender();
+    unsigned int GetMRTRender(int idTex = 0);
+    unsigned int GetPingPongRender(int idTex = 0);
+    unsigned int GetOmniRender();
+    unsigned int GetDirRender();
+    void ResizeFBOs();
 };
 
 #endif

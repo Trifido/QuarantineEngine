@@ -2,36 +2,34 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "includes\stb_image.h"
 
-Texture::Texture(std::string imagePath, unsigned int wrap, unsigned int filter, bool flip)
+Texture::~Texture()
 {
-    glGenTextures(1, &ID);
-    glBindTexture(GL_TEXTURE_2D, ID);
 
-    LoadImage(imagePath.c_str(), flip);
-
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
 }
 
-Texture::Texture(std::string imagePath, TypeTexture type, unsigned int wrap, unsigned int filter, bool flip)
+Texture::Texture(std::string imagePath, bool isGamma, unsigned int wrap, unsigned int filter, bool flip)
 {
-    this->type = type;
+    this->isGammaTexture = isGamma;
+    this->imgPath = imagePath;
+    this->wrap = wrap;
+    this->filter = filter;
+    this->flip = flip;
 
     glGenTextures(1, &ID);
-    glBindTexture(GL_TEXTURE_2D, ID);
+    LoadTextureObj();
+}
 
-    LoadImage(imagePath.c_str(), flip);
+Texture::Texture(std::string imagePath, TypeTexture type, bool isGamma, unsigned int wrap, unsigned int filter, bool flip)
+{
+    this->type = type; 
+    this->isGammaTexture = isGamma;
+    this->imgPath = imagePath;
+    this->wrap = wrap;
+    this->filter = filter;
+    this->flip = flip;
 
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+    glGenTextures(1, &ID);
+    LoadTextureObj();
 }
 
 Texture::Texture(std::vector<std::string> imagesPath, TypeTexture type, unsigned int wrap, unsigned int filter, bool flip)
@@ -61,6 +59,63 @@ Texture::Texture(std::vector<std::string> imagesPath, TypeTexture type, unsigned
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, wrap);
 }
 
+void Texture::EditComponet(TextureComponent component, bool value)
+{
+    switch (component)
+    {
+    case TextureComponent::TEX_GAMMA:
+        if (isGammaTexture != value)
+        {
+            isGammaTexture = value;
+            LoadTextureObj();
+        }
+        break;
+    }
+}
+
+void Texture::EditComponet(TextureComponent component, int value)
+{
+    switch (component)
+    {
+    case TEX_WIDTH:
+        width = value;
+        break;
+    case TEX_HEIGHT:
+        height = value;
+        break;
+    case TEX_CHANNELS:
+        nrChannels = value;
+        break;
+    }
+    LoadTextureObj();
+}
+
+void Texture::EditComponet(TextureComponent component, std::string value)
+{
+    imgPath = path;
+    LoadTextureObj();
+}
+
+void Texture::EditComponet(TextureComponent component, TypeTexture value)
+{
+    type = value;
+    LoadTextureObj();
+}
+
+void Texture::LoadTextureObj()
+{
+    glBindTexture(GL_TEXTURE_2D, ID);
+
+    LoadImage(imgPath.c_str(), flip);
+
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+}
+
 void Texture::LoadImage(const char* imagePath, bool flip)
 {
     stbi_set_flip_vertically_on_load(flip);
@@ -79,7 +134,7 @@ void Texture::LoadImage(const char* imagePath, bool flip)
 
     internalFormat = format;
 
-    if (type == TypeTexture::DIFFUSE) 
+    if (type == TypeTexture::DIFFUSE && isGammaTexture) 
     {
         if (nrChannels == 1)
             internalFormat = GL_RED;
@@ -91,7 +146,7 @@ void Texture::LoadImage(const char* imagePath, bool flip)
 
     if (data)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else

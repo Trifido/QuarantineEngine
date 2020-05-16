@@ -15,7 +15,8 @@ enum LightComponent {
     LIGHT_LINEAR,
     LIGHT_QUADRATIC,
     LIGHT_PROJSHADOW,
-    LIGHT_ASPECT
+    LIGHT_ASPECT,
+    LIGHT_CAST_SHADOW
 };
 
 enum TypeLight {
@@ -49,7 +50,7 @@ private:
     glm::mat4 lightProjection;
     glm::mat4 lightView;
     float aspect;
-    
+    bool isCastShadow;
 public:
     glm::mat4 lightSpaceMatrix;
     std::vector<glm::mat4> lightSpaceMatrices;
@@ -69,6 +70,7 @@ public:
     void EditLightComponent(LightComponent lc, glm::vec3 value);
     void EditLightComponent(LightComponent lc, glm::vec4 value);
     void EditLightComponent(LightComponent lc, float value);
+    void EditLightComponent(LightComponent lc, bool value);
 
     glm::vec3 inline GetPosition() { return this->position; }
     glm::vec3 inline GetDirection() { return this->direction; }

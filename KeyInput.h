@@ -21,7 +21,7 @@ public:
         {
             glm::vec2 clickPos = glm::vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 
-            unsigned int idModelSelected;
+            unsigned int idModelSelected = 0;
             bool isClicked = false;
             float distRay = FLT_MAX;
 

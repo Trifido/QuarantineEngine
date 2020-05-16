@@ -67,7 +67,7 @@ int main(int, char**)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    ImVec4* clear_color = new ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+    ImVec4* clear_color = new ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
     //ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
     //RENDER SYSTEM
@@ -75,20 +75,20 @@ int main(int, char**)
 
     ///TEXTURES
     std::vector<Texture> textures;
-    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE);
+    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE, true);
     Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
-    //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
+    Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
     //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
     textures.push_back(texture1);
     textures.push_back(texture2);
-    //textures.push_back(texture3);
-    Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE);
+    textures.push_back(texture3);
+    Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE, true);
     std::vector<Texture> textures_floor;
     textures_floor.push_back(textureFloor);
 
-    Texture parallaxDiff("./resources/materials/stoneFloor/Arc_Pavement_001_basecolor.jpg", TypeTexture::DIFFUSE);
-    Texture parallaxNorm("./resources/materials/stoneFloor/Arc_Pavement_001_normal.jpg", TypeTexture::NORMAL);
-    Texture parallaxDisp("./resources/materials/stoneFloor/Arc_Pavement_001_height.png", TypeTexture::HEIGHT);
+    Texture parallaxDiff("./resources/bricks/bricks2.jpg", TypeTexture::DIFFUSE);
+    Texture parallaxNorm("./resources/bricks/bricks2_normal.jpg", TypeTexture::NORMAL);
+    Texture parallaxDisp("./resources/bricks/bricks2_disp.jpg", TypeTexture::HEIGHT);
     std::vector<Texture> textures_parallax;
     textures_parallax.push_back(parallaxDiff);
     textures_parallax.push_back(parallaxNorm);
@@ -143,36 +143,36 @@ int main(int, char**)
     //renderkernel.AddModel(&ourModel);
     
     ///--CUBE   
-    //Model cubeModel(vertices, 36, textures);
-    //cubeModel.TranslationTo(glm::vec3(0.0f, 1.5f, 0.0));
-    //cubeModel.ScaleTo(glm::vec3(0.5f));
-    //renderkernel.AddModel(&cubeModel);
-    //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
-    //cubeModel.isSelectable(true);
-    //cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
-    //cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
-    //cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
-    //Model cubeModel2(vertices, 36, textures);
-    //cubeModel2.TranslationTo(glm::vec3(2.0f, -0.248f, 1.0));
-    //cubeModel2.ScaleTo(glm::vec3(0.5f));
-    //renderkernel.AddModel(&cubeModel2);
-    //Model cubeModel3(vertices, 36, textures);
-    //cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0));
-    //cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-    //cubeModel3.ScaleTo(glm::vec3(0.25f));
-    //renderkernel.AddModel(&cubeModel3);
+    Model cubeModel(vertices, 36, textures);
+    cubeModel.TranslationTo(glm::vec3(0.0f, 1.5f, 0.0));
+    cubeModel.ScaleTo(glm::vec3(0.5f));
+    renderkernel.AddModel(&cubeModel);
+    cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
+    cubeModel.isSelectable(true);
+    cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
+    cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
+    cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
+    Model cubeModel2(vertices, 36, textures);
+    cubeModel2.TranslationTo(glm::vec3(2.0f, -0.248f, 1.0));
+    cubeModel2.ScaleTo(glm::vec3(0.5f));
+    renderkernel.AddModel(&cubeModel2);
+    Model cubeModel3(vertices, 36, textures);
+    cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0));
+    cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+    cubeModel3.ScaleTo(glm::vec3(0.25f));
+    renderkernel.AddModel(&cubeModel3);
 
     ///--FLOOR
-    Model floorModel(floorVertices, 6, textures_parallax);
-    Shader* sh = new Shader("shaders/parallaxMapping.vert", "shaders/parallaxMapping.frag");
-    Material* mat = new Material(sh);
+    Model floorModel(floorVertices, 6, textures_floor);
+    //Shader* sh = new Shader("shaders/parallaxMapping.vert", "shaders/parallaxMapping.frag");
+    //Material* mat = new Material(sh);
     //mat->AddMultTextures(textures_parallax);
-    floorModel.AddMaterial(mat);
-    floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.05f);
+    //floorModel.AddMaterial(mat);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, 0.05f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 64.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::BLINN, true);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
-    floorModel.ScaleTo(glm::vec3(0.5, 1.0, 0.5));
+    //floorModel.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
     renderkernel.AddModel(&floorModel);
 
     ///--VEGETATION
@@ -226,8 +226,8 @@ int main(int, char**)
     //renderkernel.AddModel(&asteroid);
 
     // LIGHT
-    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 3.5f, 0.0f));
-    //dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
+    Light* pointLight = new Light(TypeLight::DIRL, glm::vec3(-2.0f, 4.0f, -1.0f)); 
+    pointLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
     renderkernel.AddLight(pointLight);
     //renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
@@ -235,11 +235,11 @@ int main(int, char**)
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[3]));
 
-    //renderkernel.lights.at(0)->SetSpecular(glm::vec3(0.25f));
+    renderkernel.lights.at(0)->SetSpecular(glm::vec3(1.25f));
     //renderkernel.lights.at(1)->SetSpecular(glm::vec3(0.5f));
     //renderkernel.lights.at(2)->SetSpecular(glm::vec3(0.75f));
     //renderkernel.lights.at(3)->SetSpecular(glm::vec3(1.0f));
-    //renderkernel.lights.at(0)->SetDiffuse(glm::vec3(0.25f));
+    renderkernel.lights.at(0)->SetDiffuse(glm::vec3(1.25f));
     //renderkernel.lights.at(1)->SetDiffuse(glm::vec3(0.5f));
     //renderkernel.lights.at(2)->SetDiffuse(glm::vec3(0.75f));
     //renderkernel.lights.at(3)->SetDiffuse(glm::vec3(1.0f));

@@ -106,6 +106,12 @@ void Light::EditLightComponent(LightComponent lc, float value)
     }
 }
 
+void Light::EditLightComponent(LightComponent lc, bool value)
+{
+    if(lc == LightComponent::LIGHT_CAST_SHADOW)
+        isCastShadow = value;
+}
+
 void Light::ComputeShadowProjection()
 {
     if (type == TypeLight::DIRL)

@@ -5,9 +5,10 @@ MaterialHandle::MaterialHandle()
     this->numInstances = 0;
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
-    this->shader = new Shader("shaders/standardPointShadow.vert", "shaders/standardPointShadow.frag");
+    this->shader = new Shader("shaders/standardShadow.vert", "shaders/standardShadow.frag");
+    //this->shader = new Shader("shaders/standardBloom.vert", "shaders/standardBloom.frag");
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
-    this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag"); //"shaders/pointShadow.gm", 
+    this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
 }
 
 MaterialHandle::MaterialHandle(Shader* sh)

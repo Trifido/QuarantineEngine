@@ -167,6 +167,7 @@
     <ClCompile Include="..\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\libs\gl3w\GL\gl3w.c" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FBO.cpp" />
     <ClCompile Include="FBOSystem.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="..\libs\gl3w\GL\gl3w.h" />
     <ClInclude Include="..\libs\gl3w\GL\glcorearb.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FBO.h" />
     <ClInclude Include="FBOSystem.h" />
     <ClInclude Include="HeadersRequeriments.h" />
     <ClInclude Include="includes\stb_image.h" />
@@ -213,6 +215,7 @@
     <None Include="..\README.txt" />
     <None Include="shaders\blending.frag" />
     <None Include="shaders\blending.vert" />
+    <None Include="shaders\blurPass.frag" />
     <None Include="shaders\depthRender.frag" />
     <None Include="shaders\depthRender.vert" />
     <None Include="shaders\depthRenderShadow.frag" />
@@ -221,6 +224,7 @@
     <None Include="shaders\example.vert" />
     <None Include="shaders\example1.frag" />
     <None Include="shaders\example1.vert" />
+    <None Include="shaders\finalBloom.frag" />
     <None Include="shaders\geometryShader.frag" />
     <None Include="shaders\geometryShader.gm" />
     <None Include="shaders\geometryShader.vert" />
@@ -255,6 +259,8 @@
     <None Include="shaders\shadow.vert" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
+    <None Include="shaders\standardBloom.frag" />
+    <None Include="shaders\standardBloom.vert" />
     <None Include="shaders\standardLighting.frag" />
     <None Include="shaders\standardLighting.vert" />
     <None Include="shaders\standardPointShadow.frag" />

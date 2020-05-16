@@ -4,7 +4,10 @@ RenderPlane::RenderPlane()
 {
     gammaValue = 1.0f;
     exposureValue = 1.0f;
+    pingpongIdPass = true;
     screenRenderShader = new Shader("shaders/renderPass.vert", "shaders/renderPass.frag");
+    shaderBlur = new Shader("shaders/renderPass.vert", "shaders/blurPass.frag");
+    shaderBloomFinal = new Shader("shaders/renderPass.vert", "shaders/finalBloom.frag"); 
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
 }
 
@@ -35,13 +38,52 @@ void RenderPlane::SetVAORenderPlane()
     screenRenderShader->setInt("screenTexture", 0);
     screenRenderShader->setFloat("gamma", gammaValue);
     screenRenderShader->setFloat("exposure", exposureValue);
+
+    shaderBlur->use();
+    shaderBlur->setInt("image", 0);
+
+    shaderBloomFinal->use(); 
+    shaderBloomFinal->setInt("bloom", bloomValue);
+    shaderBloomFinal->setFloat("exposure", exposureValue); 
+    shaderBloomFinal->setInt("scene", 0);
+    shaderBloomFinal->setInt("bloomBlur", 1);
 }
 
-void RenderPlane::DrawFrom(unsigned int & textureColorbuffer)
+void RenderPlane::FinalRenderPass()
 {
     screenRenderShader->use();
 
     glBindVertexArray(quadVAO);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetFinalRender());	// use the color attachment texture as the texture of the quad plane
     glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void RenderPlane::FinalRenderBloom()
+{
+    shaderBloomFinal->use();
+    glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetPingPongRender(!pingpongIdPass));
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void RenderPlane::RenderBlur()
+{
+    bool first_iteration = true;
+    unsigned int amount = 10;
+    shaderBlur->use(); 
+    for (unsigned int i = 0; i < amount; i++)
+    {
+        fboSystem->PingPongPass(pingpongIdPass);
+        shaderBlur->setInt("horizontal", pingpongIdPass);
+        glBindVertexArray(quadVAO);
+        glBindTexture(GL_TEXTURE_2D, first_iteration ? fboSystem->GetMRTRender(1) : fboSystem->GetPingPongRender(!pingpongIdPass));
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        pingpongIdPass = !pingpongIdPass;
+        if (first_iteration)
+            first_iteration = false;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
