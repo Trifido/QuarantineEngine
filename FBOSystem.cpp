@@ -91,17 +91,17 @@ unsigned int FBOSystem::GetPingPongRender(int idTex)
     return 0;
 }
 
-unsigned int FBOSystem::GetOmniRender()
+unsigned int FBOSystem::GetOmniRender(unsigned int id)
 {
     if(omniFBO != nullptr)
-        return omniFBO->GetRenderTexture();
+        return omniFBO->GetRenderTexture(id);
     return 0;
 }
 
-unsigned int FBOSystem::GetDirRender()
+unsigned int FBOSystem::GetDirRender(unsigned int id)
 {
     if(dirFBO != nullptr)
-        return dirFBO->GetRenderTexture();
+        return dirFBO->GetRenderTexture(id);
     return 0;
 }
 

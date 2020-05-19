@@ -30,7 +30,7 @@ struct Material {
     int blinn;
 };
 
-struct DirLight {
+struct DirLight { 
     vec3 direction;  
     vec3 ambient;
     vec3 diffuse;

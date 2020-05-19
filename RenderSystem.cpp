@@ -46,6 +46,7 @@ void RenderSystem::AddLight(Light* lights)
         if (num_dir_cast_shadow < LIMIT_DIR_CAST_SHADOW)
         {
             this->shadowCastDirLights.push_back(lights);
+            this->shadowCastGeneralLights.push_back(lights);
             lights->EditLightComponent(LightComponent::LIGHT_CAST_SHADOW, true);
             num_dir_cast_shadow++;
         }
@@ -55,6 +56,7 @@ void RenderSystem::AddLight(Light* lights)
         if (num_omni_cast_shadow < LIMIT_OMNI_CAST_SHADOW)
         {
             this->shadowCastOmniLights.push_back(lights);
+            this->shadowCastGeneralLights.push_back(lights);
             lights->EditLightComponent(LightComponent::LIGHT_CAST_SHADOW, true);
             num_omni_cast_shadow++;
         }
@@ -85,6 +87,7 @@ void RenderSystem::RenderDirectionalShadowMap()
         fboSystem->DirShadowPass(idLight);
         glViewport(0, 0, 1024, 1024);
         glClear(GL_DEPTH_BUFFER_BIT);
+               
         for (int idModel = 0; idModel < models.size(); idModel++)
             models[idModel]->DrawShadow(shadowCastDirLights.at(idLight)->lightSpaceMatrix);
     }
@@ -99,6 +102,7 @@ void RenderSystem::RenderOmnidirectionalShadowMap()
         fboSystem->OmniShadowPass(idLight);
         glViewport(0, 0, 1024, 1024);
         glClear(GL_DEPTH_BUFFER_BIT);
+
         for (int idModel = 0; idModel < models.size(); idModel++)
         {
             models[idModel]->DrawShadow(shadowCastOmniLights.at(idLight)->lightSpaceMatrices, shadowCastOmniLights.at(idLight)->GetPosition(), shadowCastOmniLights.at(idLight)->GetFarplane());
@@ -113,11 +117,13 @@ void RenderSystem::RenderSolidModels()
     {
         if (solidModels[i]->CAST_SHADOW)
         {
-            if(lights.at(0)->GetType() == TypeLight::DIRL)
-                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender());
-            else
-                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(), true); 
-            solidModels[i]->DrawCastShadow(lights.at(0));
+            for (int idLight = 0; idLight < this->shadowCastDirLights.size(); idLight++)
+                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight);
+
+            for (int idLight = 0; idLight < this->shadowCastOmniLights.size(); idLight++)
+                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLight), idLight, true);
+
+            solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
         }
         else
         {
@@ -158,8 +164,8 @@ void RenderSystem::PreRender()
     skybox->AddCamera(cameras.at(0));
 
     //POST-PROCESS GAMMA
-    renderPass.SetGamma(2.2f);
-    //TONE MAPPING
+    renderPass.SetGamma(2.2f); 
+    //TONE MAPPING 
     renderPass.SetExposure(1.0f);
 
     //SET REFLECTIVE MATERIALS
@@ -204,15 +210,15 @@ void RenderSystem::PreRender()
     //CREAMOS UN FRAME BUFFER OBJECT (FBO)
     glfwGetWindowSize(window, &width, &height);
     fboSystem = new FBOSystem(&width, &height);
-    //Añadimos HDR FBO
-    fboSystem->AddFBO(new FBO(FBOType::MULT_RT));
-    //Añadimos PINGPONG FBO
-    fboSystem->AddFBO(new FBO(FBOType::PINGPONG_FBO));
-    //Añadimos Final FBO
+    ///Añadimos HDR FBO
+    //fboSystem->AddFBO(new FBO(FBOType::MULT_RT));
+    ///Añadimos PINGPONG FBO
+    //fboSystem->AddFBO(new FBO(FBOType::PINGPONG_FBO));
+    ///Añadimos Final FBO
     fboSystem->AddFBO(new FBO(FBOType::COLOR_FBO, 4));
-    //Añadimos Omnidirectional shadow FBO
+    ///Añadimos Omnidirectional shadow FBO
     fboSystem->AddFBO(new FBO(FBOType::OMNI_SHADOW_FBO, 0, num_omni_cast_shadow));
-    //Añadimos Directional shadow FBO
+    ///Añadimos Directional shadow FBO
     fboSystem->AddFBO(new FBO(FBOType::DIR_SHADOW_FBO, 0, num_dir_cast_shadow));
     lastWidth = width;
     lastHeight = height;
@@ -226,11 +232,9 @@ void RenderSystem::PreRender()
 
     ///ACTIVAMOS EL DEPTH BUFFER
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
+    //glDepthFunc(GL_LESS);
     ///ACTIVAMOS EL CULLING
     glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
 }
 
 void RenderSystem::StartRender()

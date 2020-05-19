@@ -89,16 +89,21 @@ void Material::AddTexture(Texture texture)
     textures.push_back(texture);
 }
 
-void Material::ActivateShadowTexture(unsigned int idTexShadow, bool isOmni)
+void Material::ActivateShadowTexture(unsigned int idTexShadow, int idLight, bool isOmni)
 {
     ptrShader->use();
-    ptrShader->setInt("shadowMap", textures.size());
+    if(!isOmni)
+        ptrShader->setInt("dirLights[" + std::to_string(idLight) + "].shadowMap", numTextures);
+    else
+        ptrShader->setInt("pointLights[" + std::to_string(idLight) + "].shadowCubeMap", numTextures);
 
-    glActiveTexture(GL_TEXTURE0 + textures.size());
+    glActiveTexture(GL_TEXTURE0 + numTextures);
     if (isOmni)
         glBindTexture(GL_TEXTURE_CUBE_MAP, idTexShadow);
     else
         glBindTexture(GL_TEXTURE_2D, idTexShadow);
+
+    numTextures++;
 }
 
 void Material::AddMultTextures(std::vector<Texture> texturesIN)
@@ -117,7 +122,9 @@ void Material::AssignRenderTextures()
     unsigned int heightNr = 0;
     unsigned int emissiveNr = 0;
 
-    for (unsigned int i = 0; i < textures.size(); i++)
+    numTextures = textures.size();
+
+    for (unsigned int i = 0; i < numTextures; i++)
     { 
 
         std::string name;

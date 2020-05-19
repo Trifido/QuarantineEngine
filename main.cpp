@@ -77,11 +77,11 @@ int main(int, char**)
     std::vector<Texture> textures;
     Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE, true);
     Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
-    Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
+    //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
     //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
     textures.push_back(texture1);
     textures.push_back(texture2);
-    textures.push_back(texture3);
+    //textures.push_back(texture3);
     Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE, true);
     std::vector<Texture> textures_floor;
     textures_floor.push_back(textureFloor);
@@ -132,35 +132,35 @@ int main(int, char**)
     ///MODEL 3D
     ///--NANOSUIT  
     //Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
-    //Model ourModel("./resources/3DModels/darksouls/fallen.obj"); 
+    Model ourModel("./resources/3DModels/darksouls/fallen.obj"); 
     //ourModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
     /*ourModel.AddMaterial(normalMaterial);
     //ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
     */
     //ourModel.ScaleTo(glm::vec3(0.1f));
-    //ourModel.TranslationTo(glm::vec3(0.0f, -5.0f, 20.0f));
-    //renderkernel.AddModel(&ourModel);
+    ourModel.TranslationTo(glm::vec3(0.0f, -0.5f, 0.0f));
+    renderkernel.AddModel(&ourModel);
     
     ///--CUBE   
-    Model cubeModel(vertices, 36, textures);
-    cubeModel.TranslationTo(glm::vec3(0.0f, 1.5f, 0.0));
-    cubeModel.ScaleTo(glm::vec3(0.5f));
-    renderkernel.AddModel(&cubeModel);
-    cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
-    cubeModel.isSelectable(true);
-    cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
-    cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
-    cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
-    Model cubeModel2(vertices, 36, textures);
-    cubeModel2.TranslationTo(glm::vec3(2.0f, -0.248f, 1.0));
-    cubeModel2.ScaleTo(glm::vec3(0.5f));
-    renderkernel.AddModel(&cubeModel2);
-    Model cubeModel3(vertices, 36, textures);
-    cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0));
-    cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-    cubeModel3.ScaleTo(glm::vec3(0.25f));
-    renderkernel.AddModel(&cubeModel3);
+    //Model cubeModel(vertices, 36, textures);
+    //cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
+    //cubeModel.ScaleTo(glm::vec3(0.5f));
+    //renderkernel.AddModel(&cubeModel);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
+    //cubeModel.isSelectable(true);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
+    //Model cubeModel2(vertices, 36, textures);
+    //cubeModel2.TranslationTo(glm::vec3(2.0f, -0.5f, 1.0f));
+    //cubeModel2.ScaleTo(glm::vec3(0.5f));
+    //renderkernel.AddModel(&cubeModel2);
+    //Model cubeModel3(vertices, 36, textures);
+    //cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0f));
+    //cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
+    //cubeModel3.ScaleTo(glm::vec3(0.25f));
+    //renderkernel.AddModel(&cubeModel3);
 
     ///--FLOOR
     Model floorModel(floorVertices, 6, textures_floor);
@@ -226,20 +226,43 @@ int main(int, char**)
     //renderkernel.AddModel(&asteroid);
 
     // LIGHT
-    Light* pointLight = new Light(TypeLight::DIRL, glm::vec3(-2.0f, 4.0f, -1.0f)); 
-    pointLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
+    
+    Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(-5.0f, 7.0f, -5.0f));
+    dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, 0.5));
+    dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(1.0, 0.1, 0.1));
+    dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(1.0, 0.1, 0.1));
+    renderkernel.AddLight(dirLight);
+    /*
+    Light* dirLight2 = new Light(TypeLight::DIRL, glm::vec3(5.0f, 7.0f, -5.0f)); 
+    dirLight2->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.5));
+    renderkernel.AddLight(dirLight2);
+    Light* dirLight3 = new Light(TypeLight::DIRL, glm::vec3(-5.0f, 7.0f, 5.0f));
+    dirLight3->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, -0.5));
+    renderkernel.AddLight(dirLight3);
+    Light* dirLight4 = new Light(TypeLight::DIRL, glm::vec3(5.0f, 7.0f, 5.0f)); 
+    dirLight4->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, -0.5));
+    renderkernel.AddLight(dirLight4);
+    */
+    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 7.0f, -5.0f)); 
     renderkernel.AddLight(pointLight);
+    Light* pointLight2 = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 7.0f, -5.0f));
+    renderkernel.AddLight(pointLight2);
+    Light* pointLight3 = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 7.0f, 5.0f));
+    renderkernel.AddLight(pointLight3);
+    Light* pointLight4 = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 7.0f, 5.0f));
+    renderkernel.AddLight(pointLight4);
+
     //renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[1]));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[2]));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[3]));
 
-    renderkernel.lights.at(0)->SetSpecular(glm::vec3(1.25f));
+    //renderkernel.lights.at(0)->SetSpecular(glm::vec3(1.25f));
     //renderkernel.lights.at(1)->SetSpecular(glm::vec3(0.5f));
     //renderkernel.lights.at(2)->SetSpecular(glm::vec3(0.75f));
     //renderkernel.lights.at(3)->SetSpecular(glm::vec3(1.0f));
-    renderkernel.lights.at(0)->SetDiffuse(glm::vec3(1.25f));
+    //renderkernel.lights.at(0)->SetDiffuse(glm::vec3(1.25f));
     //renderkernel.lights.at(1)->SetDiffuse(glm::vec3(0.5f));
     //renderkernel.lights.at(2)->SetDiffuse(glm::vec3(0.75f));
     //renderkernel.lights.at(3)->SetDiffuse(glm::vec3(1.0f));

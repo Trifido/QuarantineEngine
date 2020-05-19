@@ -1,7 +1,5 @@
 #include "Light.h"
 
-
-
 Light::Light()
 {
     type = TypeLight::POINTLIGHT;
@@ -44,6 +42,7 @@ void Light::EditLightComponent(LightComponent lc, glm::vec3 value)
         direction = value; 
         lightView = glm::lookAt(position, glm::normalize(direction) + position, glm::vec3(0.0f, 1.0f, 0.0f));
         lightSpaceMatrix = lightProjection * lightView;
+        ComputeShadowProjection();
         break;
     case LIGHT_DIFFUSE:
         diffuse = value;
@@ -117,13 +116,13 @@ void Light::ComputeShadowProjection()
     if (type == TypeLight::DIRL)
     {
         lightProjection = glm::ortho(projDimension.x, projDimension.y, projDimension.z, projDimension.w, near_plane, far_plane);
-        glm::vec3 pointView = glm::normalize(direction) + position;
-        lightView = glm::lookAt(position, pointView, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::vec3 pointView = glm::normalize(direction) + this->position;
+        lightView = glm::lookAt(this->position, pointView, glm::vec3(0.0f, 1.0f, 0.0f));
         lightSpaceMatrix = lightProjection * lightView;
     }
     else
     {
-        lightProjection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 100.0f);//near_plane, far_plane);
+        lightProjection = glm::perspective(glm::radians(90.0f), aspect, near_plane, far_plane);
         ComputeShadowCubeMapProjection();
     }
 }
@@ -156,8 +155,8 @@ void Light::Init()
     cutOff = glm::cos(glm::radians(12.5f));
     outerCutOff = glm::cos(glm::radians(17.5f));
 
-    near_plane = 1.0f;
-    far_plane = 25.0f;
+    near_plane = 0.1f;
+    far_plane = 100.0f;
     aspect = 1.0f;
     projDimension = glm::vec4(-10.0f, 10.0f, -10.0f, 10.0f);
 }

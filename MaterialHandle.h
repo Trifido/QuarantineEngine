@@ -30,7 +30,8 @@ public:
     void EditMaterial(MaterialComponent component, MaterialType type, int numInstances=0);
     void EditMaterial(MaterialComponent component, DrawMode type);
     void EditMaterial(MaterialComponent component, std::vector<Texture> textures, unsigned int id = NULL);
-    void ActivateShadowMap(unsigned int idTexShadow, bool isOmni = false);
+	void ActivateShadowMap(unsigned int idTexShadow, unsigned int idLight, bool isOmni = false);
+    //void ActivateShadowMap(unsigned int idTexShadow, bool isOmni = false);
 };
 
 #endif

@@ -25,8 +25,10 @@ public:
     unsigned int GetFinalRender();
     unsigned int GetMRTRender(int idTex = 0);
     unsigned int GetPingPongRender(int idTex = 0);
-    unsigned int GetOmniRender();
-    unsigned int GetDirRender();
+    unsigned int GetOmniRender(unsigned int id = 0);
+    //unsigned int GetOmniRender();
+	unsigned int GetDirRender(unsigned int id = 0);
+    //unsigned int GetDirRender();
     void ResizeFBOs();
 };
 

@@ -24,6 +24,7 @@ private:
     std::vector<Model*> transparentModels;
     std::vector<Light*> shadowCastDirLights;
     std::vector<Light*> shadowCastOmniLights;
+    std::vector<Light*> shadowCastGeneralLights;
     KeyInput inputSystem;
     GLFWwindow* window;
     ImVec4* clear_color;

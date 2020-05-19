@@ -47,6 +47,8 @@ enum DrawMode
 
 class Material
 {
+private:
+    unsigned int numTextures = 0;
 public:
     MaterialType type;
     Shader* ptrShader;
@@ -74,7 +76,8 @@ public:
 
     void AddShader(Shader* sh);
     void AddTexture(Texture texture);
-    void ActivateShadowTexture(unsigned int idTexShadow, bool isOmni = false);
+	void ActivateShadowTexture(unsigned int idTexShadow, int idLight, bool isOmni = false);
+    //void ActivateShadowTexture(unsigned int idTexShadow, bool isOmni = false);
     void AddMultTextures(std::vector<Texture> texturesIN);
     void AssignRenderTextures();
 };

@@ -5,7 +5,7 @@ MaterialHandle::MaterialHandle()
     this->numInstances = 0;
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
-    this->shader = new Shader("shaders/standardShadow.vert", "shaders/standardShadow.frag");
+    this->shader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     //this->shader = new Shader("shaders/standardBloom.vert", "shaders/standardBloom.frag");
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
     this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
@@ -179,12 +179,12 @@ void MaterialHandle::EditMaterial(MaterialComponent component, std::vector<Textu
     }
 }
 
-void MaterialHandle::ActivateShadowMap(unsigned int idTexShadow, bool isOmni)
+void MaterialHandle::ActivateShadowMap(unsigned int idTexShadow, unsigned int idLight, bool isOmni)
 {
     shader->use();
     for (int i = 0; i < listMaterials.size(); i++)
     {
-        listMaterials.at(i)->ActivateShadowTexture(idTexShadow, isOmni);
+        listMaterials.at(i)->ActivateShadowTexture(idTexShadow, idLight, isOmni);
     }
 }
 

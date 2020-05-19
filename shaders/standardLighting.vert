@@ -5,10 +5,16 @@ layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangents;
 layout (location = 4) in vec3 aBitangents;
 
-out vec2 TexCoords;
-out vec3 FragPos;
-out vec3 Normal;
-out mat3 TBN;
+#define NR_LIGHTS 5
+
+out VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+    vec4 FragPosDirLightSpace[NR_LIGHTS];
+    vec4 FragPosPointLightSpace[NR_LIGHTS];
+    mat3 TBN;
+} vs_out;
 
 layout (std140) uniform Matrices
 {
@@ -17,7 +23,14 @@ layout (std140) uniform Matrices
 };
 
 uniform mat4 model;
-uniform int num_normal;
+uniform int num_normal; 
+uniform mat4 DirlightSpaceMatrix[NR_LIGHTS];
+uniform mat4 PointlightSpaceMatrix[NR_LIGHTS];
+
+uniform int numSpotLights;
+uniform int numPointLights;
+uniform int numDirLights;
+uniform int numFPSLights;
 
 void main()
 {
@@ -26,11 +39,17 @@ void main()
         vec3 T = normalize(vec3(model * vec4(aTangents, 0.0)));
         vec3 B = normalize(vec3(model * vec4(aBitangents, 0.0)));
         vec3 N = normalize(vec3(model * vec4(aNormal, 0.0)));
-        TBN = mat3(T, B, N);
+        vs_out.TBN = mat3(T, B, N);
     }
 
-    Normal = mat3(transpose(inverse(model))) * aNormal;
-    TexCoords = aTexCoords;
-    FragPos = vec3(model * vec4(aPos, 1.0));
-    gl_Position = projection * view * vec4(FragPos, 1.0);
+    vs_out.Normal = mat3(transpose(inverse(model))) * aNormal;
+    vs_out.TexCoords = aTexCoords;
+    vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
+
+    for(int i = 0; i < numDirLights; i++)
+        vs_out.FragPosDirLightSpace[i] = DirlightSpaceMatrix[i] * vec4(vs_out.FragPos, 1.0);
+    for(int i = 0; i < numPointLights; i++)
+        vs_out.FragPosPointLightSpace[i] = PointlightSpaceMatrix[i] * vec4(vs_out.FragPos, 1.0);
+
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

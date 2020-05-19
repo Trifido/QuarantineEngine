@@ -234,10 +234,15 @@ void Shader::ActivateLights()
     {
         if (lights[i]->GetType() == TypeLight::DIRL)
         {
-            this->setVec3("dirLight.ambient", lights[i]->GetAmbient());
-            this->setVec3("dirLight.diffuse", lights[i]->GetDiffuse());
-            this->setVec3("dirLight.specular", lights[i]->GetSpecular());
-            this->setVec3("dirLight.direction", lights[i]->GetDirection());
+            std::string name = "dirLights[" + std::to_string(numDirLights) + "].";
+            this->setVec3(name + "ambient", lights[i]->GetAmbient());
+            this->setVec3(name + "diffuse", lights[i]->GetDiffuse());
+            this->setVec3(name + "specular", lights[i]->GetSpecular());
+            this->setVec3(name + "direction", lights[i]->GetDirection());
+            this->setVec3(name + "position", lights[i]->GetPosition());
+            this->setFloat(name + "constant", lights[i]->GetConstant());
+            this->setFloat(name + "linear", lights[i]->GetLinear());
+            this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             numDirLights++;
         }
         else if (lights[i]->GetType() == TypeLight::POINTLIGHT)
@@ -250,6 +255,7 @@ void Shader::ActivateLights()
             this->setFloat(name + "constant", lights[i]->GetConstant());
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
+            this->setFloat(name + "far_plane", lights[i]->GetFarplane());
 
             numPointLights++;
         }
