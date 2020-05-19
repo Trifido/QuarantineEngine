@@ -50,18 +50,20 @@ void Model::Draw(bool isOutline)
     }
 }
 
+//ESTO TENGO QUE CAMBIARLO
 void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
 {
+    int numDir, numPoint, numSpot;
+    numDir = numPoint = numSpot = 0;
+
+    //for(int i = 0; i < lights.size(); i++)
+    //    if(numDir )
 
     matHandle.shader->use();
-    matHandle.shader->setInt("numDirLights", lights.size());
-    matHandle.shader->setInt("numPointLights", lights.size());
+
 
     if (!isOutline || !isSelectableModel || !isSelectedModel)
     {
-        unsigned int idPlight, idDlight;
-        idPlight = idDlight = 0;
-
         for (unsigned int i = 0; i < meshes.size(); i++)
         {
             if (matHandle.type != MaterialType::INSTANCE)
@@ -70,15 +72,21 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
                 {
                     if (lights.at(idLight)->GetType() == TypeLight::DIRL)
                     {
-                        std::string numLight = std::to_string(idDlight);
+                        std::string numLight = std::to_string(numDir);
                         meshes[i].material->ptrShader->setMat4("DirlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
-                        idDlight++;
+                        numDir++;
                     }
                     else if(lights.at(idLight)->GetType() == TypeLight::POINTLIGHT)
                     {
-                        std::string numLight = std::to_string(idPlight);
+                        std::string numLight = std::to_string(numPoint);
                         meshes[i].material->ptrShader->setMat4("PointlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
-                        idPlight++;
+                        numPoint++;
+                    }
+                    else if (lights.at(idLight)->GetType() == TypeLight::SPOTL)
+                    {
+                        std::string numLight = std::to_string(numSpot);
+                        meshes[i].material->ptrShader->setMat4("SpotlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
+                        numSpot++;
                     }
                 }
                 
@@ -93,22 +101,25 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
     { 
         for (unsigned int i = 0; i < meshes.size(); i++)
         {
-
-            unsigned int idPlight, idDlight;
-            idPlight = idDlight = 0;
             for (int idLight = 0; idLight < lights.size(); idLight++)
             {
                 if (lights.at(idLight)->GetType() == TypeLight::DIRL)
                 {
-                    std::string numLight = std::to_string(idDlight);
+                    std::string numLight = std::to_string(numDir);
                     meshes[i].material->ptrShader->setMat4("DirlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
-                    idDlight++;
+                    numDir++;
                 }
                 else if (lights.at(idLight)->GetType() == TypeLight::POINTLIGHT)
                 { 
-                    std::string numLight = std::to_string(idPlight);
+                    std::string numLight = std::to_string(numPoint);
                     meshes[i].material->ptrShader->setMat4("PointlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
-                    idPlight++;
+                    numPoint++;
+                }
+                else if (lights.at(idLight)->GetType() == TypeLight::SPOTL)
+                {
+                    std::string numLight = std::to_string(numSpot);
+                    meshes[i].material->ptrShader->setMat4("SpotlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
+                    numSpot++;
                 }
             } 
             meshes[i].material->ptrShader->setMat4("model", model);
@@ -117,6 +128,10 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
             meshes[i].Draw(isOutline, isSelectedModel);
         }
     }
+    matHandle.shader->use();
+    matHandle.shader->setInt("numDirLights", numDir);
+    matHandle.shader->setInt("numPointLights", numPoint);
+    matHandle.shader->setInt("numSpotLights", numSpot);
 }
 
 void Model::DrawShadow(glm::mat4 VPShadow)

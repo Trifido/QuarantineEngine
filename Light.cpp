@@ -113,17 +113,28 @@ void Light::EditLightComponent(LightComponent lc, bool value)
 
 void Light::ComputeShadowProjection()
 {
-    if (type == TypeLight::DIRL)
+    switch (type)
     {
+    case POINTLIGHT:
+        lightProjection = glm::perspective(glm::radians(90.0f), aspect, near_plane, far_plane);
+        ComputeShadowCubeMapProjection();
+        break;
+    case DIRL:
         lightProjection = glm::ortho(projDimension.x, projDimension.y, projDimension.z, projDimension.w, near_plane, far_plane);
         glm::vec3 pointView = glm::normalize(direction) + this->position;
         lightView = glm::lookAt(this->position, pointView, glm::vec3(0.0f, 1.0f, 0.0f));
         lightSpaceMatrix = lightProjection * lightView;
-    }
-    else
-    {
+        break;
+    case SPOTL:
         lightProjection = glm::perspective(glm::radians(90.0f), aspect, near_plane, far_plane);
-        ComputeShadowCubeMapProjection();
+        glm::vec3 pointView2 = glm::normalize(direction) + this->position;
+        lightView = glm::lookAt(this->position, pointView2, glm::vec3(0.0f, 1.0f, 0.0f));
+        lightSpaceMatrix = lightProjection * lightView;
+        break;
+    case SPOTFPSL:
+        break;
+    default:
+        break;
     }
 }
 

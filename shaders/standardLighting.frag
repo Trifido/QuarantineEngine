@@ -1,7 +1,7 @@
 #version 330 core
 out vec4 FragColor;
 
-#define NUM_TEXTURES 4
+#define NUM_TEXTURES 2
 #define NR_DIR_LIGHTS 5
 #define NR_POINT_LIGHTS 5
 #define NR_SPOT_LIGHTS 5 
@@ -12,6 +12,7 @@ in VS_OUT {
     vec2 TexCoords;
     vec4 FragPosDirLightSpace[NR_DIR_LIGHTS];
     vec4 FragPosPointLightSpace[NR_POINT_LIGHTS];
+    vec4 FragPosSpotLightSpace[NR_SPOT_LIGHTS];
     mat3 TBN;
 } fs_in;
 
@@ -66,7 +67,8 @@ struct SpotLight {
     float quadratic; 
     vec3 ambient;
     vec3 diffuse;
-    vec3 specular;       
+    vec3 specular;
+    sampler2D shadowMap;
 };
 
 //MATERIAL
@@ -87,6 +89,7 @@ uniform vec3 viewPos;
 
 //DIRECTIONAL SHADOW EQUATION
 float DirShadowCalculation(int idLight);
+float SpotShadowCalculation(int idLight);
 float PointShadowCalculation(int idLight);
 
 //BLINN-PHONG LIGHT EQUATIONS
@@ -142,10 +145,10 @@ void main()
         resultSpot += CalcSpotLight(spotLights[i], i, norm, fs_in.FragPos, viewDir);
 
     //phase 4: FPS Spot Light
-    if(numFPSLights > 0)
-        resultFPS += CalcSpotLight(fpsSpotLight, 0, norm, fs_in.FragPos, viewDir);
+    //if(numFPSLights > 0)
+    //    resultFPS += CalcSpotLight(fpsSpotLight, 0, norm, fs_in.FragPos, viewDir);
 
-    result *= (resultPoint + resultDir + resultSpot + resultFPS);
+    result *= (resultPoint + resultDir + resultSpot);// + resultFPS);
     FragColor = vec4(result, 1.0);
 }
 
@@ -289,9 +292,12 @@ vec3 CalcSpotLight(SpotLight light, int idLight, vec3 normal, vec3 fragPos, vec3
     if(material.num_emissive > 0)
         resultEmissive = vec3(texture(material.emissive[0], fs_in.TexCoords));
 
+    float shadow = SpotShadowCalculation(idLight);
     vec3 diffuse = light.diffuse * diff * resultDiffuse * attenuation * intensity;
-    vec3 specular = light.specular * spec * resultSpecular * attenuation * intensity;   
-    return (diffuse + specular + resultEmissive);
+    vec3 specular = light.specular * spec * resultSpecular * attenuation * intensity;
+    vec3 emissive = resultEmissive; 
+    //return (diffuse + specular + resultEmissive);
+    return (resultDiffuse * 0.1 + (1.0 - shadow) * (diffuse + specular + emissive));
 }
 
 float DirShadowCalculation(int idLight)
@@ -320,6 +326,41 @@ float DirShadowCalculation(int idLight)
             for(int y = -1; y <= 1; ++y)
             {
                 float pcfDepth = texture(dirLights[idLight].shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+                shadow += currentDepth + bias > pcfDepth ? 1.0 : 0.0;        
+            }    
+        }
+        shadow /= 9.0;
+    }
+
+    return shadow;
+}
+
+float SpotShadowCalculation(int idLight)
+{
+    vec3 normal = normalize(fs_in.Normal);
+    vec3 lightDir = normalize(-spotLights[idLight].direction);
+
+    if(dot(normal, lightDir) < 0.0)
+        return 0.0;
+
+    // perform perspective divide
+    vec3 projCoords = fs_in.FragPosSpotLightSpace[idLight].xyz / fs_in.FragPosSpotLightSpace[idLight].w;
+    // Projection coords in range [0,1]
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(spotLights[idLight].shadowMap, projCoords.xy).r; 
+    float currentDepth = projCoords.z ;
+
+    float bias = max(0.000005 * (1.0 - dot(normal, lightDir)), 0.000005);
+    float shadow = 0.0;
+
+    if(projCoords.z < 1.0)
+    {
+        vec2 texelSize = 1.0 / textureSize(spotLights[idLight].shadowMap, 0);
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float pcfDepth = texture(spotLights[idLight].shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
                 shadow += currentDepth + bias > pcfDepth ? 1.0 : 0.0;        
             }    
         }

@@ -13,6 +13,7 @@ out VS_OUT {
     vec2 TexCoords;
     vec4 FragPosDirLightSpace[NR_LIGHTS];
     vec4 FragPosPointLightSpace[NR_LIGHTS];
+    vec4 FragPosSpotLightSpace[NR_LIGHTS];
     mat3 TBN;
 } vs_out;
 
@@ -26,11 +27,11 @@ uniform mat4 model;
 uniform int num_normal; 
 uniform mat4 DirlightSpaceMatrix[NR_LIGHTS];
 uniform mat4 PointlightSpaceMatrix[NR_LIGHTS];
+uniform mat4 SpotlightSpaceMatrix[NR_LIGHTS];
 
 uniform int numSpotLights;
 uniform int numPointLights;
 uniform int numDirLights;
-uniform int numFPSLights;
 
 void main()
 {
@@ -50,6 +51,8 @@ void main()
         vs_out.FragPosDirLightSpace[i] = DirlightSpaceMatrix[i] * vec4(vs_out.FragPos, 1.0);
     for(int i = 0; i < numPointLights; i++)
         vs_out.FragPosPointLightSpace[i] = PointlightSpaceMatrix[i] * vec4(vs_out.FragPos, 1.0);
+    for(int i = 0; i < numSpotLights; i++)
+        vs_out.FragPosSpotLightSpace[i] = SpotlightSpaceMatrix[i] * vec4(vs_out.FragPos, 1.0);
 
     gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

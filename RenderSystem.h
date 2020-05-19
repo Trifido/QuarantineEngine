@@ -24,6 +24,7 @@ private:
     std::vector<Model*> transparentModels;
     std::vector<Light*> shadowCastDirLights;
     std::vector<Light*> shadowCastOmniLights;
+    std::vector<Light*> shadowCastSpotLights;
     std::vector<Light*> shadowCastGeneralLights;
     KeyInput inputSystem;
     GLFWwindow* window;
@@ -36,8 +37,10 @@ private:
     int lastWidth, lastHeight;
     const unsigned int LIMIT_DIR_CAST_SHADOW = 5;
     const unsigned int LIMIT_OMNI_CAST_SHADOW = 5;
+    const unsigned int LIMIT_SPOT_CAST_SHADOW = 5;
     unsigned int num_dir_cast_shadow;
     unsigned int num_omni_cast_shadow;
+    unsigned int num_spot_cast_shadow;
     float gamma;
 
     void UpdateFBO();

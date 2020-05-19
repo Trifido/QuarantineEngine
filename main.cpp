@@ -227,10 +227,10 @@ int main(int, char**)
 
     // LIGHT
     
-    Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(-5.0f, 7.0f, -5.0f));
+    Light* dirLight = new Light(TypeLight::SPOTL, glm::vec3(-5.0f, 7.0f, -5.0f));
     dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, 0.5));
-    dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(1.0, 0.1, 0.1));
-    dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(1.0, 0.1, 0.1));
+    //dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(1.0, 0.1, 0.1));
+    //dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(1.0, 0.1, 0.1));
     renderkernel.AddLight(dirLight);
     /*
     Light* dirLight2 = new Light(TypeLight::DIRL, glm::vec3(5.0f, 7.0f, -5.0f)); 
@@ -243,14 +243,14 @@ int main(int, char**)
     dirLight4->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, -0.5));
     renderkernel.AddLight(dirLight4);
     */
-    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 7.0f, -5.0f)); 
-    renderkernel.AddLight(pointLight);
-    Light* pointLight2 = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 7.0f, -5.0f));
-    renderkernel.AddLight(pointLight2);
-    Light* pointLight3 = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 7.0f, 5.0f));
-    renderkernel.AddLight(pointLight3);
-    Light* pointLight4 = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 7.0f, 5.0f));
-    renderkernel.AddLight(pointLight4);
+    //Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 7.0f, -5.0f)); 
+    //renderkernel.AddLight(pointLight);
+    //Light* pointLight2 = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 7.0f, -5.0f));
+    //renderkernel.AddLight(pointLight2);
+    //Light* pointLight3 = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 7.0f, 5.0f));
+    //renderkernel.AddLight(pointLight3);
+    //Light* pointLight4 = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 7.0f, 5.0f));
+    //renderkernel.AddLight(pointLight4);
 
     //renderkernel.AddLight(new Light(TypeLight::SPOTFPSL));
     //renderkernel.AddLight(new Light(TypeLight::POINTLIGHT, pointLightPositions[0]));

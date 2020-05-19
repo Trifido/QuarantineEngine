@@ -7,6 +7,7 @@ RenderSystem::RenderSystem(GLFWwindow* window, ImVec4* clearColor)
     clear_color = clearColor;
     num_dir_cast_shadow = 0;
     num_omni_cast_shadow = 0;
+    num_spot_cast_shadow = 0;
 }
 
 void RenderSystem::ComputeDeltaTime()
@@ -61,6 +62,16 @@ void RenderSystem::AddLight(Light* lights)
             num_omni_cast_shadow++;
         }
     }
+    else if (lights->GetType() == TypeLight::SPOTL)
+    {
+        if (num_spot_cast_shadow < LIMIT_SPOT_CAST_SHADOW)
+        {
+            this->shadowCastSpotLights.push_back(lights);
+            this->shadowCastGeneralLights.push_back(lights);
+            lights->EditLightComponent(LightComponent::LIGHT_CAST_SHADOW, true);
+            num_spot_cast_shadow++;
+        }
+    }
     
 }
 
@@ -91,6 +102,16 @@ void RenderSystem::RenderDirectionalShadowMap()
         for (int idModel = 0; idModel < models.size(); idModel++)
             models[idModel]->DrawShadow(shadowCastDirLights.at(idLight)->lightSpaceMatrix);
     }
+    int idLightGeneral = this->shadowCastDirLights.size();
+    for (int idLight = idLightGeneral; idLight < this->shadowCastSpotLights.size(); idLight++)
+    {
+        fboSystem->DirShadowPass(idLight);
+        glViewport(0, 0, 1024, 1024);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        for (int idModel = 0; idModel < models.size(); idModel++)
+            models[idModel]->DrawShadow(shadowCastSpotLights.at(idLight)->lightSpaceMatrix);
+    }
     glCullFace(GL_BACK);
 }
 
@@ -118,10 +139,13 @@ void RenderSystem::RenderSolidModels()
         if (solidModels[i]->CAST_SHADOW)
         {
             for (int idLight = 0; idLight < this->shadowCastDirLights.size(); idLight++)
-                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight);
+                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::DIRL);
+
+            for (int idLight = 0; idLight < this->shadowCastSpotLights.size(); idLight++)
+                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::SPOTL);
 
             for (int idLight = 0; idLight < this->shadowCastOmniLights.size(); idLight++)
-                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLight), idLight, true);
+                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLight), idLight, TypeLight::POINTLIGHT);
 
             solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
         }
@@ -219,7 +243,7 @@ void RenderSystem::PreRender()
     ///Añadimos Omnidirectional shadow FBO
     fboSystem->AddFBO(new FBO(FBOType::OMNI_SHADOW_FBO, 0, num_omni_cast_shadow));
     ///Añadimos Directional shadow FBO
-    fboSystem->AddFBO(new FBO(FBOType::DIR_SHADOW_FBO, 0, num_dir_cast_shadow));
+    fboSystem->AddFBO(new FBO(FBOType::DIR_SHADOW_FBO, 0, num_dir_cast_shadow + num_spot_cast_shadow));
     lastWidth = width;
     lastHeight = height;
 

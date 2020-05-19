@@ -179,12 +179,12 @@ void MaterialHandle::EditMaterial(MaterialComponent component, std::vector<Textu
     }
 }
 
-void MaterialHandle::ActivateShadowMap(unsigned int idTexShadow, unsigned int idLight, bool isOmni)
+void MaterialHandle::ActivateShadowMap(unsigned int idTexShadow, unsigned int idLight, TypeLight type)
 {
     shader->use();
     for (int i = 0; i < listMaterials.size(); i++)
     {
-        listMaterials.at(i)->ActivateShadowTexture(idTexShadow, idLight, isOmni);
+        listMaterials.at(i)->ActivateShadowTexture(idTexShadow, idLight, type);
     }
 }
 

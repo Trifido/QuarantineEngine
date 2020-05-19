@@ -76,7 +76,7 @@ public:
 
     void AddShader(Shader* sh);
     void AddTexture(Texture texture);
-	void ActivateShadowTexture(unsigned int idTexShadow, int idLight, bool isOmni = false);
+	void ActivateShadowTexture(unsigned int idTexShadow, int idLight, TypeLight type = TypeLight::DIRL);
     //void ActivateShadowTexture(unsigned int idTexShadow, bool isOmni = false);
     void AddMultTextures(std::vector<Texture> texturesIN);
     void AssignRenderTextures();

@@ -89,16 +89,27 @@ void Material::AddTexture(Texture texture)
     textures.push_back(texture);
 }
 
-void Material::ActivateShadowTexture(unsigned int idTexShadow, int idLight, bool isOmni)
+void Material::ActivateShadowTexture(unsigned int idTexShadow, int idLight, TypeLight type)
 {
     ptrShader->use();
-    if(!isOmni)
+
+    switch (type)
+    {
+    case TypeLight::DIRL:
         ptrShader->setInt("dirLights[" + std::to_string(idLight) + "].shadowMap", numTextures);
-    else
+        break;
+    case TypeLight::POINTLIGHT:
         ptrShader->setInt("pointLights[" + std::to_string(idLight) + "].shadowCubeMap", numTextures);
+        break;
+    case TypeLight::SPOTL:
+        ptrShader->setInt("spotLights[" + std::to_string(idLight) + "].shadowMap", numTextures);
+        break;
+    default:
+        break;
+    }
 
     glActiveTexture(GL_TEXTURE0 + numTextures);
-    if (isOmni)
+    if (type == TypeLight::POINTLIGHT)
         glBindTexture(GL_TEXTURE_CUBE_MAP, idTexShadow);
     else
         glBindTexture(GL_TEXTURE_2D, idTexShadow);
