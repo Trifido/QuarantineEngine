@@ -4,6 +4,7 @@ RenderPlane::RenderPlane()
 {
     gammaValue = 1.0f;
     exposureValue = 1.0f;
+    amountBloom = 10;
     pingpongIdPass = true;
     screenRenderShader = new Shader("shaders/renderPass.vert", "shaders/renderPass.frag");
     shaderBlur = new Shader("shaders/renderPass.vert", "shaders/blurPass.frag");
@@ -35,7 +36,7 @@ void RenderPlane::SetVAORenderPlane()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     screenRenderShader->use();
-    screenRenderShader->setInt("screenTexture", 0);
+    screenRenderShader->setInt("screenTexture", 3);
     screenRenderShader->setFloat("gamma", gammaValue);
     screenRenderShader->setFloat("exposure", exposureValue);
 
@@ -44,6 +45,7 @@ void RenderPlane::SetVAORenderPlane()
 
     shaderBloomFinal->use(); 
     shaderBloomFinal->setInt("bloom", bloomValue);
+    shaderBloomFinal->setFloat("gamma", gammaValue);
     shaderBloomFinal->setFloat("exposure", exposureValue); 
     shaderBloomFinal->setInt("scene", 0);
     shaderBloomFinal->setInt("bloomBlur", 1);
@@ -54,6 +56,7 @@ void RenderPlane::FinalRenderPass()
     screenRenderShader->use();
 
     glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, fboSystem->GetFinalRender());	// use the color attachment texture as the texture of the quad plane
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
@@ -63,7 +66,7 @@ void RenderPlane::FinalRenderBloom()
     shaderBloomFinal->use();
     glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender());
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0));
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, fboSystem->GetPingPongRender(!pingpongIdPass));
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -71,19 +74,23 @@ void RenderPlane::FinalRenderBloom()
 
 void RenderPlane::RenderBlur()
 {
-    bool first_iteration = true;
-    unsigned int amount = 10;
-    shaderBlur->use(); 
-    for (unsigned int i = 0; i < amount; i++)
+    if (bloomValue)
     {
-        fboSystem->PingPongPass(pingpongIdPass);
-        shaderBlur->setInt("horizontal", pingpongIdPass);
-        glBindVertexArray(quadVAO);
-        glBindTexture(GL_TEXTURE_2D, first_iteration ? fboSystem->GetMRTRender(1) : fboSystem->GetPingPongRender(!pingpongIdPass));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        pingpongIdPass = !pingpongIdPass;
-        if (first_iteration)
-            first_iteration = false;
+        bool first_iteration = true;
+        shaderBlur->use();
+        for (unsigned int i = 0; i < amountBloom; i++)
+        {
+            fboSystem->PingPongPass(pingpongIdPass);
+            shaderBlur->setInt("horizontal", pingpongIdPass);
+            glBindVertexArray(quadVAO);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, first_iteration ? fboSystem->GetMRTRender(1) : fboSystem->GetPingPongRender(!pingpongIdPass));
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            pingpongIdPass = !pingpongIdPass;
+            if (first_iteration)
+                first_iteration = false;
+        }
     }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

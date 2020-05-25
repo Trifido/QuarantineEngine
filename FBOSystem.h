@@ -4,6 +4,7 @@
 
 #include "FBO.h"
 
+
 class FBOSystem
 {
 private:
@@ -19,7 +20,7 @@ public:
     void OmniShadowPass(unsigned int idPass);
     void DirShadowPass(unsigned int idPass);
     void PingPongPass(unsigned int idPass);
-    void MRTPass();
+    void MRTPass(unsigned int idFBO = 0);
     void FinalPass();
     void MultisamplingPass();
     unsigned int GetFinalRender();

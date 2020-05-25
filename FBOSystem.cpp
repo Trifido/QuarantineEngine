@@ -52,10 +52,10 @@ void FBOSystem::PingPongPass(unsigned int idPass)
         pingpongFBO->ActivateFBO(idPass);
 }
 
-void FBOSystem::MRTPass()
+void FBOSystem::MRTPass(unsigned int idFBO)
 {
     if(mrtFBO != nullptr)
-        mrtFBO->ActivateFBO();
+        mrtFBO->ActivateFBO(idFBO);
 }
 
 void FBOSystem::FinalPass()
@@ -68,6 +68,8 @@ void FBOSystem::MultisamplingPass()
 {
     if(colorFBO != nullptr)
         colorFBO->SetMultiSamplingFrameBuffer();
+    else if (mrtFBO != nullptr)
+        mrtFBO->SetMultiSamplingFrameBuffer();
 }
 
 unsigned int FBOSystem::GetFinalRender()
@@ -109,4 +111,8 @@ void FBOSystem::ResizeFBOs()
 {
     if(colorFBO != nullptr)
         colorFBO->GenerateFBO(width, height);
+    if (mrtFBO != nullptr)
+        mrtFBO->GenerateFBO(width, height);
+    if (pingpongFBO != nullptr)
+        pingpongFBO->GenerateFBO(width, height);
 }

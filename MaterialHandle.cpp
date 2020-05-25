@@ -99,6 +99,18 @@ void MaterialHandle::EditMaterial(MaterialComponent component, float value)
             listMaterials.at(i)->parallax_displacement = value;
         }
         break;
+    case MaterialComponent::MIN_UV:
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->min_uv = value;
+        }
+        break;
+    case MaterialComponent::MAX_UV:
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->max_uv = value;
+        }
+        break;
     default:
         printf("ERROR::CHANGE_VALUE::RUN_FAILED\n");
         break;

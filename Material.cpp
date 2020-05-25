@@ -9,6 +9,7 @@ Material::Material()
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
     parallax_displacement = 0.0f;
+
 }
 
 Material::Material(Shader* shader)
@@ -32,6 +33,8 @@ Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
     colorOutline = glm::vec4(1.0f);
     numInstances = 0; 
     parallax_displacement = 0.0f;
+    min_uv = 0.0f;
+    max_uv = 1.0f;
 }
 
 Material::Material(Shader* shader, std::vector<Texture> textures)
@@ -44,6 +47,8 @@ Material::Material(Shader* shader, std::vector<Texture> textures)
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
     parallax_displacement = 0.0f;
+    min_uv = 0.0f;
+    max_uv = 1.0f;
 }
 
 Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> textures)
@@ -57,6 +62,8 @@ Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> texture
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
     parallax_displacement = 0.0f;
+    min_uv = 0.0f;
+    max_uv = 1.0f;
 }
 
 void Material::CopyMaterial(Material mat)
@@ -77,6 +84,8 @@ void Material::CopyMaterial(Material mat)
     isAmbientRefractive = mat.isAmbientRefractive;
     isBlinnShading = mat.isBlinnShading;
     parallax_displacement = mat.parallax_displacement;
+    min_uv = mat.min_uv;
+    max_uv = mat.max_uv;
 }
 
 void Material::AddShader(Shader* sh)
@@ -179,6 +188,9 @@ void Material::AssignRenderTextures()
     ptrShader->setBool("material.isAmbientRefractive", isAmbientRefractive);
     ptrShader->setFloat("material.refractiveIndex", refractiveIndex);
     ptrShader->setFloat("material.heightScale", parallax_displacement);
+    ptrShader->setFloat("generalAmbient", 0.4f);
+    ptrShader->setFloat("material.min_uv", min_uv);
+    ptrShader->setFloat("material.max_uv", max_uv);
 
     if (isAmbientReflective || isAmbientRefractive)
     {

@@ -243,6 +243,10 @@ void Shader::ActivateLights()
             this->setFloat(name + "constant", lights[i]->GetConstant());
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
+            name = "DirlightPosition[" + std::to_string(numDirLights) + "]";
+            this->setVec3(name, lights[i]->GetPosition());
+            name = "DirlightDirection[" + std::to_string(numDirLights) + "]";
+            this->setVec3(name, lights[i]->GetDirection());
             numDirLights++;
         }
         else if (lights[i]->GetType() == TypeLight::POINTLIGHT)
@@ -256,7 +260,8 @@ void Shader::ActivateLights()
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             this->setFloat(name + "far_plane", lights[i]->GetFarplane());
-
+            name = "PointlightPosition[" + std::to_string(numPointLights) + "]";
+            this->setVec3(name, lights[i]->GetPosition());
             numPointLights++;
         }
         else if (lights[i]->GetType() == TypeLight::SPOTL)
@@ -272,7 +277,10 @@ void Shader::ActivateLights()
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             this->setFloat(name + "cutOff", lights[i]->GetCutOff());
             this->setFloat(name + "outerCutOff", lights[i]->GetOuterCutOff());
-
+            name = "SpotlightPosition[" + std::to_string(numSpotLights) + "]";
+            this->setVec3(name, lights[i]->GetPosition());
+            name = "SpotlightDirection[" + std::to_string(numSpotLights) + "]";
+            this->setVec3(name, lights[i]->GetDirection());
             numSpotLights++;
         }
         else

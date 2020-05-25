@@ -220,6 +220,8 @@
     <None Include="shaders\depthRender.vert" />
     <None Include="shaders\depthRenderShadow.frag" />
     <None Include="shaders\depthRenderShadow.vert" />
+    <None Include="shaders\emissive.frag" />
+    <None Include="shaders\emissive.vert" />
     <None Include="shaders\example.frag" />
     <None Include="shaders\example.vert" />
     <None Include="shaders\example1.frag" />

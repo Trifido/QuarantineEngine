@@ -126,7 +126,8 @@ void RenderSystem::RenderOmnidirectionalShadowMap()
 
         for (int idModel = 0; idModel < models.size(); idModel++)
         {
-            models[idModel]->DrawShadow(shadowCastOmniLights.at(idLight)->lightSpaceMatrices, shadowCastOmniLights.at(idLight)->GetPosition(), shadowCastOmniLights.at(idLight)->GetFarplane());
+            if(models[idModel]->matHandle.type != MaterialType::EMISSIVE_LIT)
+                models[idModel]->DrawShadow(shadowCastOmniLights.at(idLight)->lightSpaceMatrices, shadowCastOmniLights.at(idLight)->GetPosition(), shadowCastOmniLights.at(idLight)->GetFarplane());
         }
     }
     glCullFace(GL_BACK);
@@ -191,6 +192,9 @@ void RenderSystem::PreRender()
     renderPass.SetGamma(2.2f); 
     //TONE MAPPING 
     renderPass.SetExposure(1.0f);
+    //BLOOM EFFECT
+    renderPass.SetBloom(true);
+    renderPass.SetAmountBloom(10);
 
     //SET REFLECTIVE MATERIALS
     SetAmbientReflectiveMaterials();
@@ -201,6 +205,7 @@ void RenderSystem::PreRender()
         switch (models.at(i)->matHandle.type)
         {
             default:
+            case MaterialType::EMISSIVE_LIT:
             case MaterialType::INSTANCE:
             case MaterialType::LIT:
             case MaterialType::UNLIT: 
@@ -235,11 +240,11 @@ void RenderSystem::PreRender()
     glfwGetWindowSize(window, &width, &height);
     fboSystem = new FBOSystem(&width, &height);
     ///Añadimos HDR FBO
-    //fboSystem->AddFBO(new FBO(FBOType::MULT_RT));
+    fboSystem->AddFBO(new FBO(FBOType::MULT_RT, 0));
     ///Añadimos PINGPONG FBO
-    //fboSystem->AddFBO(new FBO(FBOType::PINGPONG_FBO));
+    fboSystem->AddFBO(new FBO(FBOType::PINGPONG_FBO));
     ///Añadimos Final FBO
-    fboSystem->AddFBO(new FBO(FBOType::COLOR_FBO, 4));
+    //fboSystem->AddFBO(new FBO(FBOType::COLOR_FBO, 16));
     ///Añadimos Omnidirectional shadow FBO
     fboSystem->AddFBO(new FBO(FBOType::OMNI_SHADOW_FBO, 0, num_omni_cast_shadow));
     ///Añadimos Directional shadow FBO
@@ -256,9 +261,10 @@ void RenderSystem::PreRender()
 
     ///ACTIVAMOS EL DEPTH BUFFER
     glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_LESS);
     ///ACTIVAMOS EL CULLING
     glEnable(GL_CULL_FACE);
+
+    glEnable(GL_MULTISAMPLE);
 }
 
 void RenderSystem::StartRender()
@@ -315,8 +321,7 @@ void RenderSystem::StartRender()
         RenderOmnidirectionalShadowMap();
 
         /// SECOND PASS -> RENDER LIGHTING TO TEXTURE (MRT)
-        fboSystem->FinalPass();
-        ///fboSystem->MRTPass();
+        fboSystem->MRTPass(0);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -334,20 +339,18 @@ void RenderSystem::StartRender()
         ///RENDER TRANSPARENT MATERIALS
         //RenderTransparentModels();
 
-        ///BLUR POST-PROCESS (BLOOM)
-        ///renderPass.RenderBlur();
-
-        ///SET FBO MULTISAMPLING
+        ///MULTISAMPLING 
         fboSystem->MultisamplingPass();
 
+        ///BLUR POST-PROCESS (BLOOM)
+        renderPass.RenderBlur();
+
         /// FINAL PASS POST-PROCESS
-        glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); 
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-        renderPass.FinalRenderPass();
-        ///renderPass.FinalRenderBloom();
+        renderPass.FinalRenderBloom();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);

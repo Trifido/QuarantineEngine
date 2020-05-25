@@ -14,7 +14,8 @@ enum MaterialType
     OUTLINE,
     NORMALS,
     PROCEDURAL,
-    INSTANCE
+    INSTANCE,
+    EMISSIVE_LIT
 };
 
 enum MaterialComponent
@@ -25,6 +26,8 @@ enum MaterialComponent
     SHADER_SHADOW,
     SHADER_POINT_SHADOW,
     TEXTURE,
+    MIN_UV,
+    MAX_UV,
     SHININESS,
     P_DISPLACEMENT,
     BLINN,
@@ -60,6 +63,7 @@ public:
     float shininess;
     float refractiveIndex;
     float parallax_displacement;
+    float min_uv, max_uv;
     bool isAmbientReflective = false;
     bool isAmbientRefractive = false;
     bool isBlinnShading = true;

@@ -68,6 +68,9 @@
     <Filter Include="sources\shaders\bloom">
       <UniqueIdentifier>{97e533c4-ae8b-4570-9c1a-e685b47a559f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sources\shaders\emissive">
+      <UniqueIdentifier>{4caebba6-cb87-4515-abe0-9c65aa3616e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -385,6 +388,12 @@
     </None>
     <None Include="shaders\finalBloom.frag">
       <Filter>sources\shaders\postprocess</Filter>
+    </None>
+    <None Include="shaders\emissive.frag">
+      <Filter>sources\shaders\emissive</Filter>
+    </None>
+    <None Include="shaders\emissive.vert">
+      <Filter>sources\shaders\emissive</Filter>
     </None>
   </ItemGroup>
 </Project>
