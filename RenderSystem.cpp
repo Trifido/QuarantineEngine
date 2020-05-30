@@ -181,7 +181,7 @@ void RenderSystem::RenderOutLineModels()
 
 void RenderSystem::PreRender()
 {
-    SetRenderMode(RenderType::DEFERRED_RENDER);
+    SetRenderMode(RenderType::FORWARD_RENDER);
     //UNIFORM BUFFER OBJECT
     uboSytem = new UBOSystem();
 

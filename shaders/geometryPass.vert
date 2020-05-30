@@ -17,6 +17,7 @@ out VS_OUT {
 
     vec3 TangentViewPos;
     vec3 TangentFragPos;
+    mat3 TBN;
 } vs_out;
 
 uniform mat4 model;
@@ -39,19 +40,25 @@ void main()
     vs_out.TexCoords = aTexCoords;
     
     mat3 normalMatrix = transpose(inverse(mat3(model)));
-    vec3 T = normalize(vec3(normalMatrix * aTangents));
-    vec3 B = normalize(vec3(normalMatrix * aBitangents));
-    vec3 N = normalize(vec3(normalMatrix * aNormal));
+    //vec3 T = normalize(vec3(normalMatrix * aTangents));
+    //vec3 B = normalize(vec3(normalMatrix * aBitangents));
+    //vec3 N = normalize(vec3(normalMatrix * aNormal));
+    vec3 T = normalize(vec3(model * vec4(aTangents,   0.0)));
+    vec3 B = normalize(vec3(model * vec4(aBitangents, 0.0)));
+    vec3 N = normalize(vec3(model * vec4(aNormal,    0.0)));
 
-    mat3 TBN = transpose(mat3(T, B, N));
-    vs_out.TangentViewPos = TBN * viewPos;
-    vs_out.TangentFragPos = TBN * vs_out.FragPos; 
+    mat3 tTBN = transpose(mat3(T, B, N));
+    mat3 TBN = mat3(T, B, N);
+    vs_out.TangentViewPos = tTBN * viewPos;
+    vs_out.TangentFragPos = tTBN * vs_out.FragPos;
+    vs_out.TBN = TBN;
 
-    vs_out.Normal = normalMatrix * aNormal;
+    //vs_out.Normal = normalMatrix * aNormal;
+    vs_out.Normal = aNormal;
 
     for(int i = 0; i < numPointLights; i++)
     {
-        vs_out.TangentPointLightPos[i] = TBN * PointlightPosition[i];
+        vs_out.TangentPointLightPos[i] = tTBN * PointlightPosition[i];
         vs_out.FragPosPointLightSpace[i] = PointlightSpaceMatrix[i] * vec4(vs_out.FragPos, 1.0);
     }
 

@@ -18,6 +18,7 @@ in VS_OUT {
 
     vec3 TangentViewPos;
     vec3 TangentFragPos;
+    mat3 TBN;
 } fs_in;
 
 struct Material {
@@ -49,18 +50,21 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 void main()
 {
     gPosition = fs_in.FragPos;
-    if(material.num_normal > 0)
-        gPosition = fs_in.TangentFragPos;
+    vec2 texCoords = fs_in.TexCoords;
 
-    vec2 texCoords = fs_in.TexCoords; 
     if(material.num_height > 0)
+    {
+        //gPosition = fs_in.TangentFragPos;
         texCoords = ParallaxMapping(fs_in.TexCoords,  normalize(fs_in.TangentViewPos - fs_in.TangentFragPos));
+    }
 
     gNormal = normalize(fs_in.Normal); 
     if(material.num_normal > 0)
     {
         gNormal = texture(material.normal[0], texCoords).rgb;
-        gNormal = normalize(gNormal * 2.0 - 1.0);  // this normal is in tangent space
+        //gNormal = normalize(gNormal * 2.0 - 1.0);  // this normal is in tangent space
+        gNormal = gNormal * 2.0 - 1.0;  // this normal is in tangent space
+        gNormal = normalize(fs_in.TBN * gNormal); 
     }
 
     if(material.num_diffuse > 0)

@@ -8,7 +8,6 @@ layout (location = 0) out vec4 FragColor;
 
 in VS_OUT {
     vec2 TexCoords; 
-    //vec3 TangentPointLightPos[NR_POINT_LIGHTS];
 } fs_in;
 
 uniform sampler2D gPosition;
@@ -135,7 +134,7 @@ vec3 CalcPointLight(int idLight, vec3 FragPos, vec3 normal, vec3 viewDir)
     vec3 specular = pointLights[idLight].specular * spec * resultSpecular * attenuation;
     vec3 emissive = resultEmissive * 10;
 
-    return (resultDiffuse.rgb * generalAmbient + (1.0 - 0.0) * (diffuse + specular + emissive));
+    return (resultDiffuse.rgb * generalAmbient + (1.0 - shadow) * (diffuse + specular + emissive));
 }
 
 //CAST SHADOWS
