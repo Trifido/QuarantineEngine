@@ -226,6 +226,8 @@ void Shader::AddLight(std::vector<Light*> lightVec)
 
 void Shader::ActivateLights()
 {
+    use();
+
     int numPointLights = 0;
     int numSpotLights = 0;
     int numDirLights = 0;

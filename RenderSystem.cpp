@@ -181,6 +181,7 @@ void RenderSystem::RenderOutLineModels()
 
 void RenderSystem::PreRender()
 {
+    SetRenderMode(RenderType::DEFERRED_RENDER);
     //UNIFORM BUFFER OBJECT
     uboSytem = new UBOSystem();
 
@@ -193,7 +194,7 @@ void RenderSystem::PreRender()
     //TONE MAPPING 
     renderPass.SetExposure(1.0f);
     //BLOOM EFFECT
-    renderPass.SetBloom(true);
+    renderPass.SetBloom(false);
     renderPass.SetAmountBloom(10);
 
     //SET REFLECTIVE MATERIALS
@@ -240,7 +241,7 @@ void RenderSystem::PreRender()
     glfwGetWindowSize(window, &width, &height);
     fboSystem = new FBOSystem(&width, &height);
     ///Añadimos HDR FBO
-    fboSystem->AddFBO(new FBO(FBOType::MULT_RT, 0));
+    fboSystem->AddFBO(new FBO(FBOType::MULT_RT, 8));
     ///Añadimos PINGPONG FBO
     fboSystem->AddFBO(new FBO(FBOType::PINGPONG_FBO));
     ///Añadimos Final FBO
@@ -249,6 +250,12 @@ void RenderSystem::PreRender()
     fboSystem->AddFBO(new FBO(FBOType::OMNI_SHADOW_FBO, 0, num_omni_cast_shadow));
     ///Añadimos Directional shadow FBO
     fboSystem->AddFBO(new FBO(FBOType::DIR_SHADOW_FBO, 0, num_dir_cast_shadow + num_spot_cast_shadow));
+
+    //DEFERRED RENDER
+    fboSystem->AddFBO(new FBO(FBOType::DEFFERED));
+    renderPass.AddLights(lights);
+    renderPass.AddCamera(cameras.at(0));
+
     lastWidth = width;
     lastHeight = height;
 
@@ -265,6 +272,111 @@ void RenderSystem::PreRender()
     glEnable(GL_CULL_FACE);
 
     glEnable(GL_MULTISAMPLE);
+}
+
+void RenderSystem::SetRenderMode(RenderType rmode)
+{
+    //assert(rmode == renderMode);
+    renderMode = rmode;
+    for (unsigned int i = 0; i < models.size(); i++)
+    {
+        models.at(i)->matHandle.EditMaterial(RENDER_MODE, renderMode);
+    }
+}
+
+void RenderSystem::ForwardRender()
+{
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    /// FIRST PASS -> RENDER DEPTH TO TEXTURE - DIRECTIONAL LIGHT
+    //Render Directional Shadow Map
+    RenderDirectionalShadowMap();
+
+    /// FIRST PASS -> RENDER DEPTH TO TEXTURE - POINT LIGHT
+    //Render OmniDirectional Shadow Map
+    RenderOmnidirectionalShadowMap();
+
+    /// SECOND PASS -> RENDER LIGHTING TO TEXTURE (MRT)
+    fboSystem->MRTPass();
+    //fboSystem->FinalPass();
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    ///UBO CAMERA
+    uboSytem->StoreData(cameras.at(0)->projection, sizeof(glm::mat4));
+    uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
+    uboSytem->StoreData(glfwGetTime(), sizeof(float), sizeof(glm::mat4) * 2);
+
+    ///RENDER OUTLINE MODELS
+    //RenderOutLineModels();
+    ///RENDER SOLID MATERIALS
+    RenderSolidModels();
+    ///RENDER SKYBOX
+    //RenderSkyBox();
+    ///RENDER TRANSPARENT MATERIALS
+    //RenderTransparentModels();
+
+    ///MULTISAMPLING 
+    fboSystem->MultisamplingPass();
+
+    ///BLUR POST-PROCESS (BLOOM)
+    renderPass.RenderBlur();
+
+    /// FINAL PASS POST-PROCESS
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    renderPass.FinalRenderBloom();
+    //renderPass.FinalRenderPass();
+}
+
+void RenderSystem::DefferedRender()
+{
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+
+    /// FIRST PASS -> RENDER DEPTH TO TEXTURE - DIRECTIONAL LIGHT
+    //Render Directional Shadow Map
+    //RenderDirectionalShadowMap();
+
+    /// FIRST PASS -> RENDER DEPTH TO TEXTURE - POINT LIGHT
+    //Render OmniDirectional Shadow Map
+    RenderOmnidirectionalShadowMap();
+
+    /// SECOND PASS -> RENDER LIGHTING TO TEXTURE (MRT)
+    fboSystem->DeferredGeometryPass();
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    ///UBO CAMERA
+    uboSytem->StoreData(cameras.at(0)->projection, sizeof(glm::mat4));
+    uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
+    uboSytem->StoreData(glfwGetTime(), sizeof(float), sizeof(glm::mat4) * 2);
+
+    ///RENDER OUTLINE MODELS
+    //RenderOutLineModels();
+    ///RENDER SOLID MATERIALS
+    RenderSolidModels();
+    ///RENDER SKYBOX
+    //RenderSkyBox();
+    ///RENDER TRANSPARENT MATERIALS
+    //RenderTransparentModels();
+
+    ///MULTISAMPLING 
+    //fboSystem->MultisamplingPass();
+
+    ///BLUR POST-PROCESS (BLOOM)
+    //renderPass.RenderBlur();
+
+    /// FINAL PASS POST-PROCESS
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    //renderPass.FinalRenderBloom();
+    //renderPass.FinalRenderPass();
+    renderPass.DefferedRender();
 }
 
 void RenderSystem::StartRender()
@@ -309,48 +421,11 @@ void RenderSystem::StartRender()
 
         // Rendering
         ImGui::Render();
-        int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
 
-        /// FIRST PASS -> RENDER DEPTH TO TEXTURE - DIRECTIONAL LIGHT
-        //Render Directional Shadow Map
-        RenderDirectionalShadowMap();
-
-        // FIRST PASS -> RENDER DEPTH TO TEXTURE - POINT LIGHT
-        //Render OmniDirectional Shadow Map
-        RenderOmnidirectionalShadowMap();
-
-        /// SECOND PASS -> RENDER LIGHTING TO TEXTURE (MRT)
-        fboSystem->MRTPass(0);
-        glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        ///UBO CAMERA
-        uboSytem->StoreData(cameras.at(0)->projection, sizeof(glm::mat4));
-        uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
-        uboSytem->StoreData(glfwGetTime(), sizeof(float), sizeof(glm::mat4) * 2);
-
-        ///RENDER OUTLINE MODELS
-        //RenderOutLineModels();
-        ///RENDER SOLID MATERIALS
-        RenderSolidModels();
-        ///RENDER SKYBOX
-        //RenderSkyBox();
-        ///RENDER TRANSPARENT MATERIALS
-        //RenderTransparentModels();
-
-        ///MULTISAMPLING 
-        fboSystem->MultisamplingPass();
-
-        ///BLUR POST-PROCESS (BLOOM)
-        renderPass.RenderBlur();
-
-        /// FINAL PASS POST-PROCESS
-        glBindFramebuffer(GL_FRAMEBUFFER, 0); 
-        glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        renderPass.FinalRenderBloom();
+        if (renderMode == RenderType::FORWARD_RENDER)
+            ForwardRender();
+        else
+            DefferedRender();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
@@ -361,6 +436,12 @@ void RenderSystem::StartRender()
 
 void RenderSystem::UpdateFBO()
 {
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+
+    width = display_w;
+    height = display_h;
+
     if (lastWidth != width || lastHeight != height)
     { 
         fboSystem->ResizeFBOs();

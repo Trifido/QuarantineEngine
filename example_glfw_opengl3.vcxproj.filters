@@ -71,6 +71,9 @@
     <Filter Include="sources\shaders\emissive">
       <UniqueIdentifier>{4caebba6-cb87-4515-abe0-9c65aa3616e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sources\shaders\deferred">
+      <UniqueIdentifier>{10068711-c82b-4943-98d8-e703b2b2334b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -394,6 +397,18 @@
     </None>
     <None Include="shaders\emissive.vert">
       <Filter>sources\shaders\emissive</Filter>
+    </None>
+    <None Include="shaders\geometryPass.frag">
+      <Filter>sources\shaders\deferred</Filter>
+    </None>
+    <None Include="shaders\geometryPass.vert">
+      <Filter>sources\shaders\deferred</Filter>
+    </None>
+    <None Include="shaders\deferredLighting.frag">
+      <Filter>sources\shaders\deferred</Filter>
+    </None>
+    <None Include="shaders\deferredLighting.vert">
+      <Filter>sources\shaders\deferred</Filter>
     </None>
   </ItemGroup>
 </Project>

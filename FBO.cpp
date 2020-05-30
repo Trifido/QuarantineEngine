@@ -26,6 +26,10 @@ FBO::FBO(FBOType type, unsigned int samples, unsigned int numTextures)
     }
     else if (numTextures > 1 && (type == FBOType::DIR_SHADOW_FBO || type == FBOType::OMNI_SHADOW_FBO))
         this->num_mrt = numTextures;
+    else if (type == FBOType::DEFFERED)
+    {
+        this->num_mrt = 5;
+    }
     else
         this->num_mrt = 1;
 
@@ -141,15 +145,13 @@ void FBO::GenerateFBO(int *width, int *height)
             {
                 glBindFramebuffer(GL_FRAMEBUFFER, idFBO[0]);
 
-                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture_buffers[2]);
-                glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB16F, *width, *height, GL_TRUE);
-                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture_buffers[2], 0);
-                 
-                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture_buffers[3]);
-                glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB16F, *width, *height, GL_TRUE);
-                glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, texture_buffers[3], 0);
+                for (unsigned int i = 0; i < num_mrt - 2; i++)
+                {
+                    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture_buffers[i+2]);
+                    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB16F, *width, *height, GL_TRUE);
+                    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D_MULTISAMPLE, texture_buffers[i + 2], 0);
+                }
 
                 glGenRenderbuffers(1, &rbo);
                 glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -166,43 +168,23 @@ void FBO::GenerateFBO(int *width, int *height)
                 // configure second post-processing framebuffer 
                 glBindFramebuffer(GL_FRAMEBUFFER, idFBO[1]);
 
-                //for (unsigned int i = 0; i < num_mrt-2; i++)
-                //{
-                //    glBindTexture(GL_TEXTURE_2D, texture_buffers[i]);
-                //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, *width, *height, 0, GL_RGB, GL_FLOAT, NULL);
-                //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                //    // attach texture to framebuffer
-                //    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture_buffers[i], 0);
-                //}
+                for (unsigned int i = 0; i < num_mrt-2; i++)
+                {
+                    glBindTexture(GL_TEXTURE_2D, texture_buffers[i]);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, *width, *height, 0, GL_RGB, GL_FLOAT, NULL);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                    // attach texture to framebuffer
+                    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture_buffers[i], 0);
+                }
 
-                glBindTexture(GL_TEXTURE_2D, texture_buffers[0]);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, *width, *height, 0, GL_RGB, GL_FLOAT, NULL);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                // attach texture to framebuffer
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_buffers[0], 0);
-
-                glBindTexture(GL_TEXTURE_2D, texture_buffers[1]);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, *width, *height, 0, GL_RGB, GL_FLOAT, NULL);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                // attach texture to framebuffer
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture_buffers[1], 0);
-
-                unsigned int rbo2;
-                glGenRenderbuffers(1, &rbo2);
-                glBindRenderbuffer(GL_RENDERBUFFER, rbo2);
-                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, *width, *height);
-                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo2);
-
-                //glDrawBuffers(2, attachments);
+                //unsigned int rbo2;
+                //glGenRenderbuffers(1, &rbo2);
+                //glBindRenderbuffer(GL_RENDERBUFFER, rbo2);
+                //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, *width, *height);
+                //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo2); 
 
                 if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                     fprintf(stderr, "ERROR::FRAMEBUFFER_MULTISAMPLING:: Intermediate Framebuffer antialiasing is not complete!\n");
@@ -253,6 +235,66 @@ void FBO::GenerateFBO(int *width, int *height)
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             {
                 fprintf(stderr, "ERROR::FRAMEBUFFER_PINGPONG::Framebuffer is not complete!\n");
+            }
+        }
+        break;
+    case FBOType::DEFFERED:
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, idFBO[0]);
+            // - position color buffer
+            glGenTextures(1, &texture_buffers[0]);
+            glBindTexture(GL_TEXTURE_2D, texture_buffers[0]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, *width, *height, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_buffers[0], 0);
+
+            // - normal color buffer
+            glGenTextures(1, &texture_buffers[1]);
+            glBindTexture(GL_TEXTURE_2D, texture_buffers[1]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, *width, *height, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture_buffers[1], 0);
+
+            // - color 
+            glGenTextures(1, &texture_buffers[2]);
+            glBindTexture(GL_TEXTURE_2D, texture_buffers[2]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, *width, *height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, texture_buffers[2], 0);
+
+            // - specular color buffer
+            glGenTextures(1, &texture_buffers[3]);
+            glBindTexture(GL_TEXTURE_2D, texture_buffers[3]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, *width, *height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, texture_buffers[3], 0);
+
+            // - specular color buffer
+            glGenTextures(1, &texture_buffers[4]);
+            glBindTexture(GL_TEXTURE_2D, texture_buffers[4]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, *width, *height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, texture_buffers[4], 0);
+
+            // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+            unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+            glDrawBuffers(5, attachments);
+
+            // create and attach depth buffer (renderbuffer) 
+            glGenRenderbuffers(1, &rbo);
+            glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, *width, *height);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+            // finally check if framebuffer is complete
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            {
+                fprintf(stderr, "ERROR::FRAMEBUFFER_DEFFERED::Framebuffer is not complete!\n");
             }
         }
         break;

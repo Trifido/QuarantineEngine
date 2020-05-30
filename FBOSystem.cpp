@@ -8,6 +8,7 @@ FBOSystem::FBOSystem(int *width, int *height)
     dirFBO = nullptr;
     omniFBO = nullptr;
     mrtFBO = nullptr;
+    deferredFBO = nullptr;
 }
 
 void FBOSystem::AddFBO(FBO* fbo)
@@ -30,6 +31,9 @@ void FBOSystem::AddFBO(FBO* fbo)
         break;
     case FBOType::PINGPONG_FBO:
         pingpongFBO = fbo;
+        break;
+    case FBOType::DEFFERED:
+        deferredFBO = fbo;
         break;
     } 
 }
@@ -62,6 +66,12 @@ void FBOSystem::FinalPass()
 {
     if(colorFBO != nullptr)
         colorFBO->ActivateFBO();
+}
+
+void FBOSystem::DeferredGeometryPass()
+{
+    if (deferredFBO != nullptr)
+        deferredFBO->ActivateFBO();
 }
 
 void FBOSystem::MultisamplingPass()
@@ -100,6 +110,13 @@ unsigned int FBOSystem::GetOmniRender(unsigned int id)
     return 0;
 }
 
+unsigned int FBOSystem::GetDeferredRender(unsigned int id)
+{
+    if (dirFBO != nullptr)
+        return deferredFBO->GetRenderTexture(id);
+    return 0;
+}
+
 unsigned int FBOSystem::GetDirRender(unsigned int id)
 {
     if(dirFBO != nullptr)
@@ -109,10 +126,12 @@ unsigned int FBOSystem::GetDirRender(unsigned int id)
 
 void FBOSystem::ResizeFBOs()
 {
-    if(colorFBO != nullptr)
+    if (colorFBO != nullptr)
         colorFBO->GenerateFBO(width, height);
     if (mrtFBO != nullptr)
         mrtFBO->GenerateFBO(width, height);
     if (pingpongFBO != nullptr)
         pingpongFBO->GenerateFBO(width, height);
+    if (deferredFBO != nullptr)
+        deferredFBO->GenerateFBO(width, height);
 }

@@ -216,6 +216,8 @@
     <None Include="shaders\blending.frag" />
     <None Include="shaders\blending.vert" />
     <None Include="shaders\blurPass.frag" />
+    <None Include="shaders\deferredLighting.frag" />
+    <None Include="shaders\deferredLighting.vert" />
     <None Include="shaders\depthRender.frag" />
     <None Include="shaders\depthRender.vert" />
     <None Include="shaders\depthRenderShadow.frag" />
@@ -227,6 +229,8 @@
     <None Include="shaders\example1.frag" />
     <None Include="shaders\example1.vert" />
     <None Include="shaders\finalBloom.frag" />
+    <None Include="shaders\geometryPass.frag" />
+    <None Include="shaders\geometryPass.vert" />
     <None Include="shaders\geometryShader.frag" />
     <None Include="shaders\geometryShader.gm" />
     <None Include="shaders\geometryShader.vert" />

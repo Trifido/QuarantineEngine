@@ -36,7 +36,8 @@ enum MaterialComponent
     OUTLINE_COLOR,
     A_REFLECTIVE,
     A_REFRACTIVE,
-    DRAW_MODE
+    DRAW_MODE,
+    RENDER_MODE
 };
 
 enum DrawMode

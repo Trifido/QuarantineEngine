@@ -13,6 +13,7 @@ private:
     FBO* colorFBO;
     FBO* mrtFBO;
     FBO* pingpongFBO;
+    FBO* deferredFBO;
     int *width, *height;
 public:
     FBOSystem(int *width, int *height);
@@ -22,11 +23,13 @@ public:
     void PingPongPass(unsigned int idPass);
     void MRTPass(unsigned int idFBO = 0);
     void FinalPass();
+    void DeferredGeometryPass();
     void MultisamplingPass();
     unsigned int GetFinalRender();
     unsigned int GetMRTRender(int idTex = 0);
     unsigned int GetPingPongRender(int idTex = 0);
     unsigned int GetOmniRender(unsigned int id = 0);
+    unsigned int GetDeferredRender(unsigned int id = 0);
     //unsigned int GetOmniRender();
 	unsigned int GetDirRender(unsigned int id = 0);
     //unsigned int GetDirRender();

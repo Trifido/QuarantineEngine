@@ -6,7 +6,7 @@ layout (location = 3) in vec3 aTangents;
 layout (location = 4) in vec3 aBitangents;
 
 #define NR_DIR_LIGHTS 2
-#define NR_POINT_LIGHTS 2
+#define NR_POINT_LIGHTS 4
 #define NR_SPOT_LIGHTS 2
 
 out VS_OUT {

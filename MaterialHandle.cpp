@@ -5,8 +5,9 @@ MaterialHandle::MaterialHandle()
     this->numInstances = 0;
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
-    this->shader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
-    //this->shader = new Shader("shaders/standardBloom.vert", "shaders/standardBloom.frag");
+    this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
+    this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
+    this->shader = forward;
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
     this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
 }
@@ -16,7 +17,9 @@ MaterialHandle::MaterialHandle(Shader* sh)
     this->numInstances = 0;
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
-    this->shader = sh;
+    this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
+    this->forward = sh;
+    this->shader = forward;
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
     this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
 }
@@ -166,6 +169,26 @@ void MaterialHandle::EditMaterial(MaterialComponent component, DrawMode type)
     else
     {
         printf("ERROR::CHANGE_DRAW_MODE::RUN_FAILED\n");
+    }
+}
+
+void MaterialHandle::EditMaterial(MaterialComponent component, RenderType type)
+{
+    if(type != current_render_mode);
+    {
+        if (type == RenderType::FORWARD_RENDER)
+        {
+            this->shader = forward;
+        }
+        else
+        {
+            this->shader = deferred;
+        }
+
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->ptrShader = shader;
+        }
     }
 }
 

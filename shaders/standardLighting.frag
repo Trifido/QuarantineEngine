@@ -4,7 +4,7 @@ layout (location = 1) out vec4 BrightColor;
 
 #define NUM_TEXTURES 1
 #define NR_DIR_LIGHTS 2
-#define NR_POINT_LIGHTS 2
+#define NR_POINT_LIGHTS 4
 #define NR_SPOT_LIGHTS 2
 
 in VS_OUT {
@@ -176,7 +176,8 @@ void main()
     //if(numFPSLights > 0)
     //    resultFPS += CalcSpotLight(fpsSpotLight, 0, normal, viewDir, texCoords);
 
-    result *= (resultPoint + resultDir + resultSpot);// + resultFPS);
+    //result *= (resultPoint + resultDir + resultSpot);// + resultFPS);
+    result = (resultPoint + resultDir + resultSpot);// + resultFPS);
     FragColor = vec4(result, 1.0);
 
     float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
@@ -254,16 +255,16 @@ vec3 CalcPointLight(PointLight light, int idLight, vec3 normal, vec3 viewDir, ve
 
     // specular BLINNPHONG-shading OR PHONG-shading
     float spec;
-    if(material.blinn > 0)
-    {
+    //if(material.blinn > 0)
+    //{
         vec3 halfwayDir = normalize(lightDir + viewDir);
         spec = pow(max(dot(normal, halfwayDir), 0.0), material.shininess);
-    }
-    else
-    { 
-        vec3 reflectDir = reflect(-lightDir, normal);
-        spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    }
+    //}
+    //else
+    //{ 
+    //    vec3 reflectDir = reflect(-lightDir, normal);
+    //    spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    //}
 
     float distance;
     if(material.num_normal > 0)
@@ -291,10 +292,11 @@ vec3 CalcPointLight(PointLight light, int idLight, vec3 normal, vec3 viewDir, ve
 
     // combine results
     float shadow = PointShadowCalculation(idLight); 
-    vec3 diffuse  = light.diffuse * diff * resultDiffuse * attenuation;//light.diffuse * attenuation;
+    vec3 diffuse  = light.diffuse * diff * resultDiffuse * attenuation;
     vec3 specular = light.specular * spec * resultSpecular * attenuation;
     vec3 emissive = resultEmissive;
-    //return diffuse;
+    //return vec3(material.shininess);
+    return spec * resultSpecular;// * attenuation;
     return (resultDiffuse * generalAmbient + (1.0 - shadow) * (diffuse + specular + emissive));
 }
 

@@ -18,6 +18,7 @@
 class RenderSystem
 {
 private:
+    RenderType renderMode = RenderType::FORWARD_RENDER;
     Skybox* skybox;
     std::vector<Model*> solidModels;
     std::vector<Model*> outLineModels;
@@ -73,6 +74,9 @@ public:
     void AddCamera(Camera* cam);
     void AddModel(Model* model3D);
 
+    void SetRenderMode(RenderType rmode);
+    void ForwardRender();
+    void DefferedRender();
     void StartRender();
     void RenderSkyBox();
     void RenderDirectionalShadowMap();

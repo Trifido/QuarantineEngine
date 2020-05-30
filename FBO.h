@@ -10,7 +10,8 @@ enum FBOType
     DIR_SHADOW_FBO,
     OMNI_SHADOW_FBO,
     MULT_RT,
-    PINGPONG_FBO
+    PINGPONG_FBO,
+    DEFFERED
 };
 
 enum FBOComponent

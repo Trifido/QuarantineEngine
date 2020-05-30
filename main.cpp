@@ -79,7 +79,7 @@ int main(int, char**)
     //Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
     Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE, true);
     Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL); 
-    //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
+    Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
     //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
     textures.push_back(texture1);
     textures.push_back(texture2);
@@ -170,12 +170,13 @@ int main(int, char**)
     cubeModel2.TranslationTo(glm::vec3(2.0f, -0.5f, 1.0f));
     cubeModel2.ScaleTo(glm::vec3(0.5f));
     renderkernel.AddModel(&cubeModel2);
-    Model cubeModel3(vertices, 36);
-    cubeModel3.AddMaterial(emissiveMaterial);
-    cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0f));
-    cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
-    cubeModel3.ScaleTo(glm::vec3(0.25f));
-    renderkernel.AddModel(&cubeModel3);
+
+    //Model cubeModel3(vertices, 36);
+    //cubeModel3.AddMaterial(emissiveMaterial);
+    //cubeModel3.TranslationTo(glm::vec3(-1.0f, 0.0f, 2.0f));
+    //cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
+    //cubeModel3.ScaleTo(glm::vec3(0.25f));
+    //renderkernel.AddModel(&cubeModel3);
 
     ///--FLOOR
     Model floorModel(floorVertices, 6, textures_parallax);
@@ -248,9 +249,15 @@ int main(int, char**)
     
     Light* dirLight = new Light(TypeLight::POINTLIGHT, glm::vec3(-1.0f, 0.0f, 2.0f));
     dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, 0.5));
-    dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(0.1f, 15.0f, 0.1f)); //glm::vec3(4.6, 20.0, 1.6));
-    dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(0.1f, 15.0f, 0.1f)); //glm::vec3(0.23, 1.0, 0.08));
+    dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
+    dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
     renderkernel.AddLight(dirLight);
+
+    //Light* dirLight2 = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 0.0f, 2.0f));
+    //dirLight2->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, 0.5));
+    //dirLight2->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 1.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
+    //dirLight2->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
+    //renderkernel.AddLight(dirLight2);
     /*
     Light* dirLight2 = new Light(TypeLight::DIRL, glm::vec3(5.0f, 7.0f, -5.0f)); 
     dirLight2->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.5));
@@ -262,8 +269,6 @@ int main(int, char**)
     dirLight4->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, -0.5));
     renderkernel.AddLight(dirLight4);
     */
-    //Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 7.0f, -5.0f)); 
-    //renderkernel.AddLight(pointLight);
     //Light* pointLight2 = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 7.0f, -5.0f));
     //renderkernel.AddLight(pointLight2);
     //Light* pointLight3 = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 7.0f, 5.0f));
