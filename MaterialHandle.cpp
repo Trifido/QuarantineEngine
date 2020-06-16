@@ -6,7 +6,8 @@ MaterialHandle::MaterialHandle()
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
     this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
-    this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
+    this->forward = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
+    //this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     this->shader = forward;
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
     this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
@@ -52,6 +53,20 @@ void MaterialHandle::EditMaterial(MaterialComponent component, Shader* sh)
         for (int i = 0; i < listMaterials.size(); i++)
         {
             listMaterials.at(i)->ptrShaderShadow = shaderShadow;
+        }
+        break;
+    case MaterialComponent::SHADER_FORWARD:
+        forward = sh;
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->ptrShader = forward;
+        }
+        break;
+    case MaterialComponent::SHADER_DEFERRED:
+        deferred = sh;
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->ptrShader = deferred;
         }
         break;
     case MaterialComponent::SHADER_POINT_SHADOW:

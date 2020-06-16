@@ -1,5 +1,10 @@
 #include "RenderPlane.h"
 
+float RenderPlane::lerp(float a, float b, float f)
+{
+    return a + f * (b - a);
+}
+
 RenderPlane::RenderPlane()
 {
     gammaValue = 1.0f;
@@ -10,6 +15,8 @@ RenderPlane::RenderPlane()
     shaderBlur = new Shader("shaders/renderPass.vert", "shaders/blurPass.frag");
     shaderBloomFinal = new Shader("shaders/renderPass.vert", "shaders/finalBloom.frag");
     deferredLighting = new Shader("shaders/deferredLighting.vert", "shaders/deferredLighting.frag");
+    ssao = new Shader("shaders/deferredLighting.vert", "shaders/ssao.frag");
+    ssao_blur = new Shader("shaders/deferredLighting.vert", "shaders/ssao_blur.frag");
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
 }
 
@@ -57,9 +64,18 @@ void RenderPlane::SetVAORenderPlane()
     deferredLighting->setInt("gAlbedo", 2);
     deferredLighting->setInt("gSpecular", 3);
     deferredLighting->setInt("gEmissive", 4);
+    deferredLighting->setInt("ssao", 5);
     deferredLighting->setFloat("generalAmbient", 0.4f);
     deferredLighting->setFloat("gamma", gammaValue);
     deferredLighting->setFloat("exposure", exposureValue);
+
+    ssao->use();
+    ssao->setInt("gPosition", 0);
+    ssao->setInt("gNormal", 1);
+    ssao->setInt("texNoise", 2);
+
+    ssao_blur->use();
+    ssao_blur->setInt("ssaoInput", 0);
 }
 
 void RenderPlane::FinalRenderPass()
@@ -77,7 +93,7 @@ void RenderPlane::FinalRenderBloom()
     shaderBloomFinal->use();
     glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0));
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0)); //fboSystem->GetDirRender());//
     if (bloomValue)
     {
         glActiveTexture(GL_TEXTURE1);
@@ -123,10 +139,42 @@ void RenderPlane::DefferedRender()
     glBindTexture(GL_TEXTURE_2D, fboSystem->GetDeferredRender(3));
     glActiveTexture(GL_TEXTURE4);
     glBindTexture(GL_TEXTURE_2D, fboSystem->GetDeferredRender(4));
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetSSAORender(1));
 
     deferredLighting->ActivateCamera();
     deferredLighting->ActivateLights();
 
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void RenderPlane::RenderSSAO()
+{
+    ssao->use();
+    for (unsigned int i = 0; i < 64; ++i)
+        ssao->setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+
+    ssao->setMat4("proj", cam->projection);
+    glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetDeferredRender(0));
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetDeferredRender(1));
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, noiseTexture);
+
+    //ssao->ActivateCamera();
+    //ssao->ActivateLights();
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void RenderPlane::RenderBlurSSAO()
+{
+    ssao_blur->use();
+    glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetSSAORender());
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -137,5 +185,45 @@ void RenderPlane::AddLights(std::vector<Light*> lights)
 
 void RenderPlane::AddCamera(Camera* cam)
 {
+    this->cam = cam;
     deferredLighting->AddCamera(cam);
+}
+
+void RenderPlane::GenerateNoiseTexture()
+{
+    std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
+    std::default_random_engine generator;
+
+    for (unsigned int i = 0; i < 64; ++i)
+    {
+        glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
+        sample = glm::normalize(sample);
+        sample *= randomFloats(generator);
+        float scale = float(i) / 64.0;
+
+        // scale samples s.t. they're more aligned to center of kernel
+        scale = lerp(0.1f, 1.0f, scale * scale);
+        sample *= scale;
+        ssaoKernel.push_back(sample);
+    }
+
+    // generate noise texture
+    // ----------------------
+    for (unsigned int i = 0; i < 16; i++)
+    {
+        glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
+        ssaoNoise.push_back(noise);
+    }
+    glGenTextures(1, &noiseTexture);
+    glBindTexture(GL_TEXTURE_2D, noiseTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+}
+
+void RenderPlane::AddUBOSystem(UBOSystem* ubo)
+{
+    ubo->SetUniformBlockIndex(ssao->ID, "Matrices");
 }

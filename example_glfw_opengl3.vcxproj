@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4a1fb5ea-22f5-42a8-ab92-1d2df5d47fb9}</ProjectGuid>
     <RootNamespace>example_glfw_opengl3</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -166,6 +166,7 @@
     <ClCompile Include="..\imgui_impl_glfw.cpp" />
     <ClCompile Include="..\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\libs\gl3w\GL\gl3w.c" />
+    <ClCompile Include="BoundingLight.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FBO.cpp" />
     <ClCompile Include="FBOSystem.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SkyBox.cpp" />
+    <ClCompile Include="SSBOSystem.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UBOSystem.cpp" />
   </ItemGroup>
@@ -190,7 +192,9 @@
     <ClInclude Include="..\imgui_impl_opengl3.h" />
     <ClInclude Include="..\libs\gl3w\GL\gl3w.h" />
     <ClInclude Include="..\libs\gl3w\GL\glcorearb.h" />
+    <ClInclude Include="BoundingLight.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ContentSSBO.h" />
     <ClInclude Include="FBO.h" />
     <ClInclude Include="FBOSystem.h" />
     <ClInclude Include="HeadersRequeriments.h" />
@@ -207,6 +211,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="SkyBox.h" />
+    <ClInclude Include="SSBOSystem.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="UBOSystem.h" />
   </ItemGroup>
@@ -246,12 +251,16 @@
     <None Include="shaders\lightingCubeVERT.vert" />
     <None Include="shaders\lightmaps.frag" />
     <None Include="shaders\lightmaps.vert" />
+    <None Include="shaders\lightVolumePass.frag" />
+    <None Include="shaders\lightVolumePass.vert" />
     <None Include="shaders\nanosuit.frag" />
     <None Include="shaders\nanosuit.vert" />
     <None Include="shaders\outline.frag" />
     <None Include="shaders\outline.vert" />
     <None Include="shaders\parallaxMapping.frag" />
     <None Include="shaders\parallaxMapping.vert" />
+    <None Include="shaders\pbrShader1.frag" />
+    <None Include="shaders\pbrShader1.vert" />
     <None Include="shaders\pointShadow.frag" />
     <None Include="shaders\pointShadow.gm" />
     <None Include="shaders\pointShadow.vert" />
@@ -265,6 +274,12 @@
     <None Include="shaders\shadow.vert" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
+    <None Include="shaders\skyboxHDR.frag" />
+    <None Include="shaders\skyboxHDR.vert" />
+    <None Include="shaders\sphericalCubemap.frag" />
+    <None Include="shaders\sphericalCubemap.vert" />
+    <None Include="shaders\ssao.frag" />
+    <None Include="shaders\ssao_blur.frag" />
     <None Include="shaders\standardBloom.frag" />
     <None Include="shaders\standardBloom.vert" />
     <None Include="shaders\standardLighting.frag" />

@@ -1,5 +1,5 @@
 #version 330 core
-layout (location = 0) out vec3 gPosition;
+layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedo;
 layout (location = 3) out vec4 gSpecular;
@@ -39,6 +39,7 @@ struct Material {
     float max_uv;
     float shininess;
     int blinn;
+    int isBoundingLight;
 };
 
 //MATERIAL
@@ -49,12 +50,11 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 
 void main()
 {
-    gPosition = fs_in.FragPos;
+    gPosition = vec4(fs_in.FragPos, 1.0);
     vec2 texCoords = fs_in.TexCoords;
 
     if(material.num_height > 0)
     {
-        //gPosition = fs_in.TangentFragPos;
         texCoords = ParallaxMapping(fs_in.TexCoords,  normalize(fs_in.TangentViewPos - fs_in.TangentFragPos));
     }
 
@@ -62,7 +62,6 @@ void main()
     if(material.num_normal > 0)
     {
         gNormal = texture(material.normal[0], texCoords).rgb;
-        //gNormal = normalize(gNormal * 2.0 - 1.0);  // this normal is in tangent space
         gNormal = gNormal * 2.0 - 1.0;  // this normal is in tangent space
         gNormal = normalize(fs_in.TBN * gNormal); 
     }
@@ -78,9 +77,7 @@ void main()
     if(material.num_specular > 0)
         gSpecular = texture(material.specular[0], texCoords);
     else
-        gSpecular = vec4(1.0);
-
-    //gSpecular.r = material.shininess;
+        gSpecular = vec4(1.0); 
 
     if(material.num_emissive > 0)
         gEmissive = texture(material.emissive[0], texCoords);

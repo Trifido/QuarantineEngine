@@ -8,6 +8,8 @@ RenderSystem::RenderSystem(GLFWwindow* window, ImVec4* clearColor)
     num_dir_cast_shadow = 0;
     num_omni_cast_shadow = 0;
     num_spot_cast_shadow = 0;
+    precookSkybox = nullptr;
+    ssboSystem = new SSBOSystem();
 }
 
 void RenderSystem::ComputeDeltaTime()
@@ -75,6 +77,19 @@ void RenderSystem::AddLight(Light* lights)
     
 }
 
+void RenderSystem::AddLight(BoundingLight* bdLight)
+{
+    this->lights.push_back(bdLight->light);
+    if (num_omni_cast_shadow < LIMIT_OMNI_CAST_SHADOW)
+    {
+        this->shadowCastOmniLights.push_back(bdLight->light);
+        this->shadowCastGeneralLights.push_back(bdLight->light);
+        bdLight->light->EditLightComponent(LightComponent::LIGHT_CAST_SHADOW, true);
+        num_omni_cast_shadow++;
+    }
+    this->boundingModels.push_back(bdLight);
+}
+
 void RenderSystem::AddCamera(Camera* cam)
 {
     this->cameras.push_back(cam);
@@ -85,9 +100,31 @@ void RenderSystem::AddModel(Model* model)
     this->models.push_back(model);
 }
 
+void RenderSystem::AddPreCookSkybox(Skybox* skyHDR)
+{
+    precookSkybox = skyHDR;
+}
+
 void RenderSystem::RenderSkyBox()
 {
-    skybox->Render();
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    if (precookSkybox == nullptr)
+    {
+        skybox->Render();
+    }
+    else
+    {
+        precookSkybox->precookFinal->use();
+        precookSkybox->precookFinal->setInt("environmentMap", 0);
+        precookSkybox->precookFinal->setMat4("projection", cameras[0]->projection);
+        precookSkybox->precookFinal->setMat4("view", cameras[0]->view);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, fboSystem->GetSkyboxRender());
+        precookSkybox->RenderHDR();
+    }
+    glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
 }
 
 void RenderSystem::RenderDirectionalShadowMap()
@@ -126,7 +163,8 @@ void RenderSystem::RenderOmnidirectionalShadowMap()
 
         for (int idModel = 0; idModel < models.size(); idModel++)
         {
-            if(models[idModel]->matHandle.type != MaterialType::EMISSIVE_LIT)
+            if(models[idModel]->matHandle.type != MaterialType::EMISSIVE_LIT &&
+                models[idModel]->matHandle.type != MaterialType::BOUNDING_VOLUME)
                 models[idModel]->DrawShadow(shadowCastOmniLights.at(idLight)->lightSpaceMatrices, shadowCastOmniLights.at(idLight)->GetPosition(), shadowCastOmniLights.at(idLight)->GetFarplane());
         }
     }
@@ -135,6 +173,7 @@ void RenderSystem::RenderOmnidirectionalShadowMap()
 
 void RenderSystem::RenderSolidModels()
 {
+    glDisable(GL_CULL_FACE);
     for (int i = 0; i < solidModels.size(); i++)
     {
         if (solidModels[i]->CAST_SHADOW)
@@ -155,7 +194,6 @@ void RenderSystem::RenderSolidModels()
             solidModels[i]->Draw();
         }
     }
-    
 }
 
 void RenderSystem::RenderTransparentModels()
@@ -171,12 +209,42 @@ void RenderSystem::RenderTransparentModels()
     glDisable(GL_BLEND);
 }
 
+void RenderSystem::ProcessBoundingModels()
+{
+    for (int i = 0; i < boundingModels.size(); i++)
+    {
+        boundingModels.at(i)->Draw();
+    }
+}
+
 void RenderSystem::RenderOutLineModels()
 {
     for (int i = 0; i < outLineModels.size(); i++)
     {
         outLineModels[i]->Draw(true);
     }
+}
+
+void RenderSystem::PreRenderHDRSkybox()
+{
+    precookSkybox->PreRender();
+    glViewport(0, 0, 512, 512);
+    fboSystem->SkyboxProcessPass();
+    //Terminamos de configurar el FBO añadiendo las texturas del cubemap
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        //precookSkybox->matHandle->shader->use();
+        precookSkybox->matHandle->shader->setMat4("view", precookSkybox->captureViews[i]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, fboSystem->GetSkyboxRender(), 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        precookSkybox->RenderHDR();
+    }
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        fprintf(stderr, "ERROR::SKYBOX Framebuffer not complete!");
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void RenderSystem::PreRender()
@@ -192,7 +260,7 @@ void RenderSystem::PreRender()
     //POST-PROCESS GAMMA
     renderPass.SetGamma(2.2f); 
     //TONE MAPPING 
-    renderPass.SetExposure(1.0f);
+    renderPass.SetExposure(0.5f);
     //BLOOM EFFECT
     renderPass.SetBloom(false);
     renderPass.SetAmountBloom(10);
@@ -225,6 +293,13 @@ void RenderSystem::PreRender()
             uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shader2->ID, "Matrices");
 
         uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shaderPointShadow->ID, "Matrices");
+        uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shaderShadow->ID, "Matrices");
+        renderPass.AddUBOSystem(uboSytem);
+    }
+
+    for (unsigned int i = 0; i < boundingModels.size(); i++)
+    {
+        uboSytem->SetUniformBlockIndex(boundingModels.at(i)->matHandle.shader->ID, "Matrices");
     }
 
     //CREAMOS UBO para VIEW & PROJECTION
@@ -237,10 +312,24 @@ void RenderSystem::PreRender()
         models.at(i)->AddCamera(cameras.at(0));
     }
 
+    //for (unsigned int i = 0; i < boundingModels.size(); i++)
+    //{
+        //boundingModels.at(i)->AddCamera(cameras.at(0));
+        //boundingModels.at(i)->AddLight(lights);
+    //}
+
+    //CONFIGURAMOS Y AÑADIMOS SSBO
+    ssboSystem->SetUpSSBOSystem();
+
+    for (unsigned int i = 0; i < solidModels.size(); i++)
+    {
+        ssboSystem->ConnectSSBOToShader(solidModels.at(i)->matHandle.shader->ID);
+    }
+
     //CREAMOS UN FRAME BUFFER OBJECT (FBO)
     glfwGetWindowSize(window, &width, &height);
     fboSystem = new FBOSystem(&width, &height);
-    ///Añadimos HDR FBO
+    ///Añadimos MRT FBO
     fboSystem->AddFBO(new FBO(FBOType::MULT_RT, 8));
     ///Añadimos PINGPONG FBO
     fboSystem->AddFBO(new FBO(FBOType::PINGPONG_FBO));
@@ -250,11 +339,18 @@ void RenderSystem::PreRender()
     fboSystem->AddFBO(new FBO(FBOType::OMNI_SHADOW_FBO, 0, num_omni_cast_shadow));
     ///Añadimos Directional shadow FBO
     fboSystem->AddFBO(new FBO(FBOType::DIR_SHADOW_FBO, 0, num_dir_cast_shadow + num_spot_cast_shadow));
+    ///Añadimos Light Volume FBO
+    //fboSystem->AddFBO(new FBO(FBOType::LIGHTING_VOLUME_FBO, 0));
+    ///Añadimos SSAO FBO
+    fboSystem->AddFBO(new FBO(FBOType::SSAO_FBO));
+    //Añadimo HDRskybox FBO
+    fboSystem->AddFBO(new FBO(FBOType::SKYBOX_FBO));
 
     //DEFERRED RENDER
     fboSystem->AddFBO(new FBO(FBOType::DEFFERED));
     renderPass.AddLights(lights);
     renderPass.AddCamera(cameras.at(0));
+    renderPass.GenerateNoiseTexture();
 
     lastWidth = width;
     lastHeight = height;
@@ -272,6 +368,12 @@ void RenderSystem::PreRender()
     glEnable(GL_CULL_FACE);
 
     glEnable(GL_MULTISAMPLE);
+
+    //Preparamos el skybox
+    if (precookSkybox != nullptr)
+    { 
+        PreRenderHDRSkybox();
+    }
 }
 
 void RenderSystem::SetRenderMode(RenderType rmode)
@@ -279,9 +381,10 @@ void RenderSystem::SetRenderMode(RenderType rmode)
     //assert(rmode == renderMode);
     renderMode = rmode;
     for (unsigned int i = 0; i < models.size(); i++)
-    {
         models.at(i)->matHandle.EditMaterial(RENDER_MODE, renderMode);
-    }
+
+    for (unsigned int i = 0; i < boundingModels.size(); i++)
+        boundingModels.at(i)->matHandle.EditMaterial(RENDER_MODE, renderMode);
 }
 
 void RenderSystem::ForwardRender()
@@ -298,7 +401,6 @@ void RenderSystem::ForwardRender()
 
     /// SECOND PASS -> RENDER LIGHTING TO TEXTURE (MRT)
     fboSystem->MRTPass();
-    //fboSystem->FinalPass();
     glViewport(0, 0, display_w, display_h);
     glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -312,7 +414,7 @@ void RenderSystem::ForwardRender()
     ///RENDER SOLID MATERIALS
     RenderSolidModels();
     ///RENDER SKYBOX
-    //RenderSkyBox();
+    RenderSkyBox();
     ///RENDER TRANSPARENT MATERIALS
     //RenderTransparentModels();
 
@@ -328,7 +430,6 @@ void RenderSystem::ForwardRender()
     glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     renderPass.FinalRenderBloom();
-    //renderPass.FinalRenderPass();
 }
 
 void RenderSystem::DefferedRender()
@@ -346,9 +447,11 @@ void RenderSystem::DefferedRender()
 
     /// SECOND PASS -> RENDER LIGHTING TO TEXTURE (MRT)
     fboSystem->DeferredGeometryPass();
+
     glViewport(0, 0, display_w, display_h);
     glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
     ///UBO CAMERA
     uboSytem->StoreData(cameras.at(0)->projection, sizeof(glm::mat4));
     uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
@@ -363,11 +466,33 @@ void RenderSystem::DefferedRender()
     ///RENDER TRANSPARENT MATERIALS
     //RenderTransparentModels();
 
+    /// THIRD PASS -> RENDER LIGHT VOLUMES
+    //fboSystem->LightVolumePass();
+    //glViewport(0, 0, display_w, display_h);
+    //glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    ///BLIT DEPTH BUFFER
+    //fboSystem->BlitDepthBuffer(FBOType::DEFFERED, FBOType::LIGHTING_VOLUME_FBO);
+
+    ///RENDER BOUNDING LIGHT MODELS
+    //ProcessBoundingModels();
+
     ///MULTISAMPLING 
     //fboSystem->MultisamplingPass();
 
     ///BLUR POST-PROCESS (BLOOM)
     //renderPass.RenderBlur();
+
+    //SSAO
+    fboSystem->SSAOPass();
+    glClear(GL_COLOR_BUFFER_BIT);
+    renderPass.RenderSSAO();
+
+    //BLUR SSAO
+    fboSystem->SSAOPass(1); 
+    glClear(GL_COLOR_BUFFER_BIT);
+    renderPass.RenderBlurSSAO();
 
     /// FINAL PASS POST-PROCESS
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -386,6 +511,10 @@ void RenderSystem::StartRender()
         //ANIMATION
         ComputeDeltaTime();
         GetWindowSize(window, &width, &height);
+
+        //ACTUALIZAMOS SSBO 
+        ssboSystem->dataSSBO.camera_position = cameras.at(0)->cameraPos;
+        ssboSystem->UpdateSSBOSystem();
 
         //glm::vec3 tempPos = lights.at(0)->GetPosition();
         //tempPos.x = sin(glfwGetTime() * 0.5) * 3.0;

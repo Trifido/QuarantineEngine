@@ -36,7 +36,8 @@ uniform vec3 viewPos;
 void main()
 {
     vec4 worldPos = model * vec4(aPos, 1.0);
-    vs_out.FragPos = worldPos.xyz; 
+    vec4 worldPos2 = view * model * vec4(aPos, 1.0);
+    vs_out.FragPos = worldPos2.xyz; 
     vs_out.TexCoords = aTexCoords;
     
     mat3 normalMatrix = transpose(inverse(mat3(model)));
@@ -53,8 +54,9 @@ void main()
     vs_out.TangentFragPos = tTBN * vs_out.FragPos;
     vs_out.TBN = TBN;
 
-    //vs_out.Normal = normalMatrix * aNormal;
+    mat3 normalMatrix2 = transpose(inverse(mat3(view * model)));
     vs_out.Normal = aNormal;
+    vs_out.Normal = normalMatrix2 * aNormal;
 
     for(int i = 0; i < numPointLights; i++)
     {

@@ -14,26 +14,37 @@ private:
     FBO* mrtFBO;
     FBO* pingpongFBO;
     FBO* deferredFBO;
+    FBO* lightVolumeFBO;
+    FBO* ssaoFBO;
+    FBO* skyboxFBO;
     int *width, *height;
 public:
     FBOSystem(int *width, int *height);
+    FBO* GetFBO(FBOType type);
     void AddFBO(FBO* fbo);
     void OmniShadowPass(unsigned int idPass);
     void DirShadowPass(unsigned int idPass);
     void PingPongPass(unsigned int idPass);
     void MRTPass(unsigned int idFBO = 0);
+    void SSAOPass(unsigned int idFBO = 0);
     void FinalPass();
     void DeferredGeometryPass();
+    void LightVolumePass();
     void MultisamplingPass();
+    void SkyboxProcessPass();
     unsigned int GetFinalRender();
     unsigned int GetMRTRender(int idTex = 0);
     unsigned int GetPingPongRender(int idTex = 0);
     unsigned int GetOmniRender(unsigned int id = 0);
     unsigned int GetDeferredRender(unsigned int id = 0);
+    unsigned int GetLightVolumeRender(unsigned int id = 0);
+    unsigned int GetSSAORender(unsigned int id = 0);
+    unsigned int GetSkyboxRender(unsigned int id = 0);
     //unsigned int GetOmniRender();
 	unsigned int GetDirRender(unsigned int id = 0);
     //unsigned int GetDirRender();
     void ResizeFBOs();
+    void BlitDepthBuffer(FBOType readBuffer, FBOType drawBuffer);
 };
 
 #endif

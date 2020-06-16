@@ -28,7 +28,7 @@ enum TypeLight {
 
 class Light
 {
-private:
+private: 
     glm::vec3 position;
     glm::vec3 direction;
     glm::vec3 diffuse;
@@ -41,6 +41,7 @@ private:
     float constant;
     float linear;
     float quadratic;
+    float radius;
 
     TypeLight type;
 
@@ -84,6 +85,7 @@ public:
     float inline GetLinear() { return this->linear; }
     float inline GetQuadratic() { return this->quadratic; }
     float inline GetFarplane() { return this->far_plane; }
+    float inline GetRadius() { return this->radius; }
 private:
     void ComputeShadowProjection();
     void ComputeShadowCubeMapProjection();

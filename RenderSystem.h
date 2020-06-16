@@ -6,9 +6,11 @@
 
 #include "Camera.h"
 #include "Light.h"
+#include "BoundingLight.h"
 #include "Model.h"
 #include "FBOSystem.h"
 #include "UBOSystem.h"
+#include "SSBOSystem.h"
 #include "RenderPlane.h"
 #include "KeyInput.h"
 #include "SkyBox.h"
@@ -19,10 +21,11 @@ class RenderSystem
 {
 private:
     RenderType renderMode = RenderType::FORWARD_RENDER;
-    Skybox* skybox;
+    Skybox* skybox, *precookSkybox;
     std::vector<Model*> solidModels;
     std::vector<Model*> outLineModels;
     std::vector<Model*> transparentModels;
+    std::vector<BoundingLight*> boundingModels;
     std::vector<Light*> shadowCastDirLights;
     std::vector<Light*> shadowCastOmniLights;
     std::vector<Light*> shadowCastSpotLights;
@@ -31,8 +34,8 @@ private:
     GLFWwindow* window;
     ImVec4* clear_color;
     FBOSystem* fboSystem;
-    //FBOSystem* fboSystemShadowMap;
     UBOSystem* uboSytem;
+    SSBOSystem* ssboSystem;
     RenderPlane renderPass;
     int width, height;
     int lastWidth, lastHeight;
@@ -71,8 +74,10 @@ public:
 
     void AddGlfWindow(GLFWwindow* window);
     void AddLight(Light* lights);
+    void AddLight(BoundingLight* lights);
     void AddCamera(Camera* cam);
     void AddModel(Model* model3D);
+    void AddPreCookSkybox(Skybox* skyHDR);
 
     void SetRenderMode(RenderType rmode);
     void ForwardRender();
@@ -84,7 +89,9 @@ public:
     void RenderSolidModels();
     void RenderOutLineModels();
     void RenderTransparentModels();
+    void ProcessBoundingModels();
     void PreRender();
+    void PreRenderHDRSkybox();
     void SetAmbientReflectiveMaterials();
 };
 

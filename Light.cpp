@@ -160,8 +160,13 @@ void Light::Init()
     specular = glm::vec3(1.0f);
     //Attenuation & Intensity
     constant = 1.0f;
-    linear = 0.09f;
-    quadratic = 0.032f;
+    //linear = 0.09f;
+    linear = 0.7f;
+    //quadratic = 0.032f;
+    quadratic = 1.8f;
+    float maxRandianceChannel = std::fmaxf(std::fmaxf(diffuse.r, diffuse.g), diffuse.b);
+    radius = (-linear + std::sqrtf(linear * linear - 4.0f * (float)quadratic * (constant - (256.0 / 5.0) * maxRandianceChannel))) / (2.0f * quadratic);
+
     //Spot
     cutOff = glm::cos(glm::radians(12.5f));
     outerCutOff = glm::cos(glm::radians(17.5f));

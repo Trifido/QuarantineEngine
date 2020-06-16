@@ -11,7 +11,10 @@ enum FBOType
     OMNI_SHADOW_FBO,
     MULT_RT,
     PINGPONG_FBO,
-    DEFFERED
+    DEFFERED,
+    LIGHTING_VOLUME_FBO,
+    SSAO_FBO,
+    SKYBOX_FBO
 };
 
 enum FBOComponent
@@ -39,6 +42,7 @@ class FBO
         float borderColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
     public:
         FBO() {};
+        unsigned int GetID() { return *idFBO; }
         FBO(FBOType type, unsigned int samples=1, unsigned int numTextures = 1);
         void GenerateFBO(int *width, int *height);
         void EditFBOComponent(FBOComponent fboComp, unsigned int value);
@@ -49,6 +53,7 @@ class FBO
         unsigned int GetRenderTexture(unsigned int id = 0);
         void ActivateFBO(unsigned int id = 0);
         void SetMultiSamplingFrameBuffer();
+        void SetDepthBuffer(unsigned int readBuffer, unsigned int drawBuffer = 0);
         void CheckFBO();
 };
 

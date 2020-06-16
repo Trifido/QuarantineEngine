@@ -16,7 +16,11 @@ Texture::Texture(std::string imagePath, bool isGamma, unsigned int wrap, unsigne
     this->flip = flip;
 
     glGenTextures(1, &ID);
-    LoadTextureObj();
+
+    if (type != TypeTexture::HDR_SKYBOX)
+        LoadTextureObj();
+    else
+        LoadTextureHDR();
 }
 
 Texture::Texture(std::string imagePath, TypeTexture type, bool isGamma, unsigned int wrap, unsigned int filter, bool flip)
@@ -29,11 +33,17 @@ Texture::Texture(std::string imagePath, TypeTexture type, bool isGamma, unsigned
     this->flip = flip;
 
     glGenTextures(1, &ID);
-    LoadTextureObj();
+
+    if(type != TypeTexture::HDR_SKYBOX)
+        LoadTextureObj();
+    else
+        LoadTextureHDR();
 }
 
-Texture::Texture(std::vector<std::string> imagesPath, TypeTexture type, unsigned int wrap, unsigned int filter, bool flip)
+Texture::Texture(std::vector<std::string> imagesPath, TypeTexture type, bool isGamma, unsigned int wrap, unsigned int filter, bool flip)
 {
+    this->isGammaTexture = isGamma;
+
     //LOAD CUBEMAP
     glGenTextures(1, &ID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, ID);
@@ -41,9 +51,33 @@ Texture::Texture(std::vector<std::string> imagesPath, TypeTexture type, unsigned
     for (unsigned int i = 0; i < imagesPath.size(); i++)
     {
         unsigned char* data = stbi_load(imagesPath[i].c_str(), &width, &height, &nrChannels, 0);
+
+        GLenum internalFormat, format;
+        format = GL_RGBA;
+
+        if (nrChannels == 1)
+            format = GL_RED;
+        else if (nrChannels == 3)
+            format = GL_RGB;
+        else if (nrChannels == 4)
+            format = GL_RGBA;
+        bool aux = false;
+
+        internalFormat = format;
+
+        if (isGammaTexture)
+        {
+            if (nrChannels == 1)
+                internalFormat = GL_RED;
+            else if (nrChannels == 3)
+                internalFormat = GL_SRGB;
+            else if (nrChannels == 4)
+                internalFormat = GL_SRGB_ALPHA;
+        }
+
         if (data)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }
         else
@@ -114,6 +148,34 @@ void Texture::LoadTextureObj()
     // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+}
+
+void Texture::LoadTextureHDR()
+{
+    glBindTexture(GL_TEXTURE_2D, ID);
+    LoadHDRImage(imgPath.c_str(), true);
+}
+
+void Texture::LoadHDRImage(const char* imagePath, bool flip)
+{
+    stbi_set_flip_vertically_on_load(flip);
+    int width, height, nrComponents;
+    float* data = stbi_loadf(imagePath, &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data); // note how we specify the texture's data value to be float
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Failed to load HDR image." << std::endl;
+    }
 }
 
 void Texture::LoadImage(const char* imagePath, bool flip)

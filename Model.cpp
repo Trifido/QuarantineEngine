@@ -309,11 +309,27 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, TypeTexture::SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
         // 3. normal maps
-        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, TypeTexture::NORMAL);
+        std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, TypeTexture::NORMAL);
         textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
         // 4. height maps
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, TypeTexture::HEIGHT);
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+        // metallic maps
+        std::vector<Texture> metallicMaps = loadMaterialTextures(material, aiTextureType_METALNESS, TypeTexture::METALLIC);
+        textures.insert(textures.end(), metallicMaps.begin(), metallicMaps.end());
+        // AO maps
+        std::vector<Texture> aoMaps = loadMaterialTextures(material, aiTextureType_AMBIENT_OCCLUSION, TypeTexture::AO);
+        textures.insert(textures.end(), aoMaps.begin(), aoMaps.end());
+        // Roughness maps
+        std::vector<Texture> roughMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, TypeTexture::ROUGHNESS);
+        textures.insert(textures.end(), roughMaps.begin(), roughMaps.end());
+        // Bump maps
+        std::vector<Texture> bumpMaps;
+        if(normalMaps.empty())
+            bumpMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, TypeTexture::NORMAL);
+        else
+            bumpMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, TypeTexture::BUMP);
+        textures.insert(textures.end(), bumpMaps.begin(), bumpMaps.end());
         //AÑADIR MAS TIPOS DE TEXTURA
     }
      

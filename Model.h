@@ -21,7 +21,7 @@ class Model
 {
 private:
     ModelType model_type;
-    std::vector<Mesh> meshes;
+    
     std::vector<Texture> textures_loaded;
     std::string directory;
     bool existTangent = false;
@@ -33,6 +33,7 @@ private:
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TypeTexture typeName);
 
 public:
+    std::vector<Mesh> meshes;
     bool CAST_SHADOW = true;
     MaterialHandle matHandle;
     glm::mat4 model = glm::mat4(1.0f);

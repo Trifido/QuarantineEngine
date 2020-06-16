@@ -15,6 +15,8 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gSpecular;
 uniform sampler2D gEmissive;
+uniform sampler2D ssao;
+//uniform sampler2D gLightVolumeValue;
 
 uniform vec3 viewPos;
 
@@ -40,6 +42,7 @@ struct PointLight {
     vec3 specular;
     samplerCube shadowCubeMap;
     float far_plane;
+    float radius;
 };
 
 struct SpotLight {
@@ -78,10 +81,12 @@ void main()
 {
     // retrieve data from gbuffer
     vec3 FragPos = texture(gPosition, fs_in.TexCoords).rgb;
-    vec3 Normal = texture(gNormal, fs_in.TexCoords).rgb;
-    vec3 Diffuse = texture(gAlbedo, fs_in.TexCoords).rgb;
 
-    vec3 result = Diffuse * generalAmbient;
+    vec3 Diffuse = texture(gAlbedo, fs_in.TexCoords).rgb;
+    vec3 Normal = texture(gNormal, fs_in.TexCoords).rgb;
+    float AmbientOcclusion = texture(ssao, fs_in.TexCoords).r;
+
+    vec3 result = Diffuse * generalAmbient * AmbientOcclusion;
     vec3 resultPoint = vec3(0.0);
     vec3 viewDir  = normalize(viewPos - FragPos);
 
@@ -95,30 +100,24 @@ void main()
     result = pow(result, vec3(1.0 / gamma));
 
     FragColor = vec4(result, 1.0);
-
+    FragColor = vec4(AmbientOcclusion);
 }  
 
 vec3 CalcPointLight(int idLight, vec3 FragPos, vec3 normal, vec3 viewDir)
 {
-    vec3 lightDir;
-    //if(material.num_normal > 0)
-    //    lightDir = normalize(fs_in.TangentPointLightPos[idLight] - FragPos);
-    //else
-        lightDir = normalize(pointLights[idLight].position - FragPos);    
+    float distance = length(pointLights[idLight].position - FragPos);
+    // - DIFFUSE
+    vec4 resultDiffuse = texture(gAlbedo, fs_in.TexCoords);
+    if(pointLights[idLight].radius < distance)
+        return (resultDiffuse.rgb * generalAmbient);
+
+    vec3 lightDir = normalize(pointLights[idLight].position - FragPos);    
 
     float diff = max(dot(lightDir, normal), 0.0);
-
-    float distance;
-    //if(material.num_normal > 0)
-    //    distance = length(fs_in.TangentPointLightPos[idLight] - FragPos);
-    //else
-        distance = length(pointLights[idLight].position - FragPos);
 
     float attenuation = 1.0 / (pointLights[idLight].constant + pointLights[idLight].linear * distance + pointLights[idLight].quadratic * (distance * distance));
 
     //SAMPLE TEXTURES
-    // - DIFFUSE
-    vec4 resultDiffuse = texture(gAlbedo, fs_in.TexCoords);
     // - SPECULAR
     vec3 resultSpecular = texture(gSpecular, fs_in.TexCoords).rgb;
     // - EMISSIVE

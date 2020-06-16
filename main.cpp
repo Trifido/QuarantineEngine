@@ -17,11 +17,11 @@ int main(int, char**)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
     // GL 3.0 + GLSL 130
-    const char* glsl_version = "#version 130";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    const char* glsl_version = "#version 430";
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4.5);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4.3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
     // Create window with graphics context
@@ -67,44 +67,66 @@ int main(int, char**)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    ImVec4* clear_color = new ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-    //ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+    //ImVec4* clear_color = new ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
     //RENDER SYSTEM
     RenderSystem renderkernel(window, clear_color);
 
     ///TEXTURES
-    std::vector<Texture> textures;
+    //std::vector<Texture> textures;
     //Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE, true);
-    //Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL);
-    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE, true);
-    Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL); 
-    Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
+    //Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL); 
+    //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
     //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-    textures.push_back(texture1);
-    textures.push_back(texture2);
+    //textures.push_back(texture1);
+    //textures.push_back(texture2);
     //textures.push_back(texture3);
-    Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE, false);
-    std::vector<Texture> textures_floor;
-    textures_floor.push_back(textureFloor);
+    //Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE, false);
+    //std::vector<Texture> textures_floor;
+    //textures_floor.push_back(textureFloor);
 
     Texture parallaxDiff("resources/materials/floor_dirt/Stone_Path_001_baseColor.jpg", TypeTexture::DIFFUSE);
     Texture parallaxNorm("resources/materials/floor_dirt/Stone_Path_001_normal.jpg", TypeTexture::NORMAL);
     Texture parallaxDisp("resources/materials/floor_dirt/Stone_Path_001_height.png", TypeTexture::HEIGHT);
-
-    //Texture parallaxDiff("resources/bricks/bricks2.jpg", TypeTexture::DIFFUSE);
-    //Texture parallaxNorm("resources/bricks/bricks2_normal.jpg", TypeTexture::NORMAL);
-    //Texture parallaxDisp("resources/bricks/bricks2_disp.jpg", TypeTexture::HEIGHT);
-
-    //Texture parallaxDiff("resources/materials/bricks/Brick_Wall_016_basecolor.jpg", TypeTexture::DIFFUSE);
-    //Texture parallaxNorm("resources/materials/bricks/Brick_Wall_016_normal.jpg", TypeTexture::NORMAL);
-    //Texture parallaxDisp("resources/materials/bricks/Brick_Wall_016_height.png", TypeTexture::HEIGHT);
-
+    Texture parallaxRoug("resources/materials/floor_dirt/Stone_Path_001_roughness.jpg", TypeTexture::ROUGHNESS);
+    Texture parallaxAO("resources/materials/floor_dirt/Stone_Path_001_ambientOcclusion.jpg", TypeTexture::AO);
 
     std::vector<Texture> textures_parallax;
     textures_parallax.push_back(parallaxDiff);
     textures_parallax.push_back(parallaxNorm);
     textures_parallax.push_back(parallaxDisp);
+    textures_parallax.push_back(parallaxRoug);
+    textures_parallax.push_back(parallaxAO);
+
+
+    std::vector<Texture> textures_pbr;
+    Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
+    Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
+    Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
+    Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
+    Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
+
+    textures_pbr.push_back(pbrDiff);
+    textures_pbr.push_back(pbrNorm);
+    textures_pbr.push_back(pbrME);
+    textures_pbr.push_back(pbrRO);
+    textures_pbr.push_back(pbrAO);
+
+    //std::vector<Texture> textures_pbr_floor;
+    //Texture floor_pbrDiff("resources/materials/metal/Metal_Plate_013_basecolor.jpg", TypeTexture::DIFFUSE);
+    //Texture floor_pbrNorm("resources/materials/metal/Metal_Plate_013_normal.jpg", TypeTexture::NORMAL);
+    //Texture floor_pbrME("resources/materials/metal/Metal_Plate_013_metallic.jpg", TypeTexture::METALLIC);
+    //Texture floor_pbrRO("resources/materials/metal/Metal_Plate_013_roughness.jpg", TypeTexture::ROUGHNESS);
+    //Texture floor_pbrAO("resources/materials/metal/Metal_Plate_013_ambientOcclusion.jpg", TypeTexture::AO);
+    //Texture floor_pbrHE("resources/materials/metal/Metal_Plate_013_height.png", TypeTexture::HEIGHT);
+
+    //textures_pbr_floor.push_back(floor_pbrDiff);
+    //textures_pbr_floor.push_back(floor_pbrNorm);
+    //textures_pbr_floor.push_back(floor_pbrME);
+    //textures_pbr_floor.push_back(floor_pbrRO);
+    //textures_pbr_floor.push_back(floor_pbrAO);
+    //textures_pbr_floor.push_back(floor_pbrHE);
 
     ///SHADERS
     //Shader* outlineShader = new Shader("shaders/outline.vert", "shaders/outline.frag");
@@ -119,7 +141,7 @@ int main(int, char**)
     //Shader* standardShader = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     //Shader* instancingShader = new Shader("shaders/instancing.vert", "shaders/instancing.frag");
     //Shader* renderShader = new Shader("shaders/standardShadow.vert", "shaders/standardShadow.frag");
-    Shader* emissiveBloomShader = new Shader("shaders/emissive.vert", "shaders/emissive.frag");
+    //Shader* emissiveBloomShader = new Shader("shaders/emissive.vert", "shaders/emissive.frag");
     ///MATERIALES
     /*
     Material *cubeMaterial = new Material(refractiveShader, outlineShader, textures);
@@ -137,16 +159,19 @@ int main(int, char**)
     transpVegi->shininess = 12.0f;
     //Material* mat_asteroid = new Material(instancingShader);
     */ 
-    Material* emissiveMaterial = new Material(emissiveBloomShader);
-    emissiveMaterial->type = MaterialType::EMISSIVE_LIT;
+    //Material* emissiveMaterial = new Material(emissiveBloomShader);
+    //emissiveMaterial->type = MaterialType::EMISSIVE_LIT;
     ///CAMERA
     Camera mainCamera(1280, 720);
     renderkernel.AddCamera(&mainCamera);
 
     ///MODEL 3D
     ///--NANOSUIT  
+    //Model ourModel("./resources/space/station/SpaceShip.obj");
+    //Model ourModel("./resources/3DModels/sponza/sponza.obj");
     //Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
-    //Model ourModel("./resources/3DModels/darksouls/fallen.obj"); 
+    //Model ourModel("./resources/3DModels/sphere/sphere.obj");
+    //Model ourModel("./resources/3DModels/head/head.obj"); 
     //ourModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
     /*ourModel.AddMaterial(normalMaterial);
     //ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
@@ -154,10 +179,29 @@ int main(int, char**)
     */
     //ourModel.ScaleTo(glm::vec3(0.1f));
     //ourModel.TranslationTo(glm::vec3(0.0f, -0.5f, 0.0f));
+
+    //ourModel.matHandle.EditMaterial(MaterialComponent::TEXTURE, textures_pbr);
     //renderkernel.AddModel(&ourModel);
+
+
+    //BoundingLight* bdLight = new BoundingLight();
+    //bdLight->TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
+    //renderkernel.AddLight(bdLight);
+
+
+    ///--SPHERE
+    //Model sphereModel("./resources/3DModels/sphere/sphere.obj");
+    //sphereModel.matHandle.EditMaterial(MaterialComponent::TEXTURE, textures_pbr);
+    //sphereModel.meshes.at(0) = *(bdLight->mesh);
+    //sphereModel.matHandle.listMaterials.at(0) = bdLight->matHandle.listMaterials.at(0);
+    //sphereModel.TranslationTo(glm::vec3(0.0f, 4.0f, 0.0f));
+    //sphereModel.matHandle.listMaterials.at(0)->isBounding = true;
+    //renderkernel.AddModel(&sphereModel);
+
     
+
     ///--CUBE   
-    Model cubeModel(vertices, 36, textures);
+    Model cubeModel(vertices, 36, textures_pbr);
     cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
     cubeModel.ScaleTo(glm::vec3(0.5f));
     renderkernel.AddModel(&cubeModel);
@@ -166,7 +210,7 @@ int main(int, char**)
     //cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
-    Model cubeModel2(vertices, 36, textures);
+    Model cubeModel2(vertices, 36, textures_pbr);
     cubeModel2.TranslationTo(glm::vec3(2.0f, -0.5f, 1.0f));
     cubeModel2.ScaleTo(glm::vec3(0.5f));
     renderkernel.AddModel(&cubeModel2);
@@ -180,10 +224,10 @@ int main(int, char**)
 
     ///--FLOOR
     Model floorModel(floorVertices, 6, textures_parallax);
-    floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 32.0f);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 32.0f);
     floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
-    floorModel.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
-    floorModel.matHandle.EditMaterial(MaterialComponent::MAX_UV, 5.0f); 
+    //floorModel.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::MAX_UV, 5.0f); 
     //Shader* sh = new Shader("shaders/parallaxMapping.vert", "shaders/parallaxMapping.frag");
     //Material* mat = new Material(sh);
     //mat->AddMultTextures(textures_parallax);
@@ -247,17 +291,20 @@ int main(int, char**)
 
     // LIGHT
     
-    Light* dirLight = new Light(TypeLight::POINTLIGHT, glm::vec3(-1.0f, 0.0f, 2.0f));
-    dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, 0.5));
-    dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
-    dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
-    renderkernel.AddLight(dirLight);
+    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 1.0f, 0.0f)); 
+    //pointLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.01, -1.0, 0.01));
+    pointLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
+    pointLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
+    pointLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f); //glm::vec3(0.23, 1.0, 0.08));
+    renderkernel.AddLight(pointLight);
 
-    //Light* dirLight2 = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 0.0f, 2.0f));
-    //dirLight2->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, 0.5));
-    //dirLight2->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 1.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
-    //dirLight2->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
+    
+    Light* dirLight2 = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 1.0f, 0.0f));
+    dirLight2->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, 0.5));
+    dirLight2->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 1.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
+    dirLight2->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
     //renderkernel.AddLight(dirLight2);
+    
     /*
     Light* dirLight2 = new Light(TypeLight::DIRL, glm::vec3(5.0f, 7.0f, -5.0f)); 
     dirLight2->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.5));
@@ -290,6 +337,20 @@ int main(int, char**)
     //renderkernel.lights.at(1)->SetDiffuse(glm::vec3(0.5f));
     //renderkernel.lights.at(2)->SetDiffuse(glm::vec3(0.75f));
     //renderkernel.lights.at(3)->SetDiffuse(glm::vec3(1.0f));
+
+    Texture* textureHDR = new Texture("resources/HDR/Desert_Highway/Road_to_MonumentValley_Ref.hdr",TypeTexture::HDR_SKYBOX);
+    Skybox* skybox = new Skybox(true);
+    skybox->SetHdrTexture(textureHDR);
+    //renderkernel.AddPreCookSkybox(skybox);
+
+    std::vector<Texture> texPBR;
+    texPBR.push_back(*textureHDR);
+    Model cubeModel3(vertices, 36, texPBR);
+    cubeModel3.TranslationTo(glm::vec3(0.0f, 1.0f, 0.0f));
+    renderkernel.AddModel(&cubeModel3);
+
+    //GLint* max = new GLint(32);
+    //glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, max);
 
     //FBO
     renderkernel.PreRender();

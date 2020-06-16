@@ -262,6 +262,7 @@ void Shader::ActivateLights()
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             this->setFloat(name + "far_plane", lights[i]->GetFarplane());
+            this->setFloat(name + "radius", lights[i]->GetRadius());
             name = "PointlightPosition[" + std::to_string(numPointLights) + "]";
             this->setVec3(name, lights[i]->GetPosition());
             numPointLights++;

@@ -29,6 +29,7 @@ public:
     //Material info
     Material *material;
     /*  Functions  */
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle);
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, MaterialHandle &matHandle);
     Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, MaterialHandle& matHandle);
     Mesh(std::vector<ProceduralVertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle, glm::vec2* instances = NULL);
@@ -44,7 +45,10 @@ public:
 
     void setUpInstanceMesh(unsigned int ID);
     void SetIntanceMesh();
+    bool inline GetIsBoundingLight() { return isBoundingLight; }
+    void SetBoundingLight(bool value);
 private:
+    bool isBoundingLight = false;
     /*  Render data  */
     unsigned int VAO, VBO, EBO;
     /*  Functions    */

@@ -21,6 +21,8 @@ Material::Material(Shader* shader)
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
     parallax_displacement = 0.0f;
+    min_uv = 0.0f;
+    max_uv = 1.0f;
 }
 
 Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
@@ -108,6 +110,10 @@ void Material::ActivateShadowTexture(unsigned int idTexShadow, int idLight, Type
         ptrShader->setInt("dirLights[" + std::to_string(idLight) + "].shadowMap", numTextures);
         break;
     case TypeLight::POINTLIGHT:
+        //if(idLight == 0)
+        //    ptrShader->setInt("shadowCubeMap", numTextures);
+        //else
+        //    ptrShader->setInt("shadowCubeMap2", numTextures);
         ptrShader->setInt("pointLights[" + std::to_string(idLight) + "].shadowCubeMap", numTextures);
         break;
     case TypeLight::SPOTL:
@@ -141,6 +147,10 @@ void Material::AssignRenderTextures()
     unsigned int normalNr = 0;
     unsigned int heightNr = 0;
     unsigned int emissiveNr = 0;
+    unsigned int aoNr = 0;
+    unsigned int metallicNr = 0;
+    unsigned int roughnessNr = 0;
+    unsigned int bumpNr = 0;
 
     numTextures = textures.size();
 
@@ -167,6 +177,18 @@ void Material::AssignRenderTextures()
         case TypeTexture::EMISSIVE:
             name = "material.emissive[" + std::to_string(emissiveNr++) + "]";
             break;
+        case TypeTexture::AO:
+            name = "material.ao[" + std::to_string(aoNr++) + "]";
+            break;
+        case TypeTexture::METALLIC:
+            name = "material.metallic[" + std::to_string(metallicNr++) + "]";
+            break;
+        case TypeTexture::ROUGHNESS:
+            name = "roughness.ao[" + std::to_string(roughnessNr++) + "]";
+            break;
+        case TypeTexture::BUMP:
+            name = "material.bump[" + std::to_string(bumpNr++) + "]";
+            break;
         }
 
         glActiveTexture(GL_TEXTURE0 + i);
@@ -175,17 +197,22 @@ void Material::AssignRenderTextures()
         ptrShader->use();
         ptrShader->setInt((name).c_str(), i);
     }
-
+    ptrShader->use();
     ptrShader->setInt("material.num_diffuse", diffuseNr);
     ptrShader->setInt("material.num_specular", specularNr);
     ptrShader->setInt("material.num_normal", normalNr);
     ptrShader->setInt("num_normal", normalNr);
     ptrShader->setInt("material.num_height", heightNr);
     ptrShader->setInt("material.num_emissive", emissiveNr);
+    ptrShader->setInt("material.num_ao", aoNr);
+    ptrShader->setInt("material.num_metallic", metallicNr);
+    ptrShader->setInt("material.num_roughness", roughnessNr);
+    ptrShader->setInt("material.num_bump", bumpNr);
     ptrShader->setFloat("material.shininess", shininess);
     ptrShader->setBool("material.blinn", isBlinnShading);
     ptrShader->setBool("material.isAmbientReflective", isAmbientReflective);
     ptrShader->setBool("material.isAmbientRefractive", isAmbientRefractive);
+    ptrShader->setInt("material.isBoundingLight", isBounding);
     ptrShader->setFloat("material.refractiveIndex", refractiveIndex);
     ptrShader->setFloat("material.heightScale", parallax_displacement);
     ptrShader->setFloat("generalAmbient", 0.4f);

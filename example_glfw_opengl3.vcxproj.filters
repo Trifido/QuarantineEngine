@@ -74,6 +74,12 @@
     <Filter Include="sources\shaders\deferred">
       <UniqueIdentifier>{10068711-c82b-4943-98d8-e703b2b2334b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sources\shaders\PBR">
+      <UniqueIdentifier>{c3bbe225-32e4-47db-ab0e-c4ab8ad4122e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\shaders\PBR\cubemap">
+      <UniqueIdentifier>{aba2b080-2c48-407e-b26e-d5d07813aaba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -141,6 +147,12 @@
     </ClCompile>
     <ClCompile Include="FBO.cpp">
       <Filter>sources\system</Filter>
+    </ClCompile>
+    <ClCompile Include="BoundingLight.cpp">
+      <Filter>sources\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="SSBOSystem.cpp">
+      <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +232,15 @@
       <Filter>sources\system</Filter>
     </ClInclude>
     <ClInclude Include="FBO.h">
+      <Filter>sources\system</Filter>
+    </ClInclude>
+    <ClInclude Include="BoundingLight.h">
+      <Filter>sources\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="SSBOSystem.h">
+      <Filter>sources\system</Filter>
+    </ClInclude>
+    <ClInclude Include="ContentSSBO.h">
       <Filter>sources\system</Filter>
     </ClInclude>
   </ItemGroup>
@@ -409,6 +430,36 @@
     </None>
     <None Include="shaders\deferredLighting.vert">
       <Filter>sources\shaders\deferred</Filter>
+    </None>
+    <None Include="shaders\lightVolumePass.frag">
+      <Filter>sources\shaders\deferred</Filter>
+    </None>
+    <None Include="shaders\lightVolumePass.vert">
+      <Filter>sources\shaders\deferred</Filter>
+    </None>
+    <None Include="shaders\ssao.frag">
+      <Filter>sources\shaders\deferred</Filter>
+    </None>
+    <None Include="shaders\ssao_blur.frag">
+      <Filter>sources\shaders\deferred</Filter>
+    </None>
+    <None Include="shaders\pbrShader1.frag">
+      <Filter>sources\shaders\PBR</Filter>
+    </None>
+    <None Include="shaders\pbrShader1.vert">
+      <Filter>sources\shaders\PBR</Filter>
+    </None>
+    <None Include="shaders\sphericalCubemap.frag">
+      <Filter>sources\shaders\PBR\cubemap</Filter>
+    </None>
+    <None Include="shaders\sphericalCubemap.vert">
+      <Filter>sources\shaders\PBR\cubemap</Filter>
+    </None>
+    <None Include="shaders\skyboxHDR.frag">
+      <Filter>sources\shaders\PBR\cubemap</Filter>
+    </None>
+    <None Include="shaders\skyboxHDR.vert">
+      <Filter>sources\shaders\PBR\cubemap</Filter>
     </None>
   </ItemGroup>
 </Project>

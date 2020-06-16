@@ -15,7 +15,8 @@ enum MaterialType
     NORMALS,
     PROCEDURAL,
     INSTANCE,
-    EMISSIVE_LIT
+    EMISSIVE_LIT,
+    BOUNDING_VOLUME
 };
 
 enum MaterialComponent
@@ -23,6 +24,8 @@ enum MaterialComponent
     TYPE,
     SHADER1,
     SHADER2,
+    SHADER_FORWARD,
+    SHADER_DEFERRED,
     SHADER_SHADOW,
     SHADER_POINT_SHADOW,
     TEXTURE,
@@ -68,6 +71,7 @@ public:
     bool isAmbientReflective = false;
     bool isAmbientRefractive = false;
     bool isBlinnShading = true;
+    bool isBounding = false;
     glm::vec4 colorOutline;
     DrawMode drawtype;
     int numInstances;
@@ -82,7 +86,6 @@ public:
     void AddShader(Shader* sh);
     void AddTexture(Texture texture);
 	void ActivateShadowTexture(unsigned int idTexShadow, int idLight, TypeLight type = TypeLight::DIRL);
-    //void ActivateShadowTexture(unsigned int idTexShadow, bool isOmni = false);
     void AddMultTextures(std::vector<Texture> texturesIN);
     void AssignRenderTextures();
 };

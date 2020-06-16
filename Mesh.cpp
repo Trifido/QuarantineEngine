@@ -1,5 +1,17 @@
 #include "Mesh.h"
 
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle)
+{ 
+    this->vertices = vertices;
+    this->indices = indices;
+    material = new Material(matHandle.shader);
+    material->ptrShaderShadow = matHandle.shaderShadow;
+    material->ptrShaderPointShadow = matHandle.shaderPointShadow; 
+    matHandle.AddMaterialToList(material);
+
+    setupMesh();
+}
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, MaterialHandle& matHandle)
 {
     this->vertices = vertices;
@@ -311,4 +323,10 @@ void Mesh::SetIntanceMesh()
     glVertexAttribDivisor(6, 1);
 
     glBindVertexArray(0);
+}
+
+void Mesh::SetBoundingLight(bool value)
+{
+    isBoundingLight = value;
+    material->isBounding = value;
 }

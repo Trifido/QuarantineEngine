@@ -22,7 +22,12 @@ enum TypeTexture
     NORMAL,
     HEIGHT,
     EMISSIVE,
-    CUBEMAP
+    CUBEMAP,
+    AO,
+    ROUGHNESS,
+    METALLIC,
+    BUMP,
+    HDR_SKYBOX
 };
 
 class Texture
@@ -42,7 +47,7 @@ public:
     ~Texture();
     Texture(std::string imagePath, bool isGamma = false, unsigned int wrap = GL_REPEAT, unsigned int filter = GL_LINEAR, bool flip = false);
     Texture(std::string imagePath, TypeTexture type, bool isGamma = false, unsigned int wrap = GL_REPEAT, unsigned int filter = GL_LINEAR, bool flip = false);
-    Texture(std::vector<std::string> imagePath, TypeTexture type, unsigned int wrap = GL_CLAMP_TO_EDGE, unsigned int filter = GL_LINEAR, bool flip = false);
+    Texture(std::vector<std::string> imagePath, TypeTexture type, bool isGamma = false, unsigned int wrap = GL_CLAMP_TO_EDGE, unsigned int filter = GL_LINEAR, bool flip = false);
     void EditComponet(TextureComponent component, bool value);
     void EditComponet(TextureComponent component, int value);
     void EditComponet(TextureComponent component, std::string value);
@@ -50,7 +55,9 @@ public:
 
 private:
     void LoadTextureObj();
+    void LoadTextureHDR();
     void LoadImage(const char* imagesPath, bool flip = false);
+    void LoadHDRImage(const char* imagesPath, bool flip = false);
 };
 
 #endif
