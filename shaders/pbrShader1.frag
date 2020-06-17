@@ -164,8 +164,7 @@ void main()
     else
         N = fs_in.Normal;
  
-    //vec3 V = normalize(viewPos - fs_in.FragPos);
-    vec3 V = normalize(camera_position - fs_in.FragPos);
+    vec3 V = normalize(viewPos - fs_in.FragPos);
 
     vec3 albedo     = pow(texture(material.diffuse[0], texCoords).rgb, vec3(2.2));
 
@@ -290,8 +289,7 @@ float PointShadowCalculation(int idLight)
     float viewDistance;
     vec3 fragToLight;
 
-    //viewDistance = length(viewPos - fs_in.FragPos);
-    viewDistance = length(camera_position - fs_in.FragPos);
+    viewDistance = length(viewPos - fs_in.FragPos);
     fragToLight = fs_in.FragPos - pointLights[idLight].position;
 
     float diskRadius = (1.0 + (viewDistance / pointLights[idLight].far_plane)) / 25.0; 

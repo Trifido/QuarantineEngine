@@ -174,5 +174,5 @@ void Light::Init()
     near_plane = 0.1f;
     far_plane = 100.0f;
     aspect = 1.0f;
-    projDimension = glm::vec4(-10.0f, 10.0f, -10.0f, 10.0f);
+    projDimension = glm::vec4(-100.0f, 100.0f, -100.0f, 100.0f);
 }

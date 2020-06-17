@@ -8,7 +8,7 @@
 class SSBOSystem
 {
 private:
-    unsigned int ssboID;
+    GLuint ssboID;
 
 public: 
     ssbo_data_t dataSSBO;

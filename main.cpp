@@ -341,7 +341,7 @@ int main(int, char**)
     Texture* textureHDR = new Texture("resources/HDR/Desert_Highway/Road_to_MonumentValley_Ref.hdr",TypeTexture::HDR_SKYBOX);
     Skybox* skybox = new Skybox(true);
     skybox->SetHdrTexture(textureHDR);
-    //renderkernel.AddPreCookSkybox(skybox);
+    renderkernel.AddPreCookSkybox(skybox);
 
     std::vector<Texture> texPBR;
     texPBR.push_back(*textureHDR);

@@ -9,7 +9,7 @@ RenderSystem::RenderSystem(GLFWwindow* window, ImVec4* clearColor)
     num_omni_cast_shadow = 0;
     num_spot_cast_shadow = 0;
     precookSkybox = nullptr;
-    ssboSystem = new SSBOSystem();
+    ssboSystem = nullptr;
 }
 
 void RenderSystem::ComputeDeltaTime()
@@ -194,6 +194,7 @@ void RenderSystem::RenderSolidModels()
             solidModels[i]->Draw();
         }
     }
+    glEnable(GL_CULL_FACE);
 }
 
 void RenderSystem::RenderTransparentModels()
@@ -312,20 +313,6 @@ void RenderSystem::PreRender()
         models.at(i)->AddCamera(cameras.at(0));
     }
 
-    //for (unsigned int i = 0; i < boundingModels.size(); i++)
-    //{
-        //boundingModels.at(i)->AddCamera(cameras.at(0));
-        //boundingModels.at(i)->AddLight(lights);
-    //}
-
-    //CONFIGURAMOS Y AÑADIMOS SSBO
-    ssboSystem->SetUpSSBOSystem();
-
-    for (unsigned int i = 0; i < solidModels.size(); i++)
-    {
-        ssboSystem->ConnectSSBOToShader(solidModels.at(i)->matHandle.shader->ID);
-    }
-
     //CREAMOS UN FRAME BUFFER OBJECT (FBO)
     glfwGetWindowSize(window, &width, &height);
     fboSystem = new FBOSystem(&width, &height);
@@ -333,14 +320,10 @@ void RenderSystem::PreRender()
     fboSystem->AddFBO(new FBO(FBOType::MULT_RT, 8));
     ///Añadimos PINGPONG FBO
     fboSystem->AddFBO(new FBO(FBOType::PINGPONG_FBO));
-    ///Añadimos Final FBO
-    //fboSystem->AddFBO(new FBO(FBOType::COLOR_FBO, 16));
     ///Añadimos Omnidirectional shadow FBO
     fboSystem->AddFBO(new FBO(FBOType::OMNI_SHADOW_FBO, 0, num_omni_cast_shadow));
     ///Añadimos Directional shadow FBO
     fboSystem->AddFBO(new FBO(FBOType::DIR_SHADOW_FBO, 0, num_dir_cast_shadow + num_spot_cast_shadow));
-    ///Añadimos Light Volume FBO
-    //fboSystem->AddFBO(new FBO(FBOType::LIGHTING_VOLUME_FBO, 0));
     ///Añadimos SSAO FBO
     fboSystem->AddFBO(new FBO(FBOType::SSAO_FBO));
     //Añadimo HDRskybox FBO
@@ -511,10 +494,6 @@ void RenderSystem::StartRender()
         //ANIMATION
         ComputeDeltaTime();
         GetWindowSize(window, &width, &height);
-
-        //ACTUALIZAMOS SSBO 
-        ssboSystem->dataSSBO.camera_position = cameras.at(0)->cameraPos;
-        ssboSystem->UpdateSSBOSystem();
 
         //glm::vec3 tempPos = lights.at(0)->GetPosition();
         //tempPos.x = sin(glfwGetTime() * 0.5) * 3.0;
