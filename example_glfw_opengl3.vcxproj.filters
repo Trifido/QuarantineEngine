@@ -80,6 +80,9 @@
     <Filter Include="sources\shaders\PBR\cubemap">
       <UniqueIdentifier>{aba2b080-2c48-407e-b26e-d5d07813aaba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sources\GUI">
+      <UniqueIdentifier>{fb3debeb-b3de-49ae-8709-2f2994f30916}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -153,6 +156,12 @@
     </ClCompile>
     <ClCompile Include="SSBOSystem.cpp">
       <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GUISystem.cpp">
+      <Filter>sources\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>sources\Geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -242,6 +251,12 @@
     </ClInclude>
     <ClInclude Include="ContentSSBO.h">
       <Filter>sources\system</Filter>
+    </ClInclude>
+    <ClInclude Include="GUISystem.h">
+      <Filter>sources\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>sources\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -460,6 +475,24 @@
     </None>
     <None Include="shaders\skyboxHDR.vert">
       <Filter>sources\shaders\PBR\cubemap</Filter>
+    </None>
+    <None Include="shaders\sphericalCubemapTest.frag">
+      <Filter>sources\shaders\PBR\cubemap</Filter>
+    </None>
+    <None Include="shaders\sphericalCubemapTest.vert">
+      <Filter>sources\shaders\PBR\cubemap</Filter>
+    </None>
+    <None Include="shaders\irradianceCubemap.frag">
+      <Filter>sources\shaders\PBR\cubemap</Filter>
+    </None>
+    <None Include="shaders\prefilterShader.frag">
+      <Filter>sources\shaders\PBR\cubemap</Filter>
+    </None>
+    <None Include="shaders\brdf.frag">
+      <Filter>sources\shaders\PBR</Filter>
+    </None>
+    <None Include="shaders\brdf.vert">
+      <Filter>sources\shaders\PBR</Filter>
     </None>
   </ItemGroup>
 </Project>

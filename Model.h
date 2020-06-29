@@ -5,6 +5,7 @@
 
 #include "HeadersRequeriments.h"
 #include "Mesh.h"
+#include "Transform.h"
 #include "MaterialHandle.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -36,7 +37,7 @@ public:
     std::vector<Mesh> meshes;
     bool CAST_SHADOW = true;
     MaterialHandle matHandle;
-    glm::mat4 model = glm::mat4(1.0f);
+    Transform* transform;
     glm::mat4* modelMatrices;
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection; 
@@ -58,6 +59,9 @@ public:
     void Rotation(float radians, glm::vec3 axis);
     void TranslationTo(glm::vec3 position);
     void ScaleTo(glm::vec3 scale);
+    void AttachModel(Model* modelParent);
+    void AttachCamera(Camera* cameraParent);
+    void SetModelHierarchy();
     void ResetModel();
 
     void DeleteGPUInfo();

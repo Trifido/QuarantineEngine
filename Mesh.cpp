@@ -282,8 +282,16 @@ void Mesh::SetRenderMode()
             glDrawArraysInstanced(GL_POINTS, 0, 6, 100);
         break;
     case DrawMode::DLINES:
+        if (material->type != MaterialType::INSTANCE)
+            glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+        else
+            glDrawArraysInstanced(GL_LINES, 0, 6, 100);
         break;
     case DrawMode::DLINES_STRIP:
+        if (material->type != MaterialType::INSTANCE)
+            glDrawElements(GL_LINE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
+        else
+            glDrawArraysInstanced(GL_LINE_STRIP, 0, 6, 100);
         break;
     case DrawMode::DTRIANGLES:
         if (material->type != MaterialType::INSTANCE)

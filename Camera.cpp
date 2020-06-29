@@ -7,6 +7,7 @@ Camera::Camera(float width, float height)
     HEIGHT = height;
     lastX = WIDTH / 2.0f;
     lastY = HEIGHT / 2.0f;
+    transform = new Transform();
 }
 
 void Camera::CameraController(float deltaTime)
@@ -21,6 +22,7 @@ void Camera::CameraController(float deltaTime)
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('w')))
     {
         cameraPos += cameraSpeed * deltaTime * cameraFront;
+        this->transform->model = glm::translate(glm::mat4(1.0), cameraPos);
     }
 
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)) ||
@@ -28,6 +30,7 @@ void Camera::CameraController(float deltaTime)
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('s')))
     {
         cameraPos -= cameraSpeed * deltaTime * cameraFront;
+        this->transform->model = glm::translate(glm::mat4(1.0), cameraPos);
     }
      
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)) ||
@@ -35,6 +38,7 @@ void Camera::CameraController(float deltaTime)
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('a')))
     {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * deltaTime * cameraSpeed;
+        this->transform->model = glm::translate(glm::mat4(1.0), cameraPos);
     }
      
     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)) ||
@@ -42,7 +46,13 @@ void Camera::CameraController(float deltaTime)
         (ImGui::GetIO().KeyShift && ImGui::IsKeyDown('d')))
     {
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * deltaTime * cameraSpeed;
+        this->transform->model = glm::translate(glm::mat4(1.0), cameraPos);
     }
+
+    //for (unsigned int i = 0; i < transform->childs.size(); i++)
+    //{
+    //    transform->childs[i]->model = this->transform->model;
+    //}
 
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 500.0f);
@@ -101,5 +111,10 @@ void Camera::EditorRotate()
     {
         firstMouse = true;
     }
+}
+
+void Camera::AttachTo(Transform* model)
+{
+    transform->AttachTo(transform);
 }
 

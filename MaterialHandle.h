@@ -41,6 +41,7 @@ public:
     void EditMaterial(MaterialComponent component, RenderType type);
     void EditMaterial(MaterialComponent component, std::vector<Texture> textures, unsigned int id = NULL);
 	void ActivateShadowMap(unsigned int idTexShadow, unsigned int idLight, TypeLight type = TypeLight::DIRL);
+	void ActivateIrradianceMap(unsigned int idTexIrradiance, unsigned int idTexPrefilter, unsigned int idTexBrdf);
     //void ActivateShadowMap(unsigned int idTexShadow, bool isOmni = false);
 };
 

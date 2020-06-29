@@ -14,6 +14,7 @@ FBOSystem::FBOSystem(int *width, int *height)
     lightVolumeFBO = nullptr;
     ssaoFBO = nullptr;
     skyboxFBO = nullptr;
+    prefilterFBO = nullptr;
 }
 
 FBO* FBOSystem::GetFBO(FBOType type)
@@ -38,6 +39,8 @@ FBO* FBOSystem::GetFBO(FBOType type)
         return ssaoFBO;
     case FBOType::SKYBOX_FBO:
         return skyboxFBO;
+    case FBOType::PREFILTER_FBO:
+        return prefilterFBO;
     }
 }
 
@@ -73,6 +76,9 @@ void FBOSystem::AddFBO(FBO* fbo)
         break;
     case FBOType::SKYBOX_FBO:
         skyboxFBO = fbo;
+        break;
+    case FBOType::PREFILTER_FBO:
+        prefilterFBO = fbo;
         break;
     } 
 }
@@ -202,6 +208,13 @@ unsigned int FBOSystem::GetDirRender(unsigned int id)
     return 0;
 }
 
+unsigned int FBOSystem::GetPrefilterRender(unsigned int id)
+{
+    if(prefilterFBO != nullptr)
+        return prefilterFBO->GetRenderTexture(id);
+    return 0;
+}
+
 void FBOSystem::ResizeFBOs()
 {
     if (colorFBO != nullptr)
@@ -225,4 +238,12 @@ void FBOSystem::BlitDepthBuffer(FBOType readBuffer, FBOType drawBuffer)
 
     glBlitFramebuffer(0, 0, *width, *height, 0, 0, *width, *height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FBOSystem::SetIrradianceMap()
+{
+    if (skyboxFBO != nullptr)
+    {
+        skyboxFBO->SetIrradianceCubemap();
+    }
 }

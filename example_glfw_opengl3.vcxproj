@@ -170,6 +170,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FBO.cpp" />
     <ClCompile Include="FBOSystem.cpp" />
+    <ClCompile Include="GUISystem.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -182,6 +183,7 @@
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SSBOSystem.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Transform.cpp" />
     <ClCompile Include="UBOSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -197,6 +199,7 @@
     <ClInclude Include="ContentSSBO.h" />
     <ClInclude Include="FBO.h" />
     <ClInclude Include="FBOSystem.h" />
+    <ClInclude Include="GUISystem.h" />
     <ClInclude Include="HeadersRequeriments.h" />
     <ClInclude Include="includes\stb_image.h" />
     <ClInclude Include="KeyInput.h" />
@@ -213,6 +216,7 @@
     <ClInclude Include="SkyBox.h" />
     <ClInclude Include="SSBOSystem.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="Transform.h" />
     <ClInclude Include="UBOSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -221,6 +225,8 @@
     <None Include="shaders\blending.frag" />
     <None Include="shaders\blending.vert" />
     <None Include="shaders\blurPass.frag" />
+    <None Include="shaders\brdf.frag" />
+    <None Include="shaders\brdf.vert" />
     <None Include="shaders\deferredLighting.frag" />
     <None Include="shaders\deferredLighting.vert" />
     <None Include="shaders\depthRender.frag" />
@@ -247,6 +253,7 @@
     <None Include="shaders\instancing.vert" />
     <None Include="shaders\instancing_quads.frag" />
     <None Include="shaders\instancing_quads.vert" />
+    <None Include="shaders\irradianceCubemap.frag" />
     <None Include="shaders\lightingCubeFRAG.frag" />
     <None Include="shaders\lightingCubeVERT.vert" />
     <None Include="shaders\lightmaps.frag" />
@@ -264,6 +271,7 @@
     <None Include="shaders\pointShadow.frag" />
     <None Include="shaders\pointShadow.gm" />
     <None Include="shaders\pointShadow.vert" />
+    <None Include="shaders\prefilterShader.frag" />
     <None Include="shaders\reflective.frag" />
     <None Include="shaders\reflective.vert" />
     <None Include="shaders\refractive.frag" />
@@ -278,6 +286,8 @@
     <None Include="shaders\skyboxHDR.vert" />
     <None Include="shaders\sphericalCubemap.frag" />
     <None Include="shaders\sphericalCubemap.vert" />
+    <None Include="shaders\sphericalCubemapTest.frag" />
+    <None Include="shaders\sphericalCubemapTest.vert" />
     <None Include="shaders\ssao.frag" />
     <None Include="shaders\ssao_blur.frag" />
     <None Include="shaders\standardBloom.frag" />

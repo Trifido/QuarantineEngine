@@ -10,6 +10,7 @@ RenderSystem::RenderSystem(GLFWwindow* window, ImVec4* clearColor)
     num_spot_cast_shadow = 0;
     precookSkybox = nullptr;
     ssboSystem = nullptr;
+    guiSystem = new GUISystem();
 }
 
 void RenderSystem::ComputeDeltaTime()
@@ -109,19 +110,13 @@ void RenderSystem::RenderSkyBox()
 {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    if (precookSkybox == nullptr)
+    if (precookSkybox == nullptr)     
     {
         skybox->Render();
     }
     else
     {
-        precookSkybox->precookFinal->use();
-        precookSkybox->precookFinal->setInt("environmentMap", 0);
-        precookSkybox->precookFinal->setMat4("projection", cameras[0]->projection);
-        precookSkybox->precookFinal->setMat4("view", cameras[0]->view);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, fboSystem->GetSkyboxRender());
-        precookSkybox->RenderHDR();
+        precookSkybox->RenderHDR(cameras[0], fboSystem->GetSkyboxRender(0));
     }
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
@@ -176,6 +171,12 @@ void RenderSystem::RenderSolidModels()
     glDisable(GL_CULL_FACE);
     for (int i = 0; i < solidModels.size(); i++)
     {
+        ////Comprobamos la jerarquía de los modelos 3D
+        solidModels[i]->SetModelHierarchy();
+
+        //Añadimos el mapa de irradiancia
+        solidModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
+
         if (solidModels[i]->CAST_SHADOW)
         {
             for (int idLight = 0; idLight < this->shadowCastDirLights.size(); idLight++)
@@ -230,27 +231,51 @@ void RenderSystem::PreRenderHDRSkybox()
 {
     precookSkybox->PreRender();
     glViewport(0, 0, 512, 512);
+
     fboSystem->SkyboxProcessPass();
     //Terminamos de configurar el FBO añadiendo las texturas del cubemap
     for (unsigned int i = 0; i < 6; ++i)
     {
-        //precookSkybox->matHandle->shader->use();
         precookSkybox->matHandle->shader->setMat4("view", precookSkybox->captureViews[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, fboSystem->GetSkyboxRender(), 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        precookSkybox->RenderHDR();
+        precookSkybox->DrawCube();
     }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        fprintf(stderr, "ERROR::SKYBOX Framebuffer not complete!");
+    fboSystem->SetIrradianceMap();
+
+    glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
+    fboSystem->SkyboxProcessPass();
+
+    precookSkybox->RenderIrradianceMap(cameras[0], fboSystem->GetSkyboxRender(), fboSystem->GetSkyboxRender(1));
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    PrefilerPass();
+
+    BRDFPass();
+}
+
+void RenderSystem::PrefilerPass()
+{
+    precookSkybox->SetUpPrefilterMap(fboSystem->GetSkyboxRender(), fboSystem->GetFBO(FBOType::PREFILTER_FBO));
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RenderSystem::BRDFPass()
+{
+    fboSystem->GetFBO(FBOType::SKYBOX_FBO)->Set2DLUT();
+
+    precookSkybox->DrawQuad();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void RenderSystem::PreRender()
 {
-    SetRenderMode(RenderType::FORWARD_RENDER);
+    SetRenderMode();
+
     //UNIFORM BUFFER OBJECT
     uboSytem = new UBOSystem();
 
@@ -328,6 +353,8 @@ void RenderSystem::PreRender()
     fboSystem->AddFBO(new FBO(FBOType::SSAO_FBO));
     //Añadimo HDRskybox FBO
     fboSystem->AddFBO(new FBO(FBOType::SKYBOX_FBO));
+    //Añadimo PrefilterSkybox FBO
+    fboSystem->AddFBO(new FBO(FBOType::PREFILTER_FBO));
 
     //DEFERRED RENDER
     fboSystem->AddFBO(new FBO(FBOType::DEFFERED));
@@ -352,6 +379,11 @@ void RenderSystem::PreRender()
 
     glEnable(GL_MULTISAMPLE);
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
     //Preparamos el skybox
     if (precookSkybox != nullptr)
     { 
@@ -359,12 +391,21 @@ void RenderSystem::PreRender()
     }
 }
 
-void RenderSystem::SetRenderMode(RenderType rmode)
+void RenderSystem::SetRenderMode()
 {
-    //assert(rmode == renderMode);
-    renderMode = rmode;
+    RenderType rmode;
+    if (guiSystem->isForwardRender())
+        rmode = RenderType::FORWARD_RENDER;
+    else
+        rmode = RenderType::DEFERRED_RENDER;
+
+        renderMode = rmode;
+
     for (unsigned int i = 0; i < models.size(); i++)
+    {
         models.at(i)->matHandle.EditMaterial(RENDER_MODE, renderMode);
+        models.at(i)->matHandle.EditMaterial(DRAW_MODE, guiSystem->GetDrawMode());
+    }
 
     for (unsigned int i = 0; i < boundingModels.size(); i++)
         boundingModels.at(i)->matHandle.EditMaterial(RENDER_MODE, renderMode);
@@ -496,7 +537,13 @@ void RenderSystem::StartRender()
         GetWindowSize(window, &width, &height);
 
         //glm::vec3 tempPos = lights.at(0)->GetPosition();
-        //tempPos.x = sin(glfwGetTime() * 0.5) * 3.0;
+        glm::vec3 tempPos = glm::vec3(0.0, 0.0, 0.0);
+        glm::vec3 tempPos2 = glm::vec3(0.0, 1.0, 0.0);
+        tempPos.x = sin(glfwGetTime() * 0.5) * 3.0;
+        tempPos2.y = sin(glfwGetTime() * 0.5) * 3.0;
+
+        models[1]->TranslationTo(tempPos);
+        models[2]->TranslationTo(tempPos2);
         //lights.at(0)->EditLightComponent(LightComponent::LIGHT_POSITION, tempPos);
 
         //Set GPU instances
@@ -520,6 +567,13 @@ void RenderSystem::StartRender()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        //Draw UI
+        guiSystem->DrawGUI();
+        //bool aux = true;
+        //ImGui::ShowDemoWindow(&aux);
+        //Check Render Mode
+        SetRenderMode();
 
         //CAMERA INPUT
         cameras.at(0)->CameraController(deltaTime);

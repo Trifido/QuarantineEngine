@@ -3,6 +3,8 @@
 #define CAMERA_H
 
 #include "HeadersRequeriments.h"
+#include "Transform.h"
+//#include "Model.h"
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
@@ -26,12 +28,14 @@ public:
     glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
     glm::mat4 view;
     glm::mat4 projection;
+    Transform* transform;
     glm::mat4 MVP;
     glm::mat4 VP;
     Camera(float width, float height);
     void CameraController(float deltaTime);
     void EditorScroll();
     void EditorRotate();
+    void AttachTo(Transform* model);
 };
 
 #endif

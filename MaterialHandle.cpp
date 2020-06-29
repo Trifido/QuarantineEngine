@@ -238,6 +238,15 @@ void MaterialHandle::ActivateShadowMap(unsigned int idTexShadow, unsigned int id
     }
 }
 
+void MaterialHandle::ActivateIrradianceMap(unsigned int idTexIrradiance, unsigned int idTexPrefilter, unsigned int idTexBrdf)
+{
+    shader->use();
+    for (int i = 0; i < listMaterials.size(); i++)
+    {
+        listMaterials.at(i)->ActivateIrradianceMap(idTexIrradiance, idTexPrefilter, idTexBrdf);
+    }
+}
+
 void MaterialHandle::EditMaterial(MaterialComponent component, bool value)
 {
     switch (component)

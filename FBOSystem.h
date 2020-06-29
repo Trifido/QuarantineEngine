@@ -17,6 +17,7 @@ private:
     FBO* lightVolumeFBO;
     FBO* ssaoFBO;
     FBO* skyboxFBO;
+    FBO* prefilterFBO;
     int *width, *height;
 public:
     FBOSystem(int *width, int *height);
@@ -40,11 +41,13 @@ public:
     unsigned int GetLightVolumeRender(unsigned int id = 0);
     unsigned int GetSSAORender(unsigned int id = 0);
     unsigned int GetSkyboxRender(unsigned int id = 0);
+    unsigned int GetPrefilterRender(unsigned int id = 0);
     //unsigned int GetOmniRender();
 	unsigned int GetDirRender(unsigned int id = 0);
     //unsigned int GetDirRender();
     void ResizeFBOs();
     void BlitDepthBuffer(FBOType readBuffer, FBOType drawBuffer);
+    void SetIrradianceMap();
 };
 
 #endif

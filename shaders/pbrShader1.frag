@@ -59,6 +59,11 @@ struct PointLight {
     samplerCube shadowCubeMap;
 };
 
+//IRRADIANCE MAP
+uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D brdfLUT;
+
 //MATERIAL
 uniform Material material;
 
@@ -145,6 +150,12 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 // ----------------------------------------------------------------------------
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+// ----------------------------------------------------------------------------
+
 
 void main()
 {
@@ -160,11 +171,12 @@ void main()
     if(material.num_normal > 0)
         N = getNormalFromMap(texCoords);
     else if(material.num_bump > 0)
-        N = fs_in.Normal * texture(material.bump[0], texCoords).r;
+        N = normalize(fs_in.Normal * texture(material.bump[0], texCoords).r);
     else
-        N = fs_in.Normal;
- 
+        N = normalize(fs_in.Normal);
+
     vec3 V = normalize(viewPos - fs_in.FragPos);
+    vec3 R = reflect(-V, N);
 
     vec3 albedo     = pow(texture(material.diffuse[0], texCoords).rgb, vec3(2.2));
 
@@ -177,16 +189,40 @@ void main()
     //COMPUTE LIGHT
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    vec3 result = texture(material.diffuse[0], texCoords).rgb * generalAmbient;
+    vec3 result = texture(material.diffuse[0], texCoords).rgb;// * generalAmbient;
 
     for(int i = 0; i < numPointLights; i++)
         Lo += CalcPointLight(pointLights[i], i, N, V, texCoords);
 
     // ambient lighting (note that the next IBL tutorial will replace 
     // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * albedo * ao;
+
+    // ambient lighting (we now use IBL as the ambient term)
+    float metallic;
+    if(material.num_metallic > 0)
+        metallic = texture(material.metallic[0], texCoords).r;
+    else
+        metallic = 0.0;
+
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metallic);
+
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness); 
+    vec3 kS = F; 
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	  
+    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 diffuse      = irradiance * albedo;
+
+    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+    
+    vec3 ambient = (kD * diffuse + specular) * ao;
+
     vec3 color = ambient + Lo;
-     
     FragColor = vec4(color, 1.0); 
 }
 
@@ -237,7 +273,7 @@ vec3 CalcPointLight(PointLight light, int idLight, vec3 normal, vec3 viewDir, ve
     // scale light by NdotL
     float NdotL = max(dot(normal, L), 0.0);        
 
-    float shadow = PointShadowCalculation(idLight);
+    float shadow = 0.0;//PointShadowCalculation(idLight);
 
     // add to outgoing radiance Lo
     return (kD * albedo * (1.0 - shadow) / PI + (specular * (1.0 - shadow))) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again

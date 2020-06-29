@@ -132,6 +132,23 @@ void Material::ActivateShadowTexture(unsigned int idTexShadow, int idLight, Type
     numTextures++;
 }
 
+void Material::ActivateIrradianceMap(unsigned int idTexIrradiance, unsigned int idTexPrefilter, unsigned int idTexBrdf)
+{
+    ptrShader->use();
+    ptrShader->setInt("irradianceMap", numTextures);
+    glActiveTexture(GL_TEXTURE0 + numTextures);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, idTexIrradiance);
+    numTextures++;
+    ptrShader->setInt("prefilterMap", numTextures);
+    glActiveTexture(GL_TEXTURE0 + numTextures);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, idTexPrefilter);
+    numTextures++;
+    ptrShader->setInt("brdfLUT", numTextures);
+    glActiveTexture(GL_TEXTURE0 + numTextures);
+    glBindTexture(GL_TEXTURE_2D, idTexBrdf);
+    numTextures++;
+}
+
 void Material::AddMultTextures(std::vector<Texture> texturesIN)
 {  
     for (int i = 0; i < texturesIN.size(); i++)
@@ -184,7 +201,7 @@ void Material::AssignRenderTextures()
             name = "material.metallic[" + std::to_string(metallicNr++) + "]";
             break;
         case TypeTexture::ROUGHNESS:
-            name = "roughness.ao[" + std::to_string(roughnessNr++) + "]";
+            name = "material.roughness[" + std::to_string(roughnessNr++) + "]";
             break;
         case TypeTexture::BUMP:
             name = "material.bump[" + std::to_string(bumpNr++) + "]";

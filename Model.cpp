@@ -4,12 +4,14 @@ Model::Model()
 {
     model_type = ModelType::REGULAR_M;
     matHandle.type = MaterialType::LIT;
+    transform = new Transform();
 }
 
 Model::Model(char* path)
 {
     model_type = ModelType::REGULAR_M;
     matHandle.type = MaterialType::LIT;
+    transform = new Transform();
     loadModel(path);
 }
 
@@ -30,9 +32,9 @@ void Model::Draw(bool isOutline)
         {
             if (matHandle.type != MaterialType::INSTANCE)
             {
-                meshes[i].material->ptrShader->setMat4("model", model);
+                meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
                 if (meshes[i].material->type == MaterialType::NORMALS)
-                    meshes[i].material->ptrShader2->setMat4("model", model);
+                    meshes[i].material->ptrShader2->setMat4("model", transform->finalModelMatrix);
             }
             meshes[i].Draw();
         }
@@ -42,9 +44,9 @@ void Model::Draw(bool isOutline)
         for (unsigned int i = 0; i < meshes.size(); i++)
         {
             matHandle.shader->use();
-            meshes[i].material->ptrShader->setMat4("model", model);
+            meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
             matHandle.shader2->use();
-            meshes[i].material->ptrShader2->setMat4("model", glm::scale(model, glm::vec3(1.005f, 1.005f, 1.005f)));
+            meshes[i].material->ptrShader2->setMat4("model", glm::scale(transform->finalModelMatrix, glm::vec3(1.005f, 1.005f, 1.005f)));
             meshes[i].Draw(isOutline, isSelectedModel);
         }
     }
@@ -90,9 +92,9 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
                     }
                 }
                 
-                meshes[i].material->ptrShader->setMat4("model", model);
+                meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
                 if (meshes[i].material->type == MaterialType::NORMALS)
-                    meshes[i].material->ptrShader2->setMat4("model", model);
+                    meshes[i].material->ptrShader2->setMat4("model", transform->finalModelMatrix);
             }
             meshes[i].Draw();
         }
@@ -122,9 +124,9 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
                     numSpot++;
                 }
             } 
-            meshes[i].material->ptrShader->setMat4("model", model);
+            meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
             matHandle.shader2->use();
-            meshes[i].material->ptrShader2->setMat4("model", glm::scale(model, glm::vec3(1.005f, 1.005f, 1.005f)));
+            meshes[i].material->ptrShader2->setMat4("model", glm::scale(transform->finalModelMatrix, glm::vec3(1.005f, 1.005f, 1.005f)));
             meshes[i].Draw(isOutline, isSelectedModel);
         }
     }
@@ -139,7 +141,7 @@ void Model::DrawShadow(glm::mat4 VPShadow)
     if (CAST_SHADOW)
     {
         matHandle.shaderShadow->use();
-        matHandle.shaderShadow->setMat4("model", model);
+        matHandle.shaderShadow->setMat4("model", transform->finalModelMatrix);
         matHandle.shaderShadow->setMat4("lightSpaceMatrix", VPShadow);
         for (unsigned int i = 0; i < meshes.size(); i++)
         { 
@@ -153,7 +155,7 @@ void Model::DrawShadow(std::vector<glm::mat4> &shadowTransforms, glm::vec3 &ligh
     if (CAST_SHADOW)
     {
         matHandle.shaderPointShadow->use(); 
-        matHandle.shaderPointShadow->setMat4("model", model);
+        matHandle.shaderPointShadow->setMat4("model", transform->finalModelMatrix);
         matHandle.shaderPointShadow->setFloat("far_plane", far_plane);
         matHandle.shaderPointShadow->setVec3("lightPos", lightPos);
         for (unsigned int i = 0; i < meshes.size(); i++)
@@ -189,7 +191,7 @@ void Model::SetIntanceModelMatrix()
     float offset = 25.0f;
     for (unsigned int i = 0; i < matHandle.numInstances; i++)
     {
-        glm::mat4 model_ins = this->model;
+        glm::mat4 model_ins = this->transform->finalModelMatrix;
         // 1. translation: displace along circle with 'radius' in range [-offset, offset]
         float angle = (float)i / (float)matHandle.numInstances * 360.0f;
         float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
@@ -370,22 +372,48 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 void Model::Rotation(float radians, glm::vec3 axis)
 {
-    model = glm::rotate(model, (float)glfwGetTime() * glm::radians(radians), axis);
+    transform->model = glm::rotate(transform->model, (float)glfwGetTime() * glm::radians(radians), axis);
 }
 
 void Model::TranslationTo(glm::vec3 position)
 {
-    this->model = glm::translate(this->model, position);
+    transform->model = glm::translate(glm::mat4(1.0), position);
 }
 
 void Model::ScaleTo(glm::vec3 scale)
 {
-    this->model = glm::scale(this->model, scale);
+    transform->model = glm::scale(transform->model, scale);
+}
+
+void Model::AttachModel(Model* modelParent)
+{
+    transform->AttachTo(modelParent->transform);
+}
+
+void Model::AttachCamera(Camera* cameraParent)
+{
+    transform->AttachTo(cameraParent->transform);
+}
+
+void Model::SetModelHierarchy()
+{
+    transform->finalModelMatrix = transform->model;
+
+    if (transform->parent != nullptr)
+    {
+        Transform* parent = transform->parent;
+
+        while (parent != nullptr)
+        {
+            transform->finalModelMatrix *= parent->model;
+            parent = parent->parent;
+        }
+    }
 }
 
 void Model::ResetModel()
 {
-    this->model = glm::mat4(1.0f);
+    this->transform->model = glm::mat4(1.0f);
 }
 
 void Model::DeleteGPUInfo()
@@ -410,6 +438,7 @@ Model::Model(float rawData[], unsigned int numVertex, unsigned int offset, Model
 {
     this->model_type = model_type;
     matHandle.type = MaterialType::LIT;
+    transform = new Transform();
 
     if (model_type == ModelType::REGULAR_M)
     {
@@ -521,6 +550,7 @@ Model::Model(float rawData[], unsigned int numVertex, unsigned int offset, Model
 Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textImages)
 {
     matHandle.type = MaterialType::LIT;
+    transform = new Transform();
 
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -619,7 +649,7 @@ float Model::checkClickMouse(glm::vec3 origin, glm::vec3 dir)
     {
         for (unsigned idTri = 0; idTri < meshes[i].indices.size(); idTri += 3)
         {
-            if (meshes[i].RayIntersectsTriangle(origin, dir, idTri, intersectionDist, model))
+            if (meshes[i].RayIntersectsTriangle(origin, dir, idTri, intersectionDist, transform->model))
             {
                 if (distancePoint > intersectionDist)
                     distancePoint = intersectionDist;

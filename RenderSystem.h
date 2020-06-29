@@ -14,12 +14,14 @@
 #include "RenderPlane.h"
 #include "KeyInput.h"
 #include "SkyBox.h"
+#include "GUISystem.h"
 
 #include <GLFW/glfw3.h>
 
 class RenderSystem
 {
 private:
+    GUISystem* guiSystem;
     RenderType renderMode = RenderType::FORWARD_RENDER;
     Skybox* skybox, *precookSkybox;
     std::vector<Model*> solidModels;
@@ -79,7 +81,7 @@ public:
     void AddModel(Model* model3D);
     void AddPreCookSkybox(Skybox* skyHDR);
 
-    void SetRenderMode(RenderType rmode);
+    void SetRenderMode();
     void ForwardRender();
     void DefferedRender();
     void StartRender();
@@ -92,6 +94,8 @@ public:
     void ProcessBoundingModels();
     void PreRender();
     void PreRenderHDRSkybox();
+    void PrefilerPass();
+    void BRDFPass();
     void SetAmbientReflectiveMaterials();
 };
 
