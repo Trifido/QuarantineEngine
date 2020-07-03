@@ -16,7 +16,8 @@ enum MaterialType
     PROCEDURAL,
     INSTANCE,
     EMISSIVE_LIT,
-    BOUNDING_VOLUME
+    BOUNDING_VOLUME,
+    FPS
 };
 
 enum MaterialComponent

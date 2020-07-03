@@ -6,7 +6,8 @@ MaterialHandle::MaterialHandle()
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
     this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
-    this->forward = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
+    this->forward = new Shader("shaders/weightBones.vert", "shaders/weightBones.frag");
+    //this->forward = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
     //this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     this->shader = forward;
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");

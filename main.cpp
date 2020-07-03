@@ -168,7 +168,7 @@ int main(int, char**)
     ///MODEL 3D
     ///--NANOSUIT  
     //Model ourModel("./resources/3DModels/colt/model.obj");
-    Model ourModel("./resources/3DModels/fps_arms/obj/arms.obj");
+    Model ourModel("./resources/3DModels/fps_m16/dae/arm.fbx");
     //Model ourModel("./resources/space/station/SpaceShip.obj");
     //Model ourModel("./resources/3DModels/sponza/sponza.obj");
     //Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
@@ -180,13 +180,16 @@ int main(int, char**)
     //ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
     */
     //ourModel.ScaleTo(glm::vec3(0.05f));
-    //ourModel.Rotation(90.0f,glm::vec3(1.0, 0.0, 1.0));
-    //ourModel.TranslationTo(glm::vec3(0.0f, -0.5f, 0.0f));
+    //ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+    //ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(-10.0f), glm::vec3(1.0, 0.0, 0.0));
+    //ourModel.Rotation(glm::radians(180.0f),glm::vec3(0.0, 1.0, 0.0));
+    //ourModel.transform->model = glm::translate(ourModel.transform->model, glm::vec3(-2.5, 0.0, 5.0));
+    //ourModel.TranslationTo(glm::vec3(-2.0, 0.0, 0.0));
 
     //ourModel.matHandle.EditMaterial(MaterialComponent::TEXTURE, textures_pbr);
     renderkernel.AddModel(&ourModel);
 
-    ourModel.AttachCamera(&mainCamera);
+    //ourModel.AttachCamera(&mainCamera);
     //BoundingLight* bdLight = new BoundingLight();
     //bdLight->TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
     //renderkernel.AddLight(bdLight);
@@ -207,7 +210,7 @@ int main(int, char**)
     Model cubeModel(vertices, 36, textures_pbr);
     cubeModel.TranslationTo(glm::vec3(1.0f, 0.0f, 0.0f));
     //cubeModel.ScaleTo(glm::vec3(0.5f));
-    renderkernel.AddModel(&cubeModel);
+    //renderkernel.AddModel(&cubeModel);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
     //cubeModel.isSelectable(true);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
@@ -216,7 +219,7 @@ int main(int, char**)
     Model cubeModel2(vertices, 36, textures_pbr);
     cubeModel2.TranslationTo(glm::vec3(0.0f, 1.0f, 0.0f));
     //cubeModel2.ScaleTo(glm::vec3(0.5f));
-    renderkernel.AddModel(&cubeModel2);
+    //renderkernel.AddModel(&cubeModel2);
 
     cubeModel.AttachModel(&cubeModel2);
 
@@ -242,7 +245,7 @@ int main(int, char**)
     //floorModel.matHandle.EditMaterial(MaterialComponent::BLINN, true);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
     //floorModel.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
-    renderkernel.AddModel(&floorModel);
+    //renderkernel.AddModel(&floorModel);
 
     ///--VEGETATION
     /*

@@ -25,6 +25,7 @@ private:
     RenderType renderMode = RenderType::FORWARD_RENDER;
     Skybox* skybox, *precookSkybox;
     std::vector<Model*> solidModels;
+    std::vector<Model*> fpsModels;
     std::vector<Model*> outLineModels;
     std::vector<Model*> transparentModels;
     std::vector<BoundingLight*> boundingModels;
@@ -86,6 +87,7 @@ public:
     void DefferedRender();
     void StartRender();
     void RenderSkyBox();
+    void RenderFPSModels();
     void RenderDirectionalShadowMap();
     void RenderOmnidirectionalShadowMap();
     void RenderSolidModels();

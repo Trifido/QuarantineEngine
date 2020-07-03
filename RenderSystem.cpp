@@ -198,6 +198,38 @@ void RenderSystem::RenderSolidModels()
     glEnable(GL_CULL_FACE);
 }
 
+void RenderSystem::RenderFPSModels()
+{
+    glDisable(GL_CULL_FACE);
+    for (int i = 0; i < fpsModels.size(); i++)
+    {
+        ////Comprobamos la jerarquía de los modelos 3D
+        fpsModels[i]->SetModelHierarchy();
+
+        //Añadimos el mapa de irradiancia
+        fpsModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
+
+        if (fpsModels[i]->CAST_SHADOW)
+        {
+            for (int idLight = 0; idLight < this->shadowCastDirLights.size(); idLight++)
+                fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::DIRL);
+
+            for (int idLight = 0; idLight < this->shadowCastSpotLights.size(); idLight++)
+                fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::SPOTL);
+
+            for (int idLight = 0; idLight < this->shadowCastOmniLights.size(); idLight++)
+                fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLight), idLight, TypeLight::POINTLIGHT);
+
+            fpsModels[i]->DrawCastShadow(shadowCastGeneralLights);
+        }
+        else
+        {
+            fpsModels[i]->Draw();
+        }
+    }
+    glEnable(GL_CULL_FACE);
+}
+
 void RenderSystem::RenderTransparentModels()
 {
     glEnable(GL_BLEND);
@@ -311,6 +343,9 @@ void RenderSystem::PreRender()
                 break;
             case MaterialType::TRANSP:
                 transparentModels.push_back(models.at(i));
+                break;
+            case MaterialType::FPS:
+                fpsModels.push_back(models.at(i));
                 break;
         }
         //SET UBO BINDING SHADER
@@ -442,6 +477,8 @@ void RenderSystem::ForwardRender()
     ///RENDER TRANSPARENT MATERIALS
     //RenderTransparentModels();
 
+    RenderFPSModels();
+
     ///MULTISAMPLING 
     fboSystem->MultisamplingPass();
 
@@ -542,8 +579,8 @@ void RenderSystem::StartRender()
         tempPos.x = sin(glfwGetTime() * 0.5) * 3.0;
         tempPos2.y = sin(glfwGetTime() * 0.5) * 3.0;
 
-        models[1]->TranslationTo(tempPos);
-        models[2]->TranslationTo(tempPos2);
+       /* models[1]->TranslationTo(tempPos);
+        models[2]->TranslationTo(tempPos2);*/
         //lights.at(0)->EditLightComponent(LightComponent::LIGHT_POSITION, tempPos);
 
         //Set GPU instances

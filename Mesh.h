@@ -12,6 +12,8 @@ struct Vertex
     glm::vec2 TexCoords;
     glm::vec3 Tangents;
     glm::vec3 Bitangents;
+    glm::vec4 Weight;
+    glm::uvec4 Id;
 };
 
 struct ProceduralVertex

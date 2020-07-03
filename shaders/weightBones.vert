@@ -4,6 +4,8 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangents;
 layout (location = 4) in vec3 aBitangents;
+layout (location = 5) in vec4 aWeights;
+layout (location = 6) in vec4 aIds;
 
 out VS_OUT {
     vec3 FragPos;
@@ -11,6 +13,8 @@ out VS_OUT {
     vec2 TexCoords;
     vec3 TangentViewPos;
     vec3 TangentFragPos;
+    vec4 weights;
+    vec4 ids;
 } vs_out;
 
 layout (std140) uniform Matrices
@@ -36,6 +40,9 @@ void main()
     mat3 TBN = mat3(T, B, N);
     vs_out.TangentViewPos = tTBN * viewPos;
     vs_out.TangentFragPos = tTBN * vs_out.FragPos;
+
+    vs_out.weights = aWeights;
+    vs_out.ids = aIds;
 
     gl_Position = projection * view * vec4(vs_out.FragPos, 1.0); //mat4(1.0)
 }

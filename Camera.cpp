@@ -49,11 +49,6 @@ void Camera::CameraController(float deltaTime)
         this->transform->model = glm::translate(glm::mat4(1.0), cameraPos);
     }
 
-    //for (unsigned int i = 0; i < transform->childs.size(); i++)
-    //{
-    //    transform->childs[i]->model = this->transform->model;
-    //}
-
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 500.0f);
     VP = view * projection;
@@ -105,7 +100,10 @@ void Camera::EditorRotate()
         front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         front.y = sin(glm::radians(pitch));
         front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
         cameraFront = glm::normalize(front);
+
+        //this->transform->model = glm::rotate(glm::mat4(1.0), -glm::radians(yaw), glm::vec3(0.0, 1.0, 0.0));
     }
     else
     {

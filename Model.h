@@ -57,6 +57,7 @@ public:
     //void Model::DrawCastShadow(Light* light, bool isOutline = false);
 
     void Rotation(float radians, glm::vec3 axis);
+    void RotationTo(float radians, glm::vec3 axis);
     void TranslationTo(glm::vec3 position);
     void ScaleTo(glm::vec3 scale);
     void AttachModel(Model* modelParent);

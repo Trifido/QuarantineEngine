@@ -244,6 +244,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 
 Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
+    unsigned int WEIGHTS_PER_VERTEX = 4;
     existTangent = mesh->HasTangentsAndBitangents();
     existNormal = mesh->HasNormals();
     std::vector<Vertex> vertices;
@@ -334,6 +335,37 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         textures.insert(textures.end(), bumpMaps.begin(), bumpMaps.end());
         //AÑADIR MAS TIPOS DE TEXTURA
     }
+
+    //ANIMATION ED
+    int boneArraysSize = mesh->mNumVertices * WEIGHTS_PER_VERTEX;
+    std::vector<int> boneIDs;
+    boneIDs.resize(boneArraysSize);
+    std::vector<float> boneWeights;
+    boneWeights.resize(boneArraysSize);
+
+    for (unsigned int i = 0; i < mesh->mNumBones; i++)
+    {
+        aiBone* aiBone = mesh->mBones[i];
+
+        for (int j = 0; j < aiBone->mNumWeights; j++)
+        {
+            aiVertexWeight weight = aiBone->mWeights[j];
+            unsigned int vertexStart = weight.mVertexId * WEIGHTS_PER_VERTEX;
+
+            for (int k = 0; k < WEIGHTS_PER_VERTEX; k++)
+            {
+                if (boneWeights.at(vertexStart + k) == 0)
+                {
+                    boneWeights.at(vertexStart + k) = weight.mWeight;
+                    boneIDs.at(vertexStart + k) = i;
+
+                    vertices.at(weight.mVertexId).Id[k] = i;
+                    vertices.at(weight.mVertexId).Weight[k] = weight.mWeight;
+                    break;
+                }
+            }
+        }
+    }
      
     return Mesh(vertices, indices, textures, matHandle);
 }
@@ -375,6 +407,11 @@ void Model::Rotation(float radians, glm::vec3 axis)
     transform->model = glm::rotate(transform->model, (float)glfwGetTime() * glm::radians(radians), axis);
 }
 
+void Model::RotationTo(float radians, glm::vec3 axis)
+{
+    transform->model = glm::rotate(glm::mat4(1.0), glm::radians(radians), axis);
+}
+
 void Model::TranslationTo(glm::vec3 position)
 {
     transform->model = glm::translate(glm::mat4(1.0), position);
@@ -392,6 +429,7 @@ void Model::AttachModel(Model* modelParent)
 
 void Model::AttachCamera(Camera* cameraParent)
 {
+    this->matHandle.type = MaterialType::FPS;
     transform->AttachTo(cameraParent->transform);
 }
 
