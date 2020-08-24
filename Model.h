@@ -5,6 +5,8 @@
 
 #include "HeadersRequeriments.h"
 #include "Mesh.h"
+#include "Bone.h"
+#include "Skeleton.h"
 #include "Transform.h"
 #include "MaterialHandle.h"
 #include <assimp/Importer.hpp>
@@ -21,8 +23,8 @@ enum ModelType
 class Model
 {
 private:
+    const aiScene* scene;
     ModelType model_type;
-    
     std::vector<Texture> textures_loaded;
     std::string directory;
     bool existTangent = false;
@@ -32,6 +34,12 @@ private:
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TypeTexture typeName);
+    //Animation
+    bool anim;
+    std::vector<Bone> bones;
+    std::vector<aiNode*> ai_nodes;
+    std::vector<aiNodeAnim*> ai_nodes_anim;
+    Skeleton skeletonImported;
 
 public:
     std::vector<Mesh> meshes;
@@ -82,6 +90,15 @@ public:
     void AddShader(Shader* shader);
     void AddLight(std::vector<Light*> lights);
     void AddCamera(Camera* cam);
+
+    //ANIMATION
+    Bone* FindBone(std::string name);
+    aiNode* FindAiNode(std::string name);
+    aiNodeAnim* FindAiNodeAnim(std::string name);
+    int FindBoneIDByName(std::string name);
+
+    void recursiveNodeProcess(aiNode* node);
+    void AnimNodeProcess();
 };
 
 #endif

@@ -82,9 +82,9 @@ int main(int, char**)
     textures.push_back(texture1);
     textures.push_back(texture2);
     //textures.push_back(texture3);
-    //Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE, false);
-    //std::vector<Texture> textures_floor;
-    //textures_floor.push_back(textureFloor);
+    Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE, false);
+    std::vector<Texture> textures_floor;
+    textures_floor.push_back(textureFloor);
 
     Texture parallaxDiff("resources/materials/floor_dirt/Stone_Path_001_baseColor.jpg", TypeTexture::DIFFUSE);
     Texture parallaxNorm("resources/materials/floor_dirt/Stone_Path_001_normal.jpg", TypeTexture::NORMAL);
@@ -167,8 +167,10 @@ int main(int, char**)
 
     ///MODEL 3D
     ///--NANOSUIT  
+    //Model ourModel("./resources/3DModels/box/box.fbx");
+    //Model ourModel("./resources/3DModels/Mountain_Snow.fbx");
     //Model ourModel("./resources/3DModels/colt/model.obj");
-    Model ourModel("./resources/3DModels/fps_m16/dae/arm.fbx");
+    //Model ourModel("./resources/3DModels/fps_m16/dae/arm.fbx");
     //Model ourModel("./resources/space/station/SpaceShip.obj");
     //Model ourModel("./resources/3DModels/sponza/sponza.obj");
     //Model ourModel("./resources/3DModels/crysis/nanosuit.obj");
@@ -187,7 +189,7 @@ int main(int, char**)
     //ourModel.TranslationTo(glm::vec3(-2.0, 0.0, 0.0));
 
     //ourModel.matHandle.EditMaterial(MaterialComponent::TEXTURE, textures_pbr);
-    renderkernel.AddModel(&ourModel);
+    //renderkernel.AddModel(&ourModel);
 
     //ourModel.AttachCamera(&mainCamera);
     //BoundingLight* bdLight = new BoundingLight();
@@ -204,28 +206,35 @@ int main(int, char**)
     //sphereModel.matHandle.listMaterials.at(0)->isBounding = true;
     //renderkernel.AddModel(&sphereModel);
 
-    
+    //RAY MARCHING TECHNIQUE
+    //Shader* rmShader = new Shader("shaders/rmclouds.vert", "shaders/rmclouds.frag");
+    //std::vector<Texture> noiseTextures;
+    //noiseTextures.push_back(Texture("resources/noise/noiseFBM.png", TypeTexture::NOISE));
+    //Material* rmMaterial = new Material(rmShader, noiseTextures);
 
     ///--CUBE   
     Model cubeModel(vertices, 36, textures_pbr);
-    cubeModel.TranslationTo(glm::vec3(1.0f, 0.0f, 0.0f));
-    //cubeModel.ScaleTo(glm::vec3(0.5f));
-    //renderkernel.AddModel(&cubeModel);
+   
+    //cubeModel.AddMaterial(rmMaterial);
+    cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
+    cubeModel.ScaleTo(glm::vec3(4.0f, 4.0f, 4.0f));
+    cubeModel.TranslationTo(glm::vec3(0.0f, 0.1f, 0.0f));
+    renderkernel.AddModel(&cubeModel);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
     //cubeModel.isSelectable(true);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.31f);
-    Model cubeModel2(vertices, 36, textures_pbr);
-    cubeModel2.TranslationTo(glm::vec3(0.0f, 1.0f, 0.0f));
+    //Model cubeModel2(vertices, 36, textures_pbr);
+    //cubeModel2.TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
     //cubeModel2.ScaleTo(glm::vec3(0.5f));
     //renderkernel.AddModel(&cubeModel2);
 
-    cubeModel.AttachModel(&cubeModel2);
+    //cubeModel.AttachModel(&cubeModel2);
 
-    Model cubeModel3(vertices, 36, textures);
+    //Model cubeModel3(vertices, 36, textures);
     //cubeModel3.AddMaterial(emissiveMaterial);
-    cubeModel3.TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
+    //cubeModel3.TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
     //cubeModel3.Rotation(60.0f, glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
     //cubeModel3.ScaleTo(glm::vec3(0.25f));
     //renderkernel.AddModel(&cubeModel3);
@@ -233,6 +242,7 @@ int main(int, char**)
     ///--FLOOR
     Model floorModel(floorVertices, 6, textures_parallax);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 32.0f);
+    floorModel.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
     floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::MAX_UV, 5.0f); 
@@ -244,8 +254,17 @@ int main(int, char**)
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 64.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::BLINN, true);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
-    //floorModel.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
-    //renderkernel.AddModel(&floorModel);
+    floorModel.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
+    //floorModel.transform->model = glm::rotate(floorModel.transform->model, glm::radians(90.0f), glm::normalize(glm::vec3(0.0, 0.0, 1.0)));
+    //floorModel.transform->model = glm::translate(floorModel.transform->model, glm::vec3(0.0, -9.0, 0.0));
+    renderkernel.AddModel(&floorModel);
+
+    Model floorModel2(floorVertices, 6, textures_parallax);
+    floorModel2.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
+    floorModel2.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
+    floorModel2.transform->model = glm::rotate(floorModel2.transform->model, glm::radians(-90.0f), glm::normalize(glm::vec3(0.0, 0.0, 1.0)));
+    //floorModel2.TranslationTo(glm::vec3(1.0, 1.0, 0.0));
+    //renderkernel.AddModel(&floorModel2);
 
     ///--VEGETATION
     /*
@@ -304,14 +323,24 @@ int main(int, char**)
     pointLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
     pointLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
     pointLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f); //glm::vec3(0.23, 1.0, 0.08));
-    renderkernel.AddLight(pointLight);
+    //renderkernel.AddLight(pointLight);
 
     
-    Light* dirLight2 = new Light(TypeLight::POINTLIGHT, glm::vec3(-5.0f, 1.0f, 0.0f));
-    dirLight2->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.5, -1.0, 0.5));
-    dirLight2->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 1.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
-    dirLight2->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
-    //renderkernel.AddLight(dirLight2);
+    Light* spotLight = new Light(TypeLight::SPOTL, glm::vec3(5.0f, 0.5f, 0.0f));
+    spotLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-1.0, 0.0, 0.0));
+    spotLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
+    spotLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
+    spotLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 20.0f);
+    spotLight->EditLightComponent(LightComponent::LIGHT_CUTOFF, 25.0f);
+    spotLight->EditLightComponent(LightComponent::LIGHT_OUTERCUTOFF, 30.0f);
+    //renderkernel.AddLight(spotLight);
+
+    Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(5.0f, 5.0f, 5.0f));
+    //dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
+    dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
+    dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
+    //dirLight2->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f);
+    renderkernel.AddLight(dirLight);
 
 
     Texture* textureHDR = new Texture("resources/HDR/Desert_Highway/Road_to_MonumentValley_Ref.hdr",TypeTexture::HDR_SKYBOX);

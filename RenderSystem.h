@@ -22,7 +22,8 @@ class RenderSystem
 {
 private:
     GUISystem* guiSystem;
-    RenderType renderMode = RenderType::FORWARD_RENDER;
+    RenderType renderMode = RenderType::DEFERRED_RENDER;
+    //RenderType renderMode = RenderType::FORWARD_QUALITY_RENDER;
     Skybox* skybox, *precookSkybox;
     std::vector<Model*> solidModels;
     std::vector<Model*> fpsModels;
@@ -42,16 +43,15 @@ private:
     RenderPlane renderPass;
     int width, height;
     int lastWidth, lastHeight;
-    const unsigned int LIMIT_DIR_CAST_SHADOW = 5;
-    const unsigned int LIMIT_OMNI_CAST_SHADOW = 5;
-    const unsigned int LIMIT_SPOT_CAST_SHADOW = 5;
+    const unsigned int LIMIT_DIR_CAST_SHADOW = 8;
+    const unsigned int LIMIT_OMNI_CAST_SHADOW = 8;
+    const unsigned int LIMIT_SPOT_CAST_SHADOW = 8;
     unsigned int num_dir_cast_shadow;
     unsigned int num_omni_cast_shadow;
     unsigned int num_spot_cast_shadow;
     float gamma;
 
     void UpdateFBO();
-    void Clean();
 public:
     float deltaTime;	// Time between current frame and last frame
     float lastFrame;    // Time of last frame
@@ -76,6 +76,7 @@ public:
     }
 
     void AddGlfWindow(GLFWwindow* window);
+    void Clean();
     void AddLight(Light* lights);
     void AddLight(BoundingLight* lights);
     void AddCamera(Camera* cam);
@@ -99,6 +100,9 @@ public:
     void PrefilerPass();
     void BRDFPass();
     void SetAmbientReflectiveMaterials();
+
+    //Output Scene
+    void SaveScene();
 };
 
 

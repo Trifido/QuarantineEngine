@@ -6,10 +6,10 @@ MaterialHandle::MaterialHandle()
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
     this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
-    this->forward = new Shader("shaders/weightBones.vert", "shaders/weightBones.frag");
-    //this->forward = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
-    //this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
-    this->shader = forward;
+    this->forwardQA = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
+    this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
+    this->shader = forwardQA;
+    this->shader2 = new Shader("shaders/outline.vert", "shaders/outline.frag");
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
     this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
 }
@@ -22,6 +22,7 @@ MaterialHandle::MaterialHandle(Shader* sh)
     this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
     this->forward = sh;
     this->shader = forward;
+    this->shader2 = new Shader("shaders/outline.vert", "shaders/outline.frag");
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
     this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
 }
@@ -31,12 +32,36 @@ void MaterialHandle::AddMaterialToList(Material* mat)
     listMaterials.push_back(mat);
 }
 
+void MaterialHandle::AddLights(std::vector<Light*> lights)
+{
+    this->deferred->AddLight(lights);
+    this->forwardQA->AddLight(lights);
+    this->forward->AddLight(lights);
+    this->shader->AddLight(lights);
+    this->shader2->AddLight(lights);
+}
+
+void MaterialHandle::AddCamera(Camera* mainCamera)
+{
+    this->deferred->AddCamera(mainCamera);
+    this->forwardQA->AddCamera(mainCamera);
+    this->forward->AddCamera(mainCamera);
+    this->shader->AddCamera(mainCamera);
+    this->shader2->AddCamera(mainCamera);
+}
+
 void MaterialHandle::EditMaterial(MaterialComponent component, Shader* sh)
 {
     switch (component)
     {
     case MaterialComponent::SHADER1:
         shader = sh;
+
+        if (current_render_mode == RenderType::FORWARD_RENDER)
+            forward = shader;
+        else
+            deferred = shader;
+
         for (int i = 0; i < listMaterials.size(); i++)
         {
             listMaterials.at(i)->ptrShader = shader;
@@ -130,6 +155,12 @@ void MaterialHandle::EditMaterial(MaterialComponent component, float value)
             listMaterials.at(i)->max_uv = value;
         }
         break;
+    case MaterialComponent::BLOOM_BRIGHTNESS:
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->bloomBrightness = value;
+        }
+        break;
     default:
         printf("ERROR::CHANGE_VALUE::RUN_FAILED\n");
         break;
@@ -188,13 +219,17 @@ void MaterialHandle::EditMaterial(MaterialComponent component, DrawMode type)
     }
 }
 
-void MaterialHandle::EditMaterial(MaterialComponent component, RenderType type)
+void MaterialHandle::EditMaterial(MaterialComponent component, RenderType renderTypeSelected)
 {
-    if(type != current_render_mode);
+    if(renderTypeSelected != current_render_mode)
     {
-        if (type == RenderType::FORWARD_RENDER)
+        if (renderTypeSelected == RenderType::FORWARD_RENDER)
         {
             this->shader = forward;
+        }
+        else if (renderTypeSelected == RenderType::FORWARD_QUALITY_RENDER)
+        {
+            this->shader = forwardQA;
         }
         else
         {
@@ -205,6 +240,8 @@ void MaterialHandle::EditMaterial(MaterialComponent component, RenderType type)
         {
             listMaterials.at(i)->ptrShader = shader;
         }
+
+        current_render_mode = renderTypeSelected;
     }
 }
 

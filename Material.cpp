@@ -9,7 +9,7 @@ Material::Material()
     colorOutline = glm::vec4(1.0f);
     numInstances = 0;
     parallax_displacement = 0.0f;
-
+    bloomBrightness = 1.0f;
 }
 
 Material::Material(Shader* shader)
@@ -23,6 +23,7 @@ Material::Material(Shader* shader)
     parallax_displacement = 0.0f;
     min_uv = 0.0f;
     max_uv = 1.0f;
+    bloomBrightness = 1.0f;
 }
 
 Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
@@ -37,6 +38,7 @@ Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
     parallax_displacement = 0.0f;
     min_uv = 0.0f;
     max_uv = 1.0f;
+    bloomBrightness = 1.0f;
 }
 
 Material::Material(Shader* shader, std::vector<Texture> textures)
@@ -51,6 +53,7 @@ Material::Material(Shader* shader, std::vector<Texture> textures)
     parallax_displacement = 0.0f;
     min_uv = 0.0f;
     max_uv = 1.0f;
+    bloomBrightness = 1.0f;
 }
 
 Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> textures)
@@ -66,6 +69,7 @@ Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> texture
     parallax_displacement = 0.0f;
     min_uv = 0.0f;
     max_uv = 1.0f;
+    bloomBrightness = 1.0f;
 }
 
 void Material::CopyMaterial(Material mat)
@@ -88,6 +92,7 @@ void Material::CopyMaterial(Material mat)
     parallax_displacement = mat.parallax_displacement;
     min_uv = mat.min_uv;
     max_uv = mat.max_uv;
+    bloomBrightness = mat.bloomBrightness;
 }
 
 void Material::AddShader(Shader* sh)
@@ -168,6 +173,7 @@ void Material::AssignRenderTextures()
     unsigned int metallicNr = 0;
     unsigned int roughnessNr = 0;
     unsigned int bumpNr = 0;
+    unsigned int noiseNr = 0;
 
     numTextures = textures.size();
 
@@ -206,6 +212,9 @@ void Material::AssignRenderTextures()
         case TypeTexture::BUMP:
             name = "material.bump[" + std::to_string(bumpNr++) + "]";
             break;
+        case TypeTexture::NOISE:
+            name = "material.noise[" + std::to_string(noiseNr++) + "]";
+            break;
         }
 
         glActiveTexture(GL_TEXTURE0 + i);
@@ -225,6 +234,7 @@ void Material::AssignRenderTextures()
     ptrShader->setInt("material.num_metallic", metallicNr);
     ptrShader->setInt("material.num_roughness", roughnessNr);
     ptrShader->setInt("material.num_bump", bumpNr);
+    ptrShader->setInt("material.num_noise", noiseNr);
     ptrShader->setFloat("material.shininess", shininess);
     ptrShader->setBool("material.blinn", isBlinnShading);
     ptrShader->setBool("material.isAmbientReflective", isAmbientReflective);
@@ -235,6 +245,7 @@ void Material::AssignRenderTextures()
     ptrShader->setFloat("generalAmbient", 0.4f);
     ptrShader->setFloat("material.min_uv", min_uv);
     ptrShader->setFloat("material.max_uv", max_uv);
+    ptrShader->setFloat("material.bloomBrightness", bloomBrightness);
 
     if (isAmbientReflective || isAmbientRefractive)
     {

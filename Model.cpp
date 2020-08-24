@@ -70,7 +70,8 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
         {
             if (matHandle.type != MaterialType::INSTANCE)
             {
-                for (int idLight = 0; idLight < lights.size(); idLight++)
+                int idLight;
+                for (idLight = 0; idLight < lights.size(); idLight++)
                 {
                     if (lights.at(idLight)->GetType() == TypeLight::DIRL)
                     {
@@ -171,7 +172,7 @@ void Model::DrawShadow(std::vector<glm::mat4> &shadowTransforms, glm::vec3 &ligh
 void Model::loadModel(std::string path)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -179,6 +180,10 @@ void Model::loadModel(std::string path)
         return;
     }
     directory = path.substr(0, path.find_last_of('/'));
+
+    recursiveNodeProcess(scene->mRootNode);
+    AnimNodeProcess();
+    glm::mat4 globalInverseTransform = glm::inverse(AiToGLMMat4(scene->mRootNode->mTransformation));
 
     processNode(scene->mRootNode, scene);
 }
@@ -328,14 +333,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         textures.insert(textures.end(), roughMaps.begin(), roughMaps.end());
         // Bump maps
         std::vector<Texture> bumpMaps;
-        if(normalMaps.empty())
+        if (normalMaps.empty())
             bumpMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, TypeTexture::NORMAL);
         else
             bumpMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, TypeTexture::BUMP);
         textures.insert(textures.end(), bumpMaps.begin(), bumpMaps.end());
         //AÑADIR MAS TIPOS DE TEXTURA
     }
-
+    ///---ANIMATION---
+    /*
     //ANIMATION ED
     int boneArraysSize = mesh->mNumVertices * WEIGHTS_PER_VERTEX;
     std::vector<int> boneIDs;
@@ -343,6 +349,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<float> boneWeights;
     boneWeights.resize(boneArraysSize);
 
+    //ID & WEIGHTS
     for (unsigned int i = 0; i < mesh->mNumBones; i++)
     {
         aiBone* aiBone = mesh->mBones[i];
@@ -365,8 +372,36 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
                 }
             }
         }
+
+        //Here we're just storing the bone information that we loaded
+        //with ASSIMP into the formats our Bone class will recognize.
+        std::string b_name = mesh->mBones[i]->mName.data;
+        glm::mat4 b_mat = glm::transpose(AiToGLMMat4(mesh->mBones[i]->mOffsetMatrix));
+
+        //BONE and Hierarchy
+
+        Bone bone(i, b_name, b_mat);
+        bone.node = FindAiNode(b_name);
+        bone.animNode = FindAiNodeAnim(b_name);
+
+        if (bone.animNode == nullptr)
+            std::cout << "No Animations were found for " + b_name << std::endl;
+
+        b_name = bone.name;
+        std::string parent_name = FindAiNode(b_name)->mParent->mName.data;
+        Bone* p_bone = FindBone(parent_name);
+        bone.parent_bone = p_bone;
+
+        //Finally, we push the Bone into our vector. Yay.
+        bones.push_back(bone);
+
+        if (p_bone == nullptr)
+            std::cout << "Parent Bone for " << b_name << " does not exist (is nullptr)" << std::endl;
     }
-     
+
+   // if (meshes->size() > 0)
+   //     meshes->at(0).sceneLoaderSkeleton.Init(bones, globalInverseTransform);
+     */
     return Mesh(vertices, indices, textures, matHandle);
 }
 
@@ -710,15 +745,6 @@ void Model::AddMaterial(Material* mat)
     {
         matHandle.EditMaterial(MaterialComponent::TEXTURE, mat->textures);
     }
-
-    //for (int i = 0; i < mat->textures.size(); i++)
-    //{
-    //    if (mat->textures.at(i).type == TypeTexture::NORMAL && !existNormal)
-    //    {
-    //        existNormal = true;
-    //        break;
-    //    }
-    //}
 }
 
 void Model::AddMaterial(Material* mat, std::vector<Texture> textures)
@@ -729,15 +755,6 @@ void Model::AddMaterial(Material* mat, std::vector<Texture> textures)
     matHandle.EditMaterial(MaterialComponent::SHININESS, mat->shininess);
     matHandle.EditMaterial(MaterialComponent::OUTLINE_COLOR, mat->colorOutline);
     matHandle.EditMaterial(MaterialComponent::TEXTURE, textures);
-
-    //for (int i = 0; i < textures.size(); i++)
-    //{
-    //    if (textures.at(i).type == TypeTexture::NORMAL && !existNormal)
-    //    {
-
-    //        break;
-    //    }
-    //}
 }
 
 void Model::AddShader(Shader* shader)
@@ -752,25 +769,90 @@ void Model::AddShader(Shader* shader)
 
 void Model::AddLight(std::vector<Light*> lights)
 {
-    matHandle.shader->AddLight(lights);
-    if (matHandle.type == MaterialType::OUTLINE)
-    {
-        matHandle.shader2->AddLight(lights);
-        //for (int i = 0; i < meshes.size(); i++)
-        //{
-        //    (*meshes.at(i).material->shader2)->lights = lights;
-        //}
-    }
+    matHandle.AddLights(lights);
+    //if (matHandle.type == MaterialType::OUTLINE)
+    //{
+    //    matHandle.shader2->AddLight(lights);
+    //    //for (int i = 0; i < meshes.size(); i++)
+    //    //{
+    //    //    (*meshes.at(i).material->shader2)->lights = lights;
+    //    //}
+    //}
 }
 
 void Model::AddCamera(Camera* cam)
 {
-    matHandle.shader->AddCamera(cam);
-    if (matHandle.type == MaterialType::OUTLINE || matHandle.type == MaterialType::NORMALS)
-    {
-        matHandle.shader2->AddCamera(cam);
+    matHandle.AddCamera(cam);
+    //matHandle.shader->AddCamera(cam);
+    //if (matHandle.type == MaterialType::OUTLINE || matHandle.type == MaterialType::NORMALS)
+    //{
+    //    matHandle.shader2->AddCamera(cam);
 
-        //for (int i = 0; i < meshes.size(); i++)
-        //    (*meshes.at(i).material->shader2)->mainCamera = cam;
+    //    //for (int i = 0; i < meshes.size(); i++)
+    //    //    (*meshes.at(i).material->shader2)->mainCamera = cam;
+    //}
+}
+
+Bone* Model::FindBone(std::string name)
+{
+    for (int i = 0; i < bones.size(); i++)
+    {
+        if (bones.at(i).name == name)
+            return &bones.at(i);
     }
+
+    return nullptr;
+}
+
+aiNode* Model::FindAiNode(std::string name)
+{
+    for (int i = 0; i < ai_nodes.size(); i++)
+    {
+        if (ai_nodes.at(i)->mName.data == name)
+            return ai_nodes.at(i);
+    }
+    return nullptr;
+}
+
+aiNodeAnim* Model::FindAiNodeAnim(std::string name)
+{
+    for (int i = 0; i < ai_nodes_anim.size(); i++)
+    {
+        if (ai_nodes_anim.at(i)->mNodeName.data == name)
+            return ai_nodes_anim.at(i);
+    }
+    return nullptr;
+}
+
+int Model::FindBoneIDByName(std::string name)
+{
+    for (int i = 0; i < bones.size(); i++)
+    {
+        if (bones.at(i).name == name)
+            return i;
+    }
+
+    return -1;
+}
+
+void Model::recursiveNodeProcess(aiNode* node)
+{
+    ai_nodes.push_back(node);
+
+    for (int i = 0; i < node->mNumChildren; i++)
+        recursiveNodeProcess(node->mChildren[i]);
+}
+
+void Model::AnimNodeProcess()
+{
+    if (scene->mNumAnimations == 0)
+        return;
+
+    for (int i = 0; i < scene->mAnimations[0]->mNumChannels; i++)
+        ai_nodes_anim.push_back(scene->mAnimations[0]->mChannels[i]);
+
+    //We only get data from the first mAnimation because 
+    //Assimp crushes all of the animation data into one
+    //large sequence of data known as mAnimation.
+    //Assimp does not support multiple mAnimations, surprisingly.
 }

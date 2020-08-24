@@ -27,7 +27,8 @@ enum TypeTexture
     ROUGHNESS,
     METALLIC,
     BUMP,
-    HDR_SKYBOX
+    HDR_SKYBOX,
+    NOISE
 };
 
 class Texture

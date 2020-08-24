@@ -247,3 +247,13 @@ void FBOSystem::SetIrradianceMap()
         skyboxFBO->SetIrradianceCubemap();
     }
 }
+
+void FBOSystem::UpdateMRT(unsigned int numSamples)
+{
+    if (mrtFBO != nullptr)
+    {
+        delete mrtFBO;
+
+        AddFBO(new FBO(FBOType::MULT_RT, numSamples));
+    }
+}

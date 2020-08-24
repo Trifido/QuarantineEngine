@@ -1,10 +1,11 @@
 #version 430 core
 layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 #define NUM_TEXTURES 1
-#define NR_DIR_LIGHTS 1
-//const int NR_POINT_LIGHTS 2
-#define NR_SPOT_LIGHTS 1
+#define NR_DIR_LIGHTS 8
+#define NR_POINT_LIGHTS 8
+#define NR_SPOT_LIGHTS 8
 
 const float PI = 3.14159265359;
 
@@ -13,7 +14,9 @@ in VS_OUT {
     vec3 Normal;
     vec2 TexCoords;
     vec3 TangentViewPos;
-    vec3 TangentFragPos; 
+    vec3 TangentFragPos;
+    vec4 FragPosDirLightSpace[NR_DIR_LIGHTS];
+    vec4 FragPosSpotLightSpace[NR_SPOT_LIGHTS];
 } fs_in;
 
 layout (std430, binding=2) buffer shader_data
@@ -31,6 +34,7 @@ struct Material {
     int num_metallic;
     int num_roughness;
     int num_bump;
+    int blinn;
 
     sampler2D diffuse[NUM_TEXTURES];
     sampler2D specular[NUM_TEXTURES];
@@ -46,8 +50,35 @@ struct Material {
     float min_uv;
     float max_uv;
     float shininess;
-    int blinn;
-}; 
+    float bloomBrightness;
+
+};
+
+struct DirLight {
+    vec3 position;
+    vec3 direction;
+    float constant;
+    float linear;
+    float quadratic;  
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    sampler2D shadowMap;
+};
+
+struct SpotLight {
+    vec3 position;
+    vec3 direction;
+    float cutOff;
+    float outerCutOff; 
+    float constant;
+    float linear;
+    float quadratic; 
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    sampler2D shadowMap;
+};
 
 struct PointLight {    
     vec3 position;
@@ -68,20 +99,27 @@ uniform sampler2D brdfLUT;
 uniform Material material;
 
 //LIGHTS
-uniform int numPointLights;
-const int num = 1;
-uniform PointLight pointLights[num];
+uniform int numPointLights, numDirLights, numSpotLights;
+uniform PointLight pointLights[NR_POINT_LIGHTS];
+uniform DirLight dirLights[NR_DIR_LIGHTS];
+uniform SpotLight spotLights[NR_SPOT_LIGHTS];
 uniform float generalAmbient;
 
 //CAMERA POSITION
 uniform vec3 viewPos;
 
-//BLINN-PHONG LIGHT EQUATIONS
+//-- BLINN-PHONG LIGHT EQUATIONS --
 vec3 CalcPointLight(PointLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords); 
-//PARALLAX FUNCTION
+vec3 CalcDirLight(DirLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords);
+vec3 CalcSpotLight(SpotLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords);
+
+//-- PARALLAX FUNCTION --
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
-//SHADOW COMPUTE
+
+//-- SHADOW COMPUTE --
 float PointShadowCalculation(int idLight);
+float DirShadowCalculation(int idLight);
+float SpotShadowCalculation(int idLight);
 
 vec3 sampleOffsetDirections[20] = vec3[]
 (
@@ -183,8 +221,8 @@ void main()
     float roughness = texture(material.roughness[0], texCoords).r;
     float ao        = texture(material.ao[0], texCoords).r;
 
-    if(texture(material.diffuse[0], texCoords).a < 0.1)
-        discard; 
+    //if(texture(material.diffuse[0], texCoords).a < 0.1)
+    //    discard; 
 
     //COMPUTE LIGHT
     // reflectance equation
@@ -193,6 +231,12 @@ void main()
 
     for(int i = 0; i < numPointLights; i++)
         Lo += CalcPointLight(pointLights[i], i, N, V, texCoords);
+
+    for(int i = 0; i < numDirLights; i++)
+        Lo += CalcDirLight(dirLights[i], i, N, V, texCoords);
+
+    for(int i = 0; i < numSpotLights; i++)
+        Lo += CalcSpotLight(spotLights[i], i, N, V, texCoords);
 
     // ambient lighting (note that the next IBL tutorial will replace 
     // this ambient lighting with environment lighting).
@@ -223,7 +267,13 @@ void main()
     vec3 ambient = (kD * diffuse + specular) * ao;
 
     vec3 color = ambient + Lo;
-    FragColor = vec4(color, 1.0); 
+    FragColor = vec4(color, 1.0);
+
+    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 64.0)//material.bloomBrightness
+        BrightColor = vec4(result, 1.0);
+    else
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0); 
 }
 
 vec3 CalcPointLight(PointLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords)
@@ -273,7 +323,117 @@ vec3 CalcPointLight(PointLight light, int idLight, vec3 normal, vec3 viewDir, ve
     // scale light by NdotL
     float NdotL = max(dot(normal, L), 0.0);        
 
-    float shadow = 0.0;//PointShadowCalculation(idLight);
+    float shadow = PointShadowCalculation(idLight);
+
+    // add to outgoing radiance Lo
+    return (kD * albedo * (1.0 - shadow) / PI + (specular * (1.0 - shadow))) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+}
+
+vec3 CalcDirLight(DirLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords)
+{
+    vec3 albedo     = pow(texture(material.diffuse[0], texCoords).rgb, vec3(2.2));
+    float metallic;
+    if(material.num_metallic > 0)
+        metallic = texture(material.metallic[0], texCoords).r;
+    else
+        metallic = 0.0;
+    float roughness = texture(material.roughness[0], texCoords).r;
+
+    // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+    // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metallic);
+
+    // calculate per-light radiance
+    vec3 L = normalize(-light.direction);
+    vec3 H = normalize(viewDir + L);
+
+    vec3 radiance = light.diffuse;
+
+    // Cook-Torrance BRDF
+    float NDF = DistributionGGX(normal, H, roughness);   
+    float G   = GeometrySmith(normal, viewDir, L, roughness);      
+    vec3 F    = fresnelSchlick(max(dot(H, viewDir), 0.0), F0);
+           
+    vec3 nominator    = NDF * G * F; 
+    float denominator = 4 * max(dot(normal, viewDir), 0.0) * max(dot(normal, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+    vec3 specular = nominator / denominator;
+        
+    // kS is equal to Fresnel
+    vec3 kS = F;
+
+    // for energy conservation, the diffuse and specular light can't
+    // be above 1.0 (unless the surface emits light); to preserve this
+    // relationship the diffuse component (kD) should equal 1.0 - kS.
+    vec3 kD = vec3(1.0) - kS;
+
+    // multiply kD by the inverse metalness such that only non-metals 
+    // have diffuse lighting, or a linear blend if partly metal (pure metals
+    // have no diffuse light).
+    kD *= 1.0 - metallic;	  
+
+    // scale light by NdotL
+    float NdotL = max(dot(normal, L), 0.0);        
+
+    float shadow = DirShadowCalculation(idLight);
+
+    // add to outgoing radiance Lo
+    return (kD * albedo * (1.0 - shadow) / PI + (specular * (1.0 - shadow))) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+}
+
+vec3 CalcSpotLight(SpotLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords)
+{
+    vec3 albedo     = pow(texture(material.diffuse[0], texCoords).rgb, vec3(2.2));
+    float metallic;
+    if(material.num_metallic > 0)
+        metallic = texture(material.metallic[0], texCoords).r;
+    else
+        metallic = 0.0;
+    float roughness = texture(material.roughness[0], texCoords).r;
+
+    // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+    // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
+    vec3 F0 = vec3(0.04); 
+    F0 = mix(F0, albedo, metallic);
+
+    // calculate per-light radiance
+    vec3 L = normalize(-light.direction);
+    vec3 H = normalize(viewDir + L);
+    float distance = length(light.position - fs_in.FragPos);
+    float attenuation = (1.0 * light.linear) / (distance * distance);
+
+    float theta = dot(normalize(light.position - fs_in.FragPos), normalize(-light.direction)); 
+    float epsilon = light.cutOff - light.outerCutOff;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+    vec3 radiance = light.diffuse * attenuation * intensity;
+
+    // Cook-Torrance BRDF
+    float NDF = DistributionGGX(normal, H, roughness);   
+    float G   = GeometrySmith(normal, viewDir, L, roughness);      
+    vec3 F    = fresnelSchlick(max(dot(H, viewDir), 0.0), F0);
+           
+    vec3 nominator    = NDF * G * F; 
+    float denominator = 4 * max(dot(normal, viewDir), 0.0) * max(dot(normal, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+    vec3 specular = nominator / denominator;
+        
+    // kS is equal to Fresnel
+    vec3 kS = F;
+
+    // for energy conservation, the diffuse and specular light can't
+    // be above 1.0 (unless the surface emits light); to preserve this
+    // relationship the diffuse component (kD) should equal 1.0 - kS.
+    vec3 kD = vec3(1.0) - kS;
+
+    // multiply kD by the inverse metalness such that only non-metals 
+    // have diffuse lighting, or a linear blend if partly metal (pure metals
+    // have no diffuse light).
+    kD *= 1.0 - metallic;	  
+
+    // scale light by NdotL
+    float NdotL = max(dot(normal, L), 0.0);        
+
+    float shadow = SpotShadowCalculation(idLight);
 
     // add to outgoing radiance Lo
     return (kD * albedo * (1.0 - shadow) / PI + (specular * (1.0 - shadow))) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
@@ -336,6 +496,78 @@ float PointShadowCalculation(int idLight)
     closestDepth *= pointLights[idLight].far_plane;   // Undo mapping [0;1]
 
     shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0; 
+
+    return shadow;
+}
+
+float DirShadowCalculation(int idLight)
+{
+    vec3 normal, lightDir;
+
+    normal = normalize(fs_in.Normal);
+    lightDir = normalize(-dirLights[idLight].direction);
+
+    if(dot(normal, lightDir) < 0.0)
+        return 0.0;
+         
+    // Projection coords in range [0,1]
+    vec3 projCoords = fs_in.FragPosDirLightSpace[idLight].xyz / fs_in.FragPosDirLightSpace[idLight].w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(dirLights[idLight].shadowMap, projCoords.xy).r; 
+    float currentDepth = projCoords.z ;
+
+    float bias = max(0.000005 * (1.0 - dot(normal, lightDir)), 0.000005);
+    float shadow = 0.0;
+
+    if(projCoords.z < 1.0)
+    {
+        vec2 texelSize = 1.0 / textureSize(dirLights[idLight].shadowMap, 0);
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float pcfDepth = texture(dirLights[idLight].shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+                shadow += currentDepth + bias > pcfDepth ? 1.0 : 0.0;        
+            }    
+        }
+        shadow /= 9.0;
+    }
+
+    return shadow;
+}
+
+float SpotShadowCalculation(int idLight)
+{
+    vec3 normal, lightDir;
+
+    normal = normalize(fs_in.Normal);
+    lightDir = normalize(-spotLights[idLight].direction);
+
+    if(dot(normal, lightDir) < 0.0)
+        return 0.0;
+         
+    // Projection coords in range [0,1]
+    vec3 projCoords = fs_in.FragPosSpotLightSpace[idLight].xyz / fs_in.FragPosSpotLightSpace[idLight].w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(spotLights[idLight].shadowMap, projCoords.xy).r; 
+    float currentDepth = projCoords.z ;
+
+    float bias = max(0.000005 * (1.0 - dot(normal, lightDir)), 0.000005);
+    float shadow = 0.0;
+
+    if(projCoords.z < 1.0)
+    {
+        vec2 texelSize = 1.0 / textureSize(spotLights[idLight].shadowMap, 0);
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float pcfDepth = texture(spotLights[idLight].shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+                shadow += currentDepth + bias > pcfDepth ? 1.0 : 0.0;        
+            }    
+        }
+        shadow /= 9.0;
+    }
 
     return shadow;
 }

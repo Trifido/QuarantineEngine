@@ -41,6 +41,7 @@ public:
     void setFloat(const std::string& name, float value) const;
     void setVec3(const std::string& name, float x, float y, float z);
     void setVec3(const std::string& name, glm::vec3& pos) const;
+    void setVec2(const std::string& name, glm::vec2& pos) const;
     void setMat3(const std::string& name, glm::mat3& mat) const;
     void setMat4(const std::string& name, glm::mat4& mat) const;
     void AddTexture(Texture* tex, const std::string& name = NULL);

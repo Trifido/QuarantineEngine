@@ -128,7 +128,7 @@ void RenderSystem::RenderDirectionalShadowMap()
     for (int idLight = 0; idLight < this->shadowCastDirLights.size(); idLight++)
     {
         fboSystem->DirShadowPass(idLight);
-        glViewport(0, 0, 1024, 1024);
+        glViewport(0, 0, 4048, 4048);
         glClear(GL_DEPTH_BUFFER_BIT);
                
         for (int idModel = 0; idModel < models.size(); idModel++)
@@ -138,7 +138,7 @@ void RenderSystem::RenderDirectionalShadowMap()
     for (int idLight = idLightGeneral; idLight < this->shadowCastSpotLights.size(); idLight++)
     {
         fboSystem->DirShadowPass(idLight);
-        glViewport(0, 0, 1024, 1024);
+        glViewport(0, 0, 4048, 4048);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         for (int idModel = 0; idModel < models.size(); idModel++)
@@ -153,7 +153,7 @@ void RenderSystem::RenderOmnidirectionalShadowMap()
     for (int idLight = 0; idLight < this->shadowCastOmniLights.size(); idLight++)
     {
         fboSystem->OmniShadowPass(idLight);
-        glViewport(0, 0, 1024, 1024);
+        glViewport(0, 0, 4048, 4048);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         for (int idModel = 0; idModel < models.size(); idModel++)
@@ -179,14 +179,41 @@ void RenderSystem::RenderSolidModels()
 
         if (solidModels[i]->CAST_SHADOW)
         {
-            for (int idLight = 0; idLight < this->shadowCastDirLights.size(); idLight++)
-                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::DIRL);
+            for (int idLightD = 0; idLightD < LIMIT_DIR_CAST_SHADOW; idLightD++)
+            {
+                if (idLightD < this->shadowCastDirLights.size())
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightD), idLightD, TypeLight::DIRL);
+                }
+                else
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightD, TypeLight::DIRL);
+                }
+            }
 
-            for (int idLight = 0; idLight < this->shadowCastSpotLights.size(); idLight++)
-                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::SPOTL);
+            for (int idLightS = 0; idLightS < LIMIT_SPOT_CAST_SHADOW; idLightS++)
+            {
+                if (idLightS < this->shadowCastSpotLights.size())
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightS), idLightS, TypeLight::SPOTL);
+                }
+                else
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightS, TypeLight::SPOTL);
+                }
+            }
 
-            for (int idLight = 0; idLight < this->shadowCastOmniLights.size(); idLight++)
-                solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLight), idLight, TypeLight::POINTLIGHT);
+            for (int idLightP = 0; idLightP < LIMIT_OMNI_CAST_SHADOW; idLightP++)
+            {
+                if (idLightP < this->shadowCastOmniLights.size())
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLightP), idLightP, TypeLight::POINTLIGHT);
+                }
+                else
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
+                }
+            }
 
             solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
         }
@@ -315,13 +342,10 @@ void RenderSystem::PreRender()
     skybox = new Skybox();
     skybox->AddCamera(cameras.at(0));
 
-    //POST-PROCESS GAMMA
-    renderPass.SetGamma(2.2f); 
-    //TONE MAPPING 
-    renderPass.SetExposure(0.5f);
-    //BLOOM EFFECT
-    renderPass.SetBloom(false);
-    renderPass.SetAmountBloom(10);
+    //GUI
+    renderPass.SetHDRParameters(guiSystem->HdrGui);
+    renderPass.SetBloomParameters(guiSystem->bloomGui);
+    guiSystem->SetLightInfoGui(&lights);
 
     //SET REFLECTIVE MATERIALS
     SetAmbientReflectiveMaterials();
@@ -428,13 +452,7 @@ void RenderSystem::PreRender()
 
 void RenderSystem::SetRenderMode()
 {
-    RenderType rmode;
-    if (guiSystem->isForwardRender())
-        rmode = RenderType::FORWARD_RENDER;
-    else
-        rmode = RenderType::DEFERRED_RENDER;
-
-        renderMode = rmode;
+    renderMode = guiSystem->GetRenderModeSelected();
 
     for (unsigned int i = 0; i < models.size(); i++)
     {
@@ -469,13 +487,13 @@ void RenderSystem::ForwardRender()
     uboSytem->StoreData(glfwGetTime(), sizeof(float), sizeof(glm::mat4) * 2);
 
     ///RENDER OUTLINE MODELS
-    //RenderOutLineModels();
+    RenderOutLineModels();
     ///RENDER SOLID MATERIALS
     RenderSolidModels();
     ///RENDER SKYBOX
     RenderSkyBox();
     ///RENDER TRANSPARENT MATERIALS
-    //RenderTransparentModels();
+    RenderTransparentModels();
 
     RenderFPSModels();
 
@@ -491,6 +509,7 @@ void RenderSystem::ForwardRender()
     glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     renderPass.FinalRenderBloom();
+    //renderPass.FinalRenderRayMarching();
 }
 
 void RenderSystem::DefferedRender()
@@ -500,7 +519,7 @@ void RenderSystem::DefferedRender()
 
     /// FIRST PASS -> RENDER DEPTH TO TEXTURE - DIRECTIONAL LIGHT
     //Render Directional Shadow Map
-    //RenderDirectionalShadowMap();
+    RenderDirectionalShadowMap();
 
     /// FIRST PASS -> RENDER DEPTH TO TEXTURE - POINT LIGHT
     //Render OmniDirectional Shadow Map
@@ -508,7 +527,6 @@ void RenderSystem::DefferedRender()
 
     /// SECOND PASS -> RENDER LIGHTING TO TEXTURE (MRT)
     fboSystem->DeferredGeometryPass();
-
     glViewport(0, 0, display_w, display_h);
     glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -545,17 +563,18 @@ void RenderSystem::DefferedRender()
     ///BLUR POST-PROCESS (BLOOM)
     //renderPass.RenderBlur();
 
-    //SSAO
-    fboSystem->SSAOPass();
-    glClear(GL_COLOR_BUFFER_BIT);
-    renderPass.RenderSSAO();
+    ////SSAO
+    //fboSystem->SSAOPass();
+    //glClear(GL_COLOR_BUFFER_BIT);
+    //renderPass.RenderSSAO();
 
-    //BLUR SSAO
-    fboSystem->SSAOPass(1); 
-    glClear(GL_COLOR_BUFFER_BIT);
-    renderPass.RenderBlurSSAO();
+    ////BLUR SSAO
+    //fboSystem->SSAOPass(1); 
+    //glClear(GL_COLOR_BUFFER_BIT);
+    //renderPass.RenderBlurSSAO();
 
     /// FINAL PASS POST-PROCESS
+    
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, display_w, display_h);
     glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
@@ -563,11 +582,12 @@ void RenderSystem::DefferedRender()
     //renderPass.FinalRenderBloom();
     //renderPass.FinalRenderPass();
     renderPass.DefferedRender();
+    
 }
 
 void RenderSystem::StartRender()
 {
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window) && !guiSystem->isShutDown())
     {
         //ANIMATION
         ComputeDeltaTime();
@@ -607,8 +627,7 @@ void RenderSystem::StartRender()
 
         //Draw UI
         guiSystem->DrawGUI();
-        //bool aux = true;
-        //ImGui::ShowDemoWindow(&aux);
+
         //Check Render Mode
         SetRenderMode();
 
@@ -621,7 +640,7 @@ void RenderSystem::StartRender()
         // Rendering
         ImGui::Render();
 
-        if (renderMode == RenderType::FORWARD_RENDER)
+        if (renderMode == RenderType::FORWARD_RENDER || renderMode == RenderType::FORWARD_QUALITY_RENDER)
             ForwardRender();
         else
             DefferedRender();
@@ -648,6 +667,16 @@ void RenderSystem::UpdateFBO()
 
     lastWidth = width;
     lastHeight = height;
+
+    if (guiSystem->msaaGui->isModifiedOffMSAA)
+    {
+        fboSystem->UpdateMRT(guiSystem->msaaGui->samplesOffScreenParameter);
+    }
+
+    if (guiSystem->msaaGui->isModifiedMSAA)
+    {
+        glfwWindowHint(GLFW_SAMPLES, guiSystem->msaaGui->samplesMSAAParameter);
+    }
 }
 
 void RenderSystem::SetAmbientReflectiveMaterials()
@@ -659,5 +688,13 @@ void RenderSystem::SetAmbientReflectiveMaterials()
             for(int j = 0; j < models.at(i)->matHandle.listMaterials.size(); j++)
                 models.at(i)->matHandle.listMaterials.at(j)->skyboxTexture = &(skybox->matHandle->listMaterials.at(0)->textures[0]);
         }
+    }
+}
+
+void RenderSystem::SaveScene()
+{
+    if (guiSystem->isSave())
+    {
+
     }
 }

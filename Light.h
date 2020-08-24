@@ -16,7 +16,9 @@ enum LightComponent {
     LIGHT_QUADRATIC,
     LIGHT_PROJSHADOW,
     LIGHT_ASPECT,
-    LIGHT_CAST_SHADOW
+    LIGHT_CAST_SHADOW,
+    LIGHT_CUTOFF,
+    LIGHT_OUTERCUTOFF
 };
 
 enum TypeLight {
@@ -74,10 +76,15 @@ public:
     void EditLightComponent(LightComponent lc, bool value);
 
     glm::vec3 inline GetPosition() { return this->position; }
+    float* GetRawPosition();
     glm::vec3 inline GetDirection() { return this->direction; }
+    float* GetRawDirection();
     glm::vec3 inline GetDiffuse() { return this->diffuse; }
+    float* GetRawDiffuse();
     glm::vec3 inline GetSpecular() { return this->specular; }
+    float* GetRawSpecular();
     glm::vec3 inline GetAmbient() { return this->ambient; }
+    float* GetRawAmbient();
     TypeLight inline GetType() { return this->type; }
     float inline GetCutOff() { return this->cutOff; }
     float inline GetOuterCutOff() { return this->outerCutOff; }

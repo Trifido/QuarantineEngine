@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "FBOSystem.h"
 #include "UBOSystem.h"
+#include "GUISystem.h"
 #include <random>
 
 class RenderPlane
@@ -23,6 +24,7 @@ private:
     Shader* deferredLighting;
     Shader* ssao;
     Shader* ssao_blur;
+    Shader* rayMarching;
     FBOSystem* fboSystem;
     //SSAO
     std::vector<glm::vec3> ssaoKernel;
@@ -30,6 +32,8 @@ private:
     unsigned int noiseTexture;
     Camera* cam;
     float lerp(float a, float b, float f);
+    BloomGUI* bloomGui;
+    HdrGUI* hdrGui;
 public:
     RenderPlane();
     void SetVAORenderPlane();
@@ -39,6 +43,7 @@ public:
     void DefferedRender();
     void RenderSSAO();
     void RenderBlurSSAO();
+    void FinalRenderRayMarching();
     void inline SetGamma(float value) { gammaValue = value; };
     void inline SetExposure(float value) { exposureValue = value; };
     void inline SetFBOSystem(FBOSystem* fboSy) { fboSystem = fboSy; }
@@ -48,6 +53,8 @@ public:
     void AddCamera(Camera* cam);
     void GenerateNoiseTexture();
     void AddUBOSystem(UBOSystem* ubo);
+    void SetBloomParameters(BloomGUI* bloomParameters);
+    void SetHDRParameters(HdrGUI* hdrGui);
 };
 
 #endif

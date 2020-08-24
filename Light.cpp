@@ -100,6 +100,12 @@ void Light::EditLightComponent(LightComponent lc, float value)
         ComputeShadowCubeMapProjection();
         lightSpaceMatrix = lightProjection * lightView;
         break;
+    case LIGHT_CUTOFF:
+        cutOff = glm::cos(glm::radians(value));
+        break;
+    case LIGHT_OUTERCUTOFF:
+        outerCutOff = glm::cos(glm::radians(value));
+        break;
     default:
         break;
     }
@@ -109,6 +115,31 @@ void Light::EditLightComponent(LightComponent lc, bool value)
 {
     if(lc == LightComponent::LIGHT_CAST_SHADOW)
         isCastShadow = value;
+}
+
+float* Light::GetRawPosition()
+{
+    return &position[0];
+}
+
+float* Light::GetRawDirection()
+{
+    return &direction[0];
+}
+
+float* Light::GetRawDiffuse()
+{
+    return &diffuse[0];
+}
+
+float* Light::GetRawSpecular()
+{
+    return &specular[0];
+}
+
+float* Light::GetRawAmbient()
+{
+    return &ambient[0];
 }
 
 void Light::ComputeShadowProjection()
@@ -153,7 +184,7 @@ void Light::ComputeShadowCubeMapProjection()
 void Light::Init()
 {
     //Coords & Dir 
-    direction = glm::vec3(-0.5f, -1.0f, 0.0f); //glm::vec3(-0.2f, -1.0f, -0.3f);
+    direction = glm::vec3(-0.5f, -1.0f, -0.3f); //glm::vec3(-0.2f, -1.0f, -0.3f);
     //Color Light
     ambient = glm::vec3(0.05f);
     diffuse = glm::vec3(0.8f);
@@ -172,7 +203,7 @@ void Light::Init()
     outerCutOff = glm::cos(glm::radians(17.5f));
 
     near_plane = 0.1f;
-    far_plane = 100.0f;
+    far_plane = 10.0f;
     aspect = 1.0f;
-    projDimension = glm::vec4(-100.0f, 100.0f, -100.0f, 100.0f);
+    projDimension = glm::vec4(-10.0f, 10.0f, -10.0f, 10.0f);
 }

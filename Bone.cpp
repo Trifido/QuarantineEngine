@@ -1,26 +1,22 @@
 #include "Bone.h"
 #include <vector>
 
-Bone::Bone(Mesh* in_mesh, unsigned int in_id, std::string in_name, aiMatrix4x4 in_o_mat)
+Bone::Bone(unsigned int in_id, std::string in_name, aiMatrix4x4 in_o_mat)
 {
     id = in_id;
     name = in_name;
     offset_matrix = AiToGLMMat4(in_o_mat);
-
-    mesh = in_mesh;
 
     parent_bone = nullptr;
     node = nullptr;
 }
 //This constructor is similar to the last one in the sense that it is
 //virtually identical and whose existence seems almost pointless. Almost.
-Bone::Bone(Mesh* in_mesh, unsigned int in_id, std::string in_name, glm::mat4 in_o_mat)
+Bone::Bone(unsigned int in_id, std::string in_name, glm::mat4 in_o_mat)
 {
     id = in_id;
     name = in_name;
     offset_matrix = in_o_mat;
-
-    mesh = in_mesh;
 
     parent_bone = nullptr;
     node = nullptr;

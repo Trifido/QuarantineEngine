@@ -41,7 +41,8 @@ enum MaterialComponent
     A_REFLECTIVE,
     A_REFRACTIVE,
     DRAW_MODE,
-    RENDER_MODE
+    RENDER_MODE,
+    BLOOM_BRIGHTNESS
 };
 
 enum DrawMode
@@ -69,6 +70,7 @@ public:
     float refractiveIndex;
     float parallax_displacement;
     float min_uv, max_uv;
+    float bloomBrightness;
     bool isAmbientReflective = false;
     bool isAmbientRefractive = false;
     bool isBlinnShading = true;

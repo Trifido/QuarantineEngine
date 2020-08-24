@@ -17,6 +17,7 @@ RenderPlane::RenderPlane()
     deferredLighting = new Shader("shaders/deferredLighting.vert", "shaders/deferredLighting.frag");
     ssao = new Shader("shaders/deferredLighting.vert", "shaders/ssao.frag");
     ssao_blur = new Shader("shaders/deferredLighting.vert", "shaders/ssao_blur.frag");
+    rayMarching = new Shader("shaders/rmSky.vert", "shaders/rmSky.frag");
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
 }
 
@@ -45,15 +46,15 @@ void RenderPlane::SetVAORenderPlane()
 
     screenRenderShader->use();
     screenRenderShader->setInt("screenTexture", 3);
-    screenRenderShader->setFloat("gamma", gammaValue);
+    screenRenderShader->setFloat("gamma", hdrGui->gammaParameter);
     screenRenderShader->setFloat("exposure", exposureValue);
 
     shaderBlur->use();
     shaderBlur->setInt("image", 0);
 
     shaderBloomFinal->use(); 
-    shaderBloomFinal->setInt("bloom", bloomValue);
-    shaderBloomFinal->setFloat("gamma", gammaValue);
+    shaderBloomFinal->setInt("bloom", bloomGui->enable);
+    shaderBloomFinal->setFloat("gamma", hdrGui->gammaParameter);
     shaderBloomFinal->setFloat("exposure", exposureValue); 
     shaderBloomFinal->setInt("scene", 0);
     shaderBloomFinal->setInt("bloomBlur", 1);
@@ -66,7 +67,7 @@ void RenderPlane::SetVAORenderPlane()
     deferredLighting->setInt("gEmissive", 4);
     deferredLighting->setInt("ssao", 5);
     deferredLighting->setFloat("generalAmbient", 0.4f);
-    deferredLighting->setFloat("gamma", gammaValue);
+    deferredLighting->setFloat("gamma", hdrGui->gammaParameter);
     deferredLighting->setFloat("exposure", exposureValue);
 
     ssao->use();
@@ -76,11 +77,22 @@ void RenderPlane::SetVAORenderPlane()
 
     ssao_blur->use();
     ssao_blur->setInt("ssaoInput", 0);
+
+    rayMarching->use();
+    rayMarching->setInt("screenTexture", 3);
+
+    rayMarching->setFloat("gamma", hdrGui->gammaParameter);
+    rayMarching->setFloat("exposure", exposureValue);
+    rayMarching->setVec2("resolution", glm::vec2(cam->WIDTH, cam->HEIGHT));
+    rayMarching->setVec3("front", cam->cameraFront);
+    rayMarching->setFloat("fov", cam->GetFOV());
 }
 
 void RenderPlane::FinalRenderPass()
 {
     screenRenderShader->use();
+    screenRenderShader->setFloat("gamma", hdrGui->gammaParameter);
+    screenRenderShader->setFloat("exposure", hdrGui->exposureParameter);
 
     glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE3);
@@ -91,10 +103,13 @@ void RenderPlane::FinalRenderPass()
 void RenderPlane::FinalRenderBloom()
 {
     shaderBloomFinal->use();
+    shaderBloomFinal->setInt("bloom", bloomGui->enable && bloomGui->blurRange > 0);
+    shaderBloomFinal->setFloat("gamma", hdrGui->gammaParameter);
+    shaderBloomFinal->setFloat("exposure", hdrGui->exposureParameter);
     glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0)); //fboSystem->GetDirRender());//
-    if (bloomValue)
+    if (bloomGui->enable)
     {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, fboSystem->GetPingPongRender(!pingpongIdPass));
@@ -102,13 +117,37 @@ void RenderPlane::FinalRenderBloom()
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+void RenderPlane::FinalRenderRayMarching()
+{
+    glBindVertexArray(quadVAO);
+    rayMarching->use();
+    rayMarching->ActivateCamera();
+
+    rayMarching->setMat4("view", cam->view);
+    rayMarching->setVec3("front", cam->cameraFront);
+    rayMarching->setMat4("projection", cam->projection);
+    rayMarching->setVec3("viewPos", cam->cameraPos);
+    rayMarching->setFloat("gamma", hdrGui->gammaParameter);
+    rayMarching->setFloat("exposure", hdrGui->exposureParameter);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0)); //fboSystem->GetDirRender());//
+    if (bloomGui->enable)
+    {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, fboSystem->GetPingPongRender(!pingpongIdPass));
+    }
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
 void RenderPlane::RenderBlur()
 {
-    if (bloomValue)
+    if (bloomGui->enable)
     {
         bool first_iteration = true;
         shaderBlur->use();
-        for (unsigned int i = 0; i < amountBloom; i++)
+        for (unsigned int i = 0; i < bloomGui->blurRange; i++)
         {
             fboSystem->PingPongPass(pingpongIdPass);
             shaderBlur->setInt("horizontal", pingpongIdPass);
@@ -187,6 +226,7 @@ void RenderPlane::AddCamera(Camera* cam)
 {
     this->cam = cam;
     deferredLighting->AddCamera(cam);
+    rayMarching->AddCamera(cam);
 }
 
 void RenderPlane::GenerateNoiseTexture()
@@ -226,4 +266,14 @@ void RenderPlane::GenerateNoiseTexture()
 void RenderPlane::AddUBOSystem(UBOSystem* ubo)
 {
     ubo->SetUniformBlockIndex(ssao->ID, "Matrices");
+}
+
+void RenderPlane::SetBloomParameters(BloomGUI* bloomParameters)
+{
+    bloomGui = bloomParameters;
+}
+
+void RenderPlane::SetHDRParameters(HdrGUI* hdrGui)
+{
+    this->hdrGui = hdrGui;
 }

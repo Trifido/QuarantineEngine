@@ -180,6 +180,11 @@ void Shader::setVec3(const std::string& name, glm::vec3& pos) const
     glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &pos[0]);
 }
 
+void Shader::setVec2(const std::string& name, glm::vec2& pos) const
+{
+    glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &pos[0]);
+}
+
 void Shader::setMat3(const std::string& name, glm::mat3& mat) const
 {
     glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);

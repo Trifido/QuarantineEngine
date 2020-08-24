@@ -38,8 +38,8 @@ FBO::FBO(FBOType type, unsigned int samples, unsigned int numTextures)
     this->texture_buffers = new unsigned int[num_mrt];
     glGenTextures(num_mrt, texture_buffers);
 
-    widthDepthMap = new int(1024);
-    heightDepthMap = new int(1024);
+    widthDepthMap = new int(4048);
+    heightDepthMap = new int(4048);
     this->samples = samples;
 }
 

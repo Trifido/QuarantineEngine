@@ -5,8 +5,11 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "Skeleton.h"
 
 #include <glm/glm.hpp>
+
+class Skeleton;
 
 static aiMatrix4x4 GLMMat4ToAi(glm::mat4 mat)
 {
@@ -48,14 +51,15 @@ public:
     std::string name;
     aiNode* node;
     aiNodeAnim* animNode;
-    Bone* parent_bone;    
+    Bone* parent_bone;
+    Skeleton* parent_skeleton;
     glm::mat4 parent_transforms;
     glm::mat4 offset_matrix;
 
     Bone() { name = ""; id = -2; }
 
-    Bone(Mesh* in_mesh, unsigned int in_id, std::string in_name, aiMatrix4x4 in_o_mat);
-    Bone(Mesh* in_mesh, unsigned int in_id, std::string in_name, glm::mat4 in_o_mat);
+    Bone(unsigned int in_id, std::string in_name, aiMatrix4x4 in_o_mat);
+    Bone(unsigned int in_id, std::string in_name, glm::mat4 in_o_mat);
 
     glm::mat4 GetParentTransforms();
 };

@@ -48,6 +48,7 @@ public:
     void ResizeFBOs();
     void BlitDepthBuffer(FBOType readBuffer, FBOType drawBuffer);
     void SetIrradianceMap();
+    void UpdateMRT(unsigned int numSamples);
 };
 
 #endif
