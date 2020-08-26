@@ -250,6 +250,7 @@ void Shader::ActivateLights()
             this->setFloat(name + "constant", lights[i]->GetConstant());
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
+            this->setBool(name + "isCastShadow", lights[i]->isCastShadow);
             name = "DirlightPosition[" + std::to_string(numDirLights) + "]";
             this->setVec3(name, lights[i]->GetPosition());
             name = "DirlightDirection[" + std::to_string(numDirLights) + "]";
@@ -268,6 +269,7 @@ void Shader::ActivateLights()
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             this->setFloat(name + "far_plane", lights[i]->GetFarplane());
             this->setFloat(name + "radius", lights[i]->GetRadius());
+            this->setBool(name + "isCastShadow", lights[i]->isCastShadow);
             name = "PointlightPosition[" + std::to_string(numPointLights) + "]";
             this->setVec3(name, lights[i]->GetPosition());
             numPointLights++;
@@ -285,6 +287,7 @@ void Shader::ActivateLights()
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             this->setFloat(name + "cutOff", lights[i]->GetCutOff());
             this->setFloat(name + "outerCutOff", lights[i]->GetOuterCutOff());
+            this->setBool(name + "isCastShadow", lights[i]->isCastShadow);
             name = "SpotlightPosition[" + std::to_string(numSpotLights) + "]";
             this->setVec3(name, lights[i]->GetPosition());
             name = "SpotlightDirection[" + std::to_string(numSpotLights) + "]";
@@ -304,6 +307,7 @@ void Shader::ActivateLights()
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             this->setFloat(name + "cutOff", lights[i]->GetCutOff());
             this->setFloat(name + "outerCutOff", lights[i]->GetOuterCutOff());
+            this->setBool(name + "isCastShadow", lights[i]->isCastShadow);
             numFPSLights++;
         }
     }

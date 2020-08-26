@@ -21,7 +21,7 @@ private:
     float lastX = 1280.0f / 2.0;
     float lastY = 720.0 / 2.0;
     float fov = 45.0f;
-
+    float nearPlane, farPlane;
 public:
     float WIDTH, HEIGHT;
     //glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -39,6 +39,12 @@ public:
     void EditorRotate();
     void AttachTo(Transform* model);
     float GetFOV() { return fov; }
+    float* GetRawFOV() { return &fov; }
+    float* GetRawNearPlane() { return &nearPlane; }
+    float* GetRawFarPlane() { return &farPlane; }
+    float* GetRawCameraPosition() { return &cameraPos[0]; }
+    float* GetRawCameraFront() { return &cameraFront[0]; }
+    void CheckCameraAttributes(float* positionCamera, float* frontCamera, float fov, float nearPlane, float farPlane);
 };
 
 #endif

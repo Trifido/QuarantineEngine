@@ -346,6 +346,8 @@ void RenderSystem::PreRender()
     renderPass.SetHDRParameters(guiSystem->HdrGui);
     renderPass.SetBloomParameters(guiSystem->bloomGui);
     guiSystem->SetLightInfoGui(&lights);
+    guiSystem->SetCameraInfoGui(&cameras);
+    guiSystem->SetModelInfoGui(&models);
 
     //SET REFLECTIVE MATERIALS
     SetAmbientReflectiveMaterials();
@@ -676,6 +678,77 @@ void RenderSystem::UpdateFBO()
     if (guiSystem->msaaGui->isModifiedMSAA)
     {
         glfwWindowHint(GLFW_SAMPLES, guiSystem->msaaGui->samplesMSAAParameter);
+    }
+
+    int numPL, numSL, numDL;
+    numPL = numSL = numDL = 0;
+
+    for (unsigned int i = 0; i < lights.size(); i++)
+    {
+        if (lights.at(i)->isCastShadow)
+        {
+            switch (lights.at(i)->GetType())
+            {
+            case TypeLight::DIRL:
+                numDL++;
+                break;
+            case TypeLight::POINTLIGHT:
+                numPL++;
+                break;
+            case TypeLight::SPOTL:
+                numSL++;
+                break;
+            }
+        }
+    }
+
+    if (shadowCastGeneralLights.size() != numDL + numPL + numSL)
+    {
+        if (numPL != num_omni_cast_shadow)
+        {
+            shadowCastOmniLights.clear();
+            fboSystem->UpdateOmniShadowFbo(numPL);
+        }
+
+        if (numDL != num_dir_cast_shadow || numSL != num_spot_cast_shadow)
+        {
+            if(numDL != num_dir_cast_shadow)
+                shadowCastDirLights.clear();
+            else
+                shadowCastSpotLights.clear();
+
+            fboSystem->UpdateDirShadowFbo(numDL + numSL);
+        }
+
+        shadowCastGeneralLights.clear();
+
+        for (unsigned int i = 0; i < lights.size(); i++)
+        {
+            if (lights.at(i)->isCastShadow)
+            {
+                shadowCastGeneralLights.push_back(lights.at(i));
+
+                switch (lights.at(i)->GetType())
+                {
+                    case TypeLight::DIRL:
+                        if (numDL != num_dir_cast_shadow)
+                            shadowCastDirLights.push_back(lights.at(i));
+                        break;
+                    case TypeLight::POINTLIGHT:
+                        if (numPL != num_omni_cast_shadow)
+                            shadowCastOmniLights.push_back(lights.at(i));
+                        break;
+                    case TypeLight::SPOTL:
+                        if (numSL != num_spot_cast_shadow)
+                            shadowCastSpotLights.push_back(lights.at(i));
+                        break;
+                }
+            }
+        }
+
+        num_omni_cast_shadow = numPL;
+        num_dir_cast_shadow = numDL;
+        num_spot_cast_shadow = numSL;
     }
 }
 

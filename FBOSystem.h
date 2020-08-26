@@ -49,6 +49,8 @@ public:
     void BlitDepthBuffer(FBOType readBuffer, FBOType drawBuffer);
     void SetIrradianceMap();
     void UpdateMRT(unsigned int numSamples);
+    void UpdateDirShadowFbo(unsigned int numRTargets);
+    void UpdateOmniShadowFbo(unsigned int numRTargets);
 };
 
 #endif

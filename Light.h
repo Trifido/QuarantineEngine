@@ -53,8 +53,8 @@ private:
     glm::mat4 lightProjection;
     glm::mat4 lightView;
     float aspect;
-    bool isCastShadow;
 public:
+    bool isCastShadow;
     glm::mat4 lightSpaceMatrix;
     std::vector<glm::mat4> lightSpaceMatrices;
     Light();
@@ -87,12 +87,17 @@ public:
     float* GetRawAmbient();
     TypeLight inline GetType() { return this->type; }
     float inline GetCutOff() { return this->cutOff; }
+    float* GetRawCutOff() { return &cutOff; }
     float inline GetOuterCutOff() { return this->outerCutOff; }
+    float* GetRawOuterCutOff() { return &outerCutOff; }
     float inline GetConstant() { return this->constant; }
     float inline GetLinear() { return this->linear; }
+    float* GetRawLinear() { return &linear; }
     float inline GetQuadratic() { return this->quadratic; }
+    float* GetRawQuadratic() { return &quadratic; }
     float inline GetFarplane() { return this->far_plane; }
     float inline GetRadius() { return this->radius; }
+    bool* GetRawCastShadow() { return &isCastShadow; }
 private:
     void ComputeShadowProjection();
     void ComputeShadowCubeMapProjection();

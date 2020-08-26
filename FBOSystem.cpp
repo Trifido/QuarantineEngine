@@ -257,3 +257,21 @@ void FBOSystem::UpdateMRT(unsigned int numSamples)
         AddFBO(new FBO(FBOType::MULT_RT, numSamples));
     }
 }
+
+void FBOSystem::UpdateDirShadowFbo(unsigned int numRTargets)
+{
+    if (dirFBO != nullptr)
+    {
+        delete dirFBO;
+        AddFBO(new FBO(FBOType::DIR_SHADOW_FBO, 0, numRTargets));
+    }
+}
+
+void FBOSystem::UpdateOmniShadowFbo(unsigned int numRTargets)
+{
+    if (omniFBO != nullptr)
+    {
+        delete omniFBO;
+        AddFBO(new FBO(FBOType::OMNI_SHADOW_FBO, 0, numRTargets));
+    }
+}

@@ -7,6 +7,8 @@ Camera::Camera(float width, float height)
     HEIGHT = height;
     lastX = WIDTH / 2.0f;
     lastY = HEIGHT / 2.0f;
+    nearPlane = 0.1f;
+    farPlane = 500.0f;
     transform = new Transform();
 }
 
@@ -50,7 +52,7 @@ void Camera::CameraController(float deltaTime)
     }
 
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-    projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 500.0f);
+    projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, nearPlane, farPlane);
     VP = view * projection;
 }
 
@@ -114,5 +116,31 @@ void Camera::EditorRotate()
 void Camera::AttachTo(Transform* model)
 {
     transform->AttachTo(transform);
+}
+
+void Camera::CheckCameraAttributes(float* positionCamera, float* frontCamera, float fov, float nearPlane, float farPlane)
+{
+    bool posEqual = true;
+    bool lookAtEqual = true;
+    if (positionCamera[0] != cameraPos.x || positionCamera[1] != cameraPos.y || positionCamera[2] != cameraPos.z)
+        posEqual = false;
+    if (frontCamera[0] != cameraFront.x || frontCamera[1] != cameraFront.y || frontCamera[2] != cameraFront.z)
+        lookAtEqual = false;
+    if (!posEqual || !lookAtEqual || fov != this->fov || nearPlane != this->nearPlane || farPlane != this->farPlane)
+    {
+        cameraPos.x = positionCamera[0];
+        cameraPos.y = positionCamera[1];
+        cameraPos.z = positionCamera[2];
+        cameraFront.x = frontCamera[0];
+        cameraFront.y = frontCamera[1];
+        cameraFront.z = frontCamera[2];
+        this->fov = fov;
+        this->nearPlane = nearPlane;
+        this->farPlane = farPlane;
+
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, nearPlane, farPlane);
+        VP = view * projection;
+    }
 }
 

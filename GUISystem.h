@@ -58,6 +58,8 @@ public:
     MsaaGUI* msaaGui;
 
     std::vector<Light*>* lights;
+    std::vector<Camera*>* cameras;
+    std::vector<Model*>* models;
 
     GUISystem();
     void DrawGUI();
@@ -73,6 +75,8 @@ public:
     void SetHDRParameters(float gammaParam, float exposureParam);
     void SetMSAAParameters(unsigned int msaaSamples, unsigned int offSamples, bool enableMSAA, bool enableOffMSAA);
     void SetLightInfoGui(std::vector<Light*>* lights);
+    void SetCameraInfoGui(std::vector<Camera*>* cameras);
+    void SetModelInfoGui(std::vector<Model*>* models);
 };
 
 #endif

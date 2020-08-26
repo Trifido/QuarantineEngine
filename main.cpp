@@ -323,7 +323,7 @@ int main(int, char**)
     pointLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
     pointLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
     pointLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f); //glm::vec3(0.23, 1.0, 0.08));
-    //renderkernel.AddLight(pointLight);
+    renderkernel.AddLight(pointLight);
 
     
     Light* spotLight = new Light(TypeLight::SPOTL, glm::vec3(5.0f, 0.5f, 0.0f));
@@ -340,7 +340,7 @@ int main(int, char**)
     dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
     dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
     //dirLight2->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f);
-    renderkernel.AddLight(dirLight);
+    //renderkernel.AddLight(dirLight);
 
 
     Texture* textureHDR = new Texture("resources/HDR/Desert_Highway/Road_to_MonumentValley_Ref.hdr",TypeTexture::HDR_SKYBOX);
