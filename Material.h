@@ -92,6 +92,20 @@ public:
 	void ActivateIrradianceMap(unsigned int idTexIrradiance, unsigned int idTexPrefilter, unsigned int idTexBrdf);
     void AddMultTextures(std::vector<Texture> texturesIN);
     void AssignRenderTextures();
+
+    unsigned int RawMaterialType() { return type; }
+    unsigned int RawDrawType() { return drawtype; }
+    void SetRawMaterialType(unsigned int id) { type = (MaterialType)id; }
+    void SetRawDrawType(unsigned int id) { drawtype = (DrawMode)id; }
+    float* RawShininess() { return &shininess; }
+    float* RawRefractiveIndex() { return &refractiveIndex; }
+    float* RawParallaxDisplacement() { return &parallax_displacement; }
+    float* RawMinUV() { return &min_uv; }
+    float* RawMaxUV() { return &max_uv; }
+    bool* RawIsAmbientReflective() { return &isAmbientReflective; }
+    bool* RawIsAmbientRefractive() { return &isAmbientRefractive; }
+    bool* RawIsBlinnShading() { return &isBlinnShading; }
+    float* RawColorOutline() { return &colorOutline[0]; }
 };
 
 #endif

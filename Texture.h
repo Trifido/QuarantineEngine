@@ -54,6 +54,11 @@ public:
     void EditComponet(TextureComponent component, std::string value);
     void EditComponet(TextureComponent component, TypeTexture value);
 
+    unsigned int GetIDTexture() { return ID; }
+    std::string GetPathTexture() { return path; }
+    unsigned int RawTypeTexture() { return type; }
+    void SetRawTypeTexture(unsigned int id) { type = (TypeTexture)id; }
+
 private:
     void LoadTextureObj();
     void LoadTextureHDR();

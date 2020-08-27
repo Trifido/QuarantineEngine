@@ -236,6 +236,219 @@ void GUISystem::DrawPropertyWindow()
                     ImGui::PopID();
 
                     ImGui::TreePop();
+
+                    for (unsigned int i = 0; i < model->matHandle.listMaterials.size(); i++)
+                    {
+                        ImGui::PushID(uid+i+1);                      // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
+                        ImGui::AlignTextToFramePadding();  // Text and Tree nodes are less high than regular widgets, here we add vertical spacing to make the tree lines equal high.
+                        bool node_mat_open = ImGui::TreeNode("Material", "Material %s", std::to_string(i+1).c_str());
+                        ImGui::NextColumn();
+                        ImGui::AlignTextToFramePadding();
+
+                        ImGui::NextColumn();
+                        if (node_mat_open)
+                        {
+                            ImGui::PushID(5 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldType", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Material Type");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+
+                            const char* items[] = { "UNLIT", "LIT", "TRANSP", "OUTLINE", "NORMALS", "PROCEDURAL", "INSTANCE", "EMISSIVE_LIT", "BOUNDING_VOLUME", "FPS" };
+                            static const char* item_current = items[model->matHandle.listMaterials[i]->RawMaterialType()];  // Here our selection is a single pointer stored outside the object.
+                            if (ImGui::BeginCombo("combo 1", item_current)) // The second parameter is the label previewed before opening the combo.
+                            {
+                                for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+                                {
+                                    bool is_selected = (item_current == items[n]);
+                                    if (ImGui::Selectable(items[n], is_selected))
+                                        item_current = items[n];
+                                    if (is_selected)
+                                    {
+                                        ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+                                        model->matHandle.listMaterials[i]->SetRawMaterialType(n);
+                                    }
+                                }
+                                ImGui::EndCombo();
+                            }
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+
+
+                            ImGui::PushID(15 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldDrawType", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Render Type");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            const char* items2[] = { "DPOINTS", "DLINES", "DLINES_STRIP", "DTRIANGLES", "DTRIANGLES_STRIP" };
+                            static const char* item_current2 = items2[model->matHandle.listMaterials[i]->RawDrawType()];  // Here our selection is a single pointer stored outside the object.
+                            if (ImGui::BeginCombo("combo 2", item_current2)) // The second parameter is the label previewed before opening the combo.
+                            {
+                                for (int n = 0; n < IM_ARRAYSIZE(items2); n++)
+                                {
+                                    bool is_selected = (item_current2 == items2[n]);
+                                    if (ImGui::Selectable(items2[n], is_selected))
+                                        item_current2 = items2[n];
+                                    if (is_selected)
+                                    {
+                                        ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+                                        model->matHandle.listMaterials[i]->SetRawDrawType(n);
+                                    }
+                                }
+                                ImGui::EndCombo();
+                            }
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+
+                            ImGui::PushID(6 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldShininess", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Shininess");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            ImGui::DragFloat("", model->matHandle.listMaterials[i]->RawShininess(), 0.1f, 0.0f, 100.0f);
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+                            
+                            ImGui::PushID(7 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldParallax", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Parallax Displacement");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            ImGui::DragFloat("", model->matHandle.listMaterials[i]->RawParallaxDisplacement(), 0.01f, -10.0f, 10.0f);
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+                            
+                            ImGui::PushID(8 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldMinUV", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Min UV");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            ImGui::DragFloat("", model->matHandle.listMaterials[i]->RawMinUV(), 1.0f, -100.0f, 100.0f);
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+                            
+                            ImGui::PushID(9 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldMaxUV", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Max UV");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            ImGui::DragFloat("", model->matHandle.listMaterials[i]->RawMaxUV(), 1.0f, -100.0f, 100.0f);
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+                            
+                            ImGui::PushID(10 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldARefl", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Ambient Reflective");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            ImGui::Checkbox("Ambient Reflective", model->matHandle.listMaterials[i]->RawIsAmbientReflective());
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+
+                            ImGui::PushID(11 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldARefr", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Ambient Refractive");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            ImGui::Checkbox("Ambient Refractive", model->matHandle.listMaterials[i]->RawIsAmbientRefractive());
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+
+                            if (true)
+                            {
+                                ImGui::PushID(12 + i);
+                                ImGui::AlignTextToFramePadding();
+                                ImGui::TreeNodeEx("FieldARefr", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Refractive Index");
+                                ImGui::NextColumn();
+                                ImGui::SetNextItemWidth(-1);
+                                ImGui::DragFloat("", model->matHandle.listMaterials[i]->RawRefractiveIndex(), 0.1f, 0.0f, 100.0f);
+                                ImGui::NextColumn();
+                                ImGui::PopID();
+                            }
+
+                            ImGui::PushID(13 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldBlinn", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Blinn Shading");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            ImGui::Checkbox("Blinn Mode", model->matHandle.listMaterials[i]->RawIsBlinnShading());
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+                            
+                            ImGui::PushID(14 + i);
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TreeNodeEx("FieldColorOut", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Outline Color");
+                            ImGui::NextColumn();
+                            ImGui::SetNextItemWidth(-1);
+                            ImGui::ColorPicker3("MyColor##3", model->matHandle.listMaterials[i]->RawColorOutline(), ImGuiColorEditFlags_NoAlpha);
+
+                            ImGui::NextColumn();
+                            ImGui::PopID();
+
+                            for (unsigned int j = 0; j < model->matHandle.listMaterials[i]->textures.size(); j++)
+                            {
+                                ImGui::PushID(16 + j);                      // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
+                                ImGui::AlignTextToFramePadding();  // Text and Tree nodes are less high than regular widgets, here we add vertical spacing to make the tree lines equal high.
+                                bool node_texture_open = ImGui::TreeNode("Texture", "%s", std::to_string(j).c_str());
+                                ImGui::NextColumn();
+                                ImGui::AlignTextToFramePadding();
+
+                                ImGui::NextColumn();
+                                if (node_texture_open)
+                                {
+                                    ImGui::PushID(17 + j);
+                                    ImGui::AlignTextToFramePadding();
+                                    ImGui::TreeNodeEx("FieldIDTex", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "ID Texture");
+                                    ImGui::NextColumn();
+                                    ImGui::SetNextItemWidth(-1);
+                                    ImGui::DragFloat3("(X, Y, Z)", model->transform->RawPosition(), 0.01f, -100000.0f, 100000.0f); //model->matHandle.listMaterials[i]->textures[j].ID
+                                    ImGui::NextColumn();
+                                    ImGui::PopID();
+
+                                    ImGui::PushID(18 + j);
+                                    ImGui::AlignTextToFramePadding();
+                                    ImGui::TreeNodeEx("FieldTexPath", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Texture Path");
+                                    ImGui::NextColumn();
+                                    ImGui::SetNextItemWidth(-1);
+                                    ImGui::DragFloat3("(X, Y, Z)", model->transform->RawPosition(), 0.01f, -100000.0f, 100000.0f); //model->matHandle.listMaterials[i]->textures[j].path
+                                    ImGui::NextColumn();
+                                    ImGui::PopID();
+                                    
+                                    ImGui::PushID(19 + j);
+                                    ImGui::AlignTextToFramePadding();
+                                    ImGui::TreeNodeEx("FieldTexType", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Texture Type");
+                                    ImGui::NextColumn();
+                                    ImGui::SetNextItemWidth(-1);
+                                    const char* items3[] = { "DIFFUSE", "SPECULAR", "NORMAL", "HEIGHT", "EMISSIVE", "CUBEMAP", "AO", "ROUGHNESS", "METALLIC", "BUMP", "HDR_SKYBOX", "NOISE" };
+                                    static const char* item_current3 = items3[model->matHandle.listMaterials[i]->textures[j].type];  // Here our selection is a single pointer stored outside the object.
+                                    if (ImGui::BeginCombo("combo 3", item_current3)) // The second parameter is the label previewed before opening the combo.
+                                    {
+                                        for (int n = 0; n < IM_ARRAYSIZE(items3); n++)
+                                        {
+                                            bool is_selected = (item_current3 == items3[n]);
+                                            if (ImGui::Selectable(items3[n], is_selected))
+                                                item_current3 = items3[n];
+                                            if (is_selected)
+                                            {
+                                                ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+                                                model->matHandle.listMaterials[i]->textures[j].SetRawTypeTexture(n);
+                                            }
+                                        }
+                                        ImGui::EndCombo();
+                                    }
+                                    ImGui::NextColumn();
+                                    ImGui::PopID();
+
+                                    ImGui::TreePop();
+                                }
+
+                                ImGui::PopID();
+                            }
+
+                            ImGui::TreePop();
+                        }
+                        ImGui::PopID();
+                    }
                 }
                 ImGui::PopID();
 

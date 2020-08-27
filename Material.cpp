@@ -10,6 +10,7 @@ Material::Material()
     numInstances = 0;
     parallax_displacement = 0.0f;
     bloomBrightness = 1.0f;
+    refractiveIndex = 1.0f;
 }
 
 Material::Material(Shader* shader)
@@ -24,6 +25,7 @@ Material::Material(Shader* shader)
     min_uv = 0.0f;
     max_uv = 1.0f;
     bloomBrightness = 1.0f;
+    refractiveIndex = 1.0f;
 }
 
 Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
@@ -39,6 +41,7 @@ Material::Material(Shader* shader, Shader* shader2, MaterialType mattype)
     min_uv = 0.0f;
     max_uv = 1.0f;
     bloomBrightness = 1.0f;
+    refractiveIndex = 1.0f;
 }
 
 Material::Material(Shader* shader, std::vector<Texture> textures)
@@ -54,6 +57,7 @@ Material::Material(Shader* shader, std::vector<Texture> textures)
     min_uv = 0.0f;
     max_uv = 1.0f;
     bloomBrightness = 1.0f;
+    refractiveIndex = 1.0f;
 }
 
 Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> textures)
@@ -70,6 +74,7 @@ Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> texture
     min_uv = 0.0f;
     max_uv = 1.0f;
     bloomBrightness = 1.0f;
+    refractiveIndex = 1.0f;
 }
 
 void Material::CopyMaterial(Material mat)
