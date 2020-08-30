@@ -17,18 +17,18 @@ enum TextureComponent
 
 enum TypeTexture
 {
-    DIFFUSE,
-    SPECULAR,
-    NORMAL,
-    HEIGHT,
-    EMISSIVE,
-    CUBEMAP,
-    AO,
-    ROUGHNESS,
-    METALLIC,
-    BUMP,
-    HDR_SKYBOX,
-    NOISE
+    DIFFUSE = 0,
+    SPECULAR = 1,
+    NORMAL = 2,
+    HEIGHT = 3,
+    EMISSIVE = 4,
+    CUBEMAP = 5,
+    AO = 6,
+    ROUGHNESS = 7,
+    METALLIC = 8,
+    BUMP = 9,
+    HDR_SKYBOX = 10,
+    NOISE = 11
 };
 
 class Texture
@@ -56,8 +56,9 @@ public:
 
     unsigned int GetIDTexture() { return ID; }
     std::string GetPathTexture() { return path; }
-    unsigned int RawTypeTexture() { return type; }
-    void SetRawTypeTexture(unsigned int id) { type = (TypeTexture)id; }
+    unsigned int RawTypeTexture();
+    void SetRawTypeTexture(unsigned int id);
+    const char* GetRawPath() { return imgPath.c_str(); };
 
 private:
     void LoadTextureObj();

@@ -127,7 +127,7 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
             } 
             meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
             matHandle.shader2->use();
-            meshes[i].material->ptrShader2->setMat4("model", glm::scale(transform->finalModelMatrix, glm::vec3(1.005f, 1.005f, 1.005f)));
+            meshes[i].material->ptrShader2->setMat4("model", glm::scale(transform->finalModelMatrix, glm::vec3(1.055f, 1.055f, 1.055f)));
             meshes[i].Draw(isOutline, isSelectedModel);
         }
     }
@@ -712,11 +712,11 @@ float Model::checkClickMouse(glm::vec3 origin, glm::vec3 dir)
 {
     //Möller–Trumbore intersection algorithm
     if (!isSelectableModel)
-        return INFINITE;
+        return FLT_MAX;
 
     bool existIntesection = false;
     float intersectionDist;
-    float distancePoint = INFINITE;
+    float distancePoint = FLT_MAX;
 
     for (unsigned int i = 0; i < meshes.size(); i++)
     {

@@ -9,6 +9,7 @@
 #include "Skeleton.h"
 #include "Transform.h"
 #include "MaterialHandle.h"
+#include "Collider.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -43,6 +44,7 @@ private:
 
 public:
     std::vector<Mesh> meshes;
+    std::vector<Collider*> colliders;
     bool CAST_SHADOW = true;
     MaterialHandle matHandle;
     Transform* transform;

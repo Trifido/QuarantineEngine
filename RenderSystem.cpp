@@ -11,6 +11,10 @@ RenderSystem::RenderSystem(GLFWwindow* window, ImVec4* clearColor)
     precookSkybox = nullptr;
     ssboSystem = nullptr;
     guiSystem = new GUISystem();
+
+    //Load Pivot Model
+    pivot = new Pivot();
+    this->AddModel(pivot->GetModel());
 }
 
 void RenderSystem::ComputeDeltaTime()
@@ -171,7 +175,7 @@ void RenderSystem::RenderSolidModels()
     glDisable(GL_CULL_FACE);
     for (int i = 0; i < solidModels.size(); i++)
     {
-        ////Comprobamos la jerarquía de los modelos 3D
+        //Comprobamos la jerarquía de los modelos 3D
         solidModels[i]->SetModelHierarchy();
 
         //Añadimos el mapa de irradiancia
@@ -270,6 +274,15 @@ void RenderSystem::RenderTransparentModels()
     glDisable(GL_BLEND);
 }
 
+void RenderSystem::RenderInternalModels()
+{
+    glDisable(GL_DEPTH_TEST);
+    pivot->GetModel()->SetModelHierarchy();
+    pivot->DrawPivot();
+
+    glEnable(GL_DEPTH_TEST);
+}
+
 void RenderSystem::ProcessBoundingModels()
 {
     for (int i = 0; i < boundingModels.size(); i++)
@@ -282,7 +295,52 @@ void RenderSystem::RenderOutLineModels()
 {
     for (int i = 0; i < outLineModels.size(); i++)
     {
-        outLineModels[i]->Draw(true);
+        //Comprobamos la jerarquía de los modelos 3D
+        outLineModels[i]->SetModelHierarchy();
+
+        //Añadimos el mapa de irradiancia
+        outLineModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
+
+        if (outLineModels[i]->CAST_SHADOW)
+        {
+            for (int idLightD = 0; idLightD < LIMIT_DIR_CAST_SHADOW; idLightD++)
+            {
+                if (idLightD < this->shadowCastDirLights.size())
+                {
+                    outLineModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightD), idLightD, TypeLight::DIRL);
+                }
+                else
+                {
+                    outLineModels[i]->matHandle.ActivateShadowMap(NULL, idLightD, TypeLight::DIRL);
+                }
+            }
+
+            for (int idLightS = 0; idLightS < LIMIT_SPOT_CAST_SHADOW; idLightS++)
+            {
+                if (idLightS < this->shadowCastSpotLights.size())
+                {
+                    outLineModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightS), idLightS, TypeLight::SPOTL);
+                }
+                else
+                {
+                    outLineModels[i]->matHandle.ActivateShadowMap(NULL, idLightS, TypeLight::SPOTL);
+                }
+            }
+
+            for (int idLightP = 0; idLightP < LIMIT_OMNI_CAST_SHADOW; idLightP++)
+            {
+                if (idLightP < this->shadowCastOmniLights.size())
+                {
+                    outLineModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLightP), idLightP, TypeLight::POINTLIGHT);
+                }
+                else
+                {
+                    outLineModels[i]->matHandle.ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
+                }
+            }
+
+            outLineModels[i]->DrawCastShadow(shadowCastGeneralLights, true);
+        }
     }
 }
 
@@ -373,6 +431,9 @@ void RenderSystem::PreRender()
             case MaterialType::FPS:
                 fpsModels.push_back(models.at(i));
                 break;
+            case MaterialType::INTERNAL:
+                internalModels.push_back(models.at(i));
+                break;
         }
         //SET UBO BINDING SHADER
         uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shader->ID, "Matrices");
@@ -381,6 +442,11 @@ void RenderSystem::PreRender()
 
         uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shaderPointShadow->ID, "Matrices");
         uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shaderShadow->ID, "Matrices");
+
+                                                                                                            //TEMPORAL
+        for (int i = 0; i < pivot->GetModel()->colliders.size(); i++)
+            uboSytem->SetUniformBlockIndex(pivot->GetModel()->colliders.at(i)->matHandle.shader->ID, "Matrices");
+
         renderPass.AddUBOSystem(uboSytem);
     }
 
@@ -493,11 +559,12 @@ void RenderSystem::ForwardRender()
     ///RENDER SOLID MATERIALS
     RenderSolidModels();
     ///RENDER SKYBOX
-    RenderSkyBox();
+    //RenderSkyBox();
     ///RENDER TRANSPARENT MATERIALS
-    RenderTransparentModels();
+    //RenderTransparentModels();
 
-    RenderFPSModels();
+    //RenderFPSModels();
+    RenderInternalModels();
 
     ///MULTISAMPLING 
     fboSystem->MultisamplingPass();
@@ -618,7 +685,7 @@ void RenderSystem::StartRender()
         //Keyboad functions
         inputSystem.processInput(window); 
         //Mouse functions
-        inputSystem.processMouseInput(window, cameras.at(0), models);
+        inputSystem.processMouseInput(window, cameras.at(0), models, pivot);
 
         glfwPollEvents();
 

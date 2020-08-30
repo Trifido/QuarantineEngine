@@ -1,11 +1,17 @@
 #pragma once
 
 #include "Camera.h"
+#include "Pivot.h"
 #include "Model.h"
 
 class KeyInput
 {
 public:
+    glm::vec2 clickPos;
+    Model* modelSelected;
+    bool isClicked = false;
+    float distRay = FLT_MAX;
+    float dragValue = 0.0f;
 
     KeyInput() {}
 
@@ -15,50 +21,72 @@ public:
             glfwSetWindowShouldClose(window, true);
     }
 
-    void processMouseInput(GLFWwindow* window, Camera* cam, std::vector<Model*> sceneModels)
+    void processMouseInput(GLFWwindow* window, Camera* cam, std::vector<Model*> sceneModels, Pivot* pivote)
     {
         if (ImGui::IsMouseClicked(0))
         {
-            glm::vec2 clickPos = glm::vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y);
+            modelSelected = nullptr;
+            isClicked = false;
+            distRay = FLT_MAX;
 
-            unsigned int idModelSelected = 0;
-            bool isClicked = false;
-            float distRay = FLT_MAX;
+            clickPos = glm::vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 
-            for (unsigned int i = 0; i < sceneModels.size(); i++)
+            CheckRayGeometry(window, cam, pivote->GetModel());
+            //First CheckPivot
+            if (!isClicked || !pivote->isRendered)
             {
-                //Experimental
-                int width, height;
-                glfwGetWindowSize(window, &width, &height);
-
-                float xVal = ((2.0f * clickPos.x) / (float)width) - 1.0f;
-                float yVal = 1.0f - (2.0f * clickPos.y) / (float)height;
-                float zVal = -1.0f;
-
-                glm::vec3 ray_nds = glm::vec3(xVal, yVal, zVal);
-                glm::vec4 ray_clip = glm::vec4(ray_nds.x, ray_nds.y, 1.0, 1.0);
-                glm::vec4 ray_eye = inverse(cam->projection * cam->view * sceneModels.at(i)->transform->model) * ray_clip;
-                glm::vec3 ray_wor = glm::normalize(ray_eye);
-
-
-                glm::vec3 ray_orig = inverse(sceneModels.at(i)->transform->model) * glm::vec4(cam->cameraPos, 1.0f);
-
-                float dist = sceneModels.at(i)->checkClickMouse(ray_orig, ray_wor);
-                if (dist > 0.0f && dist < distRay)
+                for (unsigned int i = 1; i < sceneModels.size(); i++)
                 {
-                    isClicked = true;
-                    distRay = dist;
-                    idModelSelected = i;
+                    CheckRayGeometry(window, cam, sceneModels.at(i));
+                }
+
+                for (unsigned int i = 1; i < sceneModels.size(); i++)
+                    sceneModels.at(i)->isSelected(false);
+
+                if (isClicked)
+                {
+                    pivote->AttachModel(modelSelected);
+                    pivote->isRendered = true;
+                    modelSelected->isSelected(true);
+                }
+                else
+                {
+                    pivote->isRendered = false;
                 }
             }
+        }
 
-            for (unsigned int i = 0; i < sceneModels.size(); i++)
-                sceneModels.at(i)->isSelected(false);
+        if (pivote->isRendered)
+        {
+            //Check Pivote X axis
+            pivote->CheckXAxis(clickPos);
+            //Check Pivote Y axis
+            //Check Pivote Z axis
+        }
+    }
 
-            if (isClicked)
-            {
-                sceneModels.at(idModelSelected)->isSelected(true);
-            }
+    void CheckRayGeometry(GLFWwindow* window, Camera* cam, Model* model)
+    {
+        //Experimental
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+
+        float xVal = ((2.0f * clickPos.x) / (float)width) - 1.0f;
+        float yVal = 1.0f - (2.0f * clickPos.y) / (float)height;
+        float zVal = -1.0f;
+
+        glm::vec3 ray_nds = glm::vec3(xVal, yVal, zVal);
+        glm::vec4 ray_clip = glm::vec4(ray_nds.x, ray_nds.y, 1.0, 1.0);
+        glm::vec4 ray_eye = inverse(cam->projection * cam->view * model->transform->model) * ray_clip;
+        glm::vec3 ray_wor = glm::normalize(ray_eye);
+        glm::vec3 ray_orig = inverse(model->transform->model) * glm::vec4(cam->cameraPos, 1.0f);
+
+        float dist = model->checkClickMouse(ray_orig, ray_wor);
+        if (dist > 0.0f && dist < distRay)
+        {
+            modelSelected = model;
+            isClicked = true;
+            distRay = dist;
         }
     }
 };

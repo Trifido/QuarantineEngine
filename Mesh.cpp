@@ -4,7 +4,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Mate
 { 
     this->vertices = vertices;
     this->indices = indices;
-    material = new Material(matHandle.shader);
+    material = new Material(matHandle.shader, matHandle.shader2);
     material->ptrShaderShadow = matHandle.shaderShadow;
     material->ptrShaderPointShadow = matHandle.shaderPointShadow; 
     matHandle.AddMaterialToList(material);
@@ -16,7 +16,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 {
     this->vertices = vertices;
     this->indices = indices;
-    material=new Material(matHandle.shader);
+    material=new Material(matHandle.shader, matHandle.shader2);
     material->ptrShaderShadow = matHandle.shaderShadow;
     material->ptrShaderPointShadow = matHandle.shaderPointShadow;
     material->AddMultTextures(textures);
@@ -137,6 +137,16 @@ void Mesh::setUpInstanceMesh(unsigned int ID)
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(2, 1); // tell OpenGL this is an instanced vertex attribute.
+}
+
+void Mesh::MeshCollider(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle)
+{
+    this->vertices = vertices;
+    this->indices = indices;
+    material = new Material(matHandle.shader, matHandle.shader2);
+    matHandle.AddMaterialToList(material);
+
+    setupMesh();
 }
 
 void Mesh::Draw(bool isOutline, bool isActive)

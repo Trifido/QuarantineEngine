@@ -28,6 +28,7 @@ public:
     Shader* shaderPointShadow;
     bool isAmbientReflective;
     bool isChangeNumInstances;
+    bool generalDrawMode = true;
     int numInstances;
     const int MAX_INSTANCES = 1000000;
 
@@ -41,7 +42,7 @@ public:
     void EditMaterial(MaterialComponent component, bool value);
     void EditMaterial(MaterialComponent component, glm::vec4 value);
     void EditMaterial(MaterialComponent component, MaterialType type, int numInstances=0);
-    void EditMaterial(MaterialComponent component, DrawMode type);
+    void EditMaterial(MaterialComponent component, DrawMode type, bool guimode = false);
     void EditMaterial(MaterialComponent component, RenderType renderTypeSelected);
     void EditMaterial(MaterialComponent component, std::vector<Texture> textures, unsigned int id = NULL);
 	void ActivateShadowMap(unsigned int idTexShadow, unsigned int idLight, TypeLight type = TypeLight::DIRL);

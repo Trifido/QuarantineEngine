@@ -214,11 +214,13 @@ int main(int, char**)
 
     ///--CUBE   
     Model cubeModel(vertices, 36, textures_pbr);
-   
+    cubeModel.isSelectableModel = true;
     //cubeModel.AddMaterial(rmMaterial);
     cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
     cubeModel.ScaleTo(glm::vec3(4.0f, 4.0f, 4.0f));
     cubeModel.TranslationTo(glm::vec3(0.0f, 0.1f, 0.0f));
+
+    cubeModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::OUTLINE);
     renderkernel.AddModel(&cubeModel);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
     //cubeModel.isSelectable(true);
@@ -241,9 +243,11 @@ int main(int, char**)
 
     ///--FLOOR
     Model floorModel(floorVertices, 6, textures_parallax);
+    floorModel.isSelectableModel = true;
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 32.0f);
     floorModel.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
     floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
+    floorModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::OUTLINE);
     //floorModel.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::MAX_UV, 5.0f); 
     //Shader* sh = new Shader("shaders/parallaxMapping.vert", "shaders/parallaxMapping.frag");
@@ -257,7 +261,7 @@ int main(int, char**)
     floorModel.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
     //floorModel.transform->model = glm::rotate(floorModel.transform->model, glm::radians(90.0f), glm::normalize(glm::vec3(0.0, 0.0, 1.0)));
     //floorModel.transform->model = glm::translate(floorModel.transform->model, glm::vec3(0.0, -9.0, 0.0));
-    renderkernel.AddModel(&floorModel);
+    //renderkernel.AddModel(&floorModel);
 
     Model floorModel2(floorVertices, 6, textures_parallax);
     floorModel2.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);

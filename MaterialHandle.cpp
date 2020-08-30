@@ -204,13 +204,14 @@ void MaterialHandle::EditMaterial(MaterialComponent component, MaterialType type
     }
 }
 
-void MaterialHandle::EditMaterial(MaterialComponent component, DrawMode type)
+void MaterialHandle::EditMaterial(MaterialComponent component, DrawMode type, bool guimode)
 {
     if (component == MaterialComponent::DRAW_MODE)
     {
         for (int i = 0; i < listMaterials.size(); i++)
         {
-            listMaterials.at(i)->drawtype = type;
+            if(generalDrawMode || guimode)
+                listMaterials.at(i)->drawtype = type;
         }
     }
     else

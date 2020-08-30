@@ -136,6 +136,80 @@ void Texture::EditComponet(TextureComponent component, TypeTexture value)
     LoadTextureObj();
 }
 
+unsigned int Texture::RawTypeTexture()
+{
+    switch (this->type)
+    {
+    case TypeTexture::DIFFUSE:
+        return 0;
+    case TypeTexture::SPECULAR:
+        return 1;
+    case TypeTexture::NORMAL:
+        return 2;
+    case TypeTexture::HEIGHT:
+        return 3;
+    case TypeTexture::EMISSIVE:
+        return 4;
+    case TypeTexture::CUBEMAP:
+        return 5;
+    case TypeTexture::AO:
+        return 6;
+    case TypeTexture::ROUGHNESS:
+        return 7;
+    case TypeTexture::METALLIC:
+        return 8;
+    case TypeTexture::BUMP:
+        return 9;
+    case TypeTexture::HDR_SKYBOX:
+        return 10;
+    case TypeTexture::NOISE:
+        return 11;
+    }
+}
+
+void Texture::SetRawTypeTexture(unsigned int id)
+{
+    switch (id)
+    {
+    case 0:
+        type = TypeTexture::DIFFUSE;
+        break;
+    case 1:
+        type = TypeTexture::SPECULAR;
+        break;
+    case 2:
+        type = TypeTexture::NORMAL;
+        break;
+    case 3:
+        type = TypeTexture::HEIGHT;
+        break;
+    case 4:
+        type = TypeTexture::EMISSIVE;
+        break;
+    case 5:
+        type = TypeTexture::CUBEMAP;
+        break;
+    case 6:
+        type = TypeTexture::AO;
+        break;
+    case 7:
+        type = TypeTexture::ROUGHNESS;
+        break;
+    case 8:
+        type = TypeTexture::METALLIC;
+        break;
+    case 9:
+        type = TypeTexture::BUMP;
+        break;
+    case 10:
+        type = TypeTexture::HDR_SKYBOX;
+        break;
+    case 11:
+        type = TypeTexture::NOISE;
+        break;
+    }
+}
+
 void Texture::LoadTextureObj()
 {
     glBindTexture(GL_TEXTURE_2D, ID);

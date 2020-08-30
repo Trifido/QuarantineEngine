@@ -8,16 +8,17 @@
 
 enum MaterialType
 {
-    UNLIT,
-    LIT,
-    TRANSP,
-    OUTLINE,
-    NORMALS,
-    PROCEDURAL,
-    INSTANCE,
-    EMISSIVE_LIT,
-    BOUNDING_VOLUME,
-    FPS
+    UNLIT = 0,
+    LIT = 1,
+    TRANSP = 2,
+    OUTLINE = 3,
+    NORMALS = 4,
+    PROCEDURAL = 5,
+    INSTANCE = 6,
+    EMISSIVE_LIT = 7,
+    BOUNDING_VOLUME = 8,
+    FPS = 9,
+    INTERNAL = 10
 };
 
 enum MaterialComponent
@@ -47,11 +48,11 @@ enum MaterialComponent
 
 enum DrawMode
 {
-    DPOINTS,
-    DLINES,
-    DLINES_STRIP,
-    DTRIANGLES,
-    DTRIANGLES_STRIP
+    DPOINTS = 0,
+    DLINES = 1,
+    DLINES_STRIP = 2,
+    DTRIANGLES = 3,
+    DTRIANGLES_STRIP = 4
 };
 
 class Material

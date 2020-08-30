@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "BoundingLight.h"
 #include "Model.h"
+#include "Pivot.h"
 #include "FBOSystem.h"
 #include "UBOSystem.h"
 #include "SSBOSystem.h"
@@ -29,12 +30,14 @@ private:
     std::vector<Model*> fpsModels;
     std::vector<Model*> outLineModels;
     std::vector<Model*> transparentModels;
+    std::vector<Model*> internalModels;
     std::vector<BoundingLight*> boundingModels;
     std::vector<Light*> shadowCastDirLights;
     std::vector<Light*> shadowCastOmniLights;
     std::vector<Light*> shadowCastSpotLights;
     std::vector<Light*> shadowCastGeneralLights;
     KeyInput inputSystem;
+    Pivot* pivot;
     GLFWwindow* window;
     ImVec4* clear_color;
     FBOSystem* fboSystem;
@@ -94,6 +97,7 @@ public:
     void RenderSolidModels();
     void RenderOutLineModels();
     void RenderTransparentModels();
+    void RenderInternalModels();
     void ProcessBoundingModels();
     void PreRender();
     void PreRenderHDRSkybox();

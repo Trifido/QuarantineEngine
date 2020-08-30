@@ -114,7 +114,7 @@ void GUISystem::DrawPostProcessWindow()
     if (isOpenBloomWindow)
     {
         ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Bloom Post-process Tool");
+        ImGui::Begin("Bloom Post-process Tool", &isOpenBloomWindow);
         ImGui::Text("Bloom Controller");
         static bool enableBloomParameter = false;
         static int bloomRangeParameter = 20;
@@ -129,7 +129,7 @@ void GUISystem::DrawPostProcessWindow()
     if (isOpenHDRWindow)
     {
         ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Post-process Tool");
+        ImGui::Begin("Post-process Tool", &isOpenHDRWindow);
         ImGui::Text("HDR & Gamma Controller");
         static float gammaParameter = 2.2f;
         static float exposureParameter = 0.5f;
@@ -143,7 +143,7 @@ void GUISystem::DrawPostProcessWindow()
     if (isOpenOffScreeMSAAWindow)
     {
         ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Post-process Tool");
+        ImGui::Begin("Post-process Tool", &isOpenOffScreeMSAAWindow);
         ImGui::Text("Antialiasing Controller");
         static bool enableoffScreenSampleParameter = true;
         static int offScreenSampleParameter = 8;
@@ -158,7 +158,7 @@ void GUISystem::DrawPostProcessWindow()
     if (isOpenMSAAWindow)
     {
         ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Post-process Tool");
+        ImGui::Begin("Post-process Tool", &isOpenMSAAWindow);
         ImGui::Text("Antialiasing GLFW Controller");
         static bool enableMSAASampleParameter = true;
         static int MSAASampleParameter = 8;
@@ -176,7 +176,7 @@ void GUISystem::DrawPropertyWindow()
     if (isOpenModelPropertyWindow)
     {
         ImGui::SetNextWindowSize(ImVec2(630, 450), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Model Editor", NULL);
+        ImGui::Begin("Model Editor", &isOpenModelPropertyWindow);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         ImGui::Columns(2);
@@ -235,13 +235,52 @@ void GUISystem::DrawPropertyWindow()
                     ImGui::NextColumn();
                     ImGui::PopID();
 
+                    //General Draw Mode
+                    ImGui::PushID(20);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldGeneralDrawMode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "General Draw Mode");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::Checkbox("General Draw Mode", &model->matHandle.generalDrawMode);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    //Draw Mode
+                    ImGui::PushID(15);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldDrawType", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Render Type");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    char* items2[] = { "DPOINTS", "DLINES", "DLINES_STRIP", "DTRIANGLES", "DTRIANGLES_STRIP" };
+                    char* item_current2 = items2[model->matHandle.listMaterials[0]->RawDrawType()];  // Here our selection is a single pointer stored outside the object.
+
+                    if (ImGui::BeginCombo("combo 2", item_current2))
+                    {
+                        for (int n = 0; n < IM_ARRAYSIZE(items2); n++)
+                        {
+                            bool is_selected = (item_current2 == items2[n]);
+                            if (ImGui::Selectable(items2[n], is_selected))
+                            {
+                                item_current2 = items2[n];
+                                model->matHandle.EditMaterial(MaterialComponent::DRAW_MODE, (DrawMode)n, true);
+                            }
+                            if (is_selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
+                            }
+                        }
+                        ImGui::EndCombo();
+                    }
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
                     ImGui::TreePop();
 
                     for (unsigned int i = 0; i < model->matHandle.listMaterials.size(); i++)
                     {
                         ImGui::PushID(uid+i+1);                      // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
                         ImGui::AlignTextToFramePadding();  // Text and Tree nodes are less high than regular widgets, here we add vertical spacing to make the tree lines equal high.
-                        bool node_mat_open = ImGui::TreeNode("Material", "Material %s", std::to_string(i+1).c_str());
+                        bool node_mat_open = ImGui::TreeNode("Material", "Material %s", std::to_string(i+uid+1).c_str());
                         ImGui::NextColumn();
                         ImGui::AlignTextToFramePadding();
 
@@ -254,45 +293,23 @@ void GUISystem::DrawPropertyWindow()
                             ImGui::NextColumn();
                             ImGui::SetNextItemWidth(-1);
 
-                            const char* items[] = { "UNLIT", "LIT", "TRANSP", "OUTLINE", "NORMALS", "PROCEDURAL", "INSTANCE", "EMISSIVE_LIT", "BOUNDING_VOLUME", "FPS" };
-                            static const char* item_current = items[model->matHandle.listMaterials[i]->RawMaterialType()];  // Here our selection is a single pointer stored outside the object.
+                            char* items[] = { "UNLIT", "LIT", "TRANSP", "OUTLINE", "NORMALS", "PROCEDURAL", "INSTANCE", "EMISSIVE_LIT", "BOUNDING_VOLUME", "FPS" };
+                            char* item_current = items[model->matHandle.listMaterials[i]->RawMaterialType()];  // Here our selection is a single pointer stored outside the object.
+
                             if (ImGui::BeginCombo("combo 1", item_current)) // The second parameter is the label previewed before opening the combo.
                             {
                                 for (int n = 0; n < IM_ARRAYSIZE(items); n++)
                                 {
                                     bool is_selected = (item_current == items[n]);
                                     if (ImGui::Selectable(items[n], is_selected))
-                                        item_current = items[n];
-                                    if (is_selected)
                                     {
-                                        ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+                                        item_current = items[n];
                                         model->matHandle.listMaterials[i]->SetRawMaterialType(n);
                                     }
-                                }
-                                ImGui::EndCombo();
-                            }
-                            ImGui::NextColumn();
-                            ImGui::PopID();
-
-
-                            ImGui::PushID(15 + i);
-                            ImGui::AlignTextToFramePadding();
-                            ImGui::TreeNodeEx("FieldDrawType", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Render Type");
-                            ImGui::NextColumn();
-                            ImGui::SetNextItemWidth(-1);
-                            const char* items2[] = { "DPOINTS", "DLINES", "DLINES_STRIP", "DTRIANGLES", "DTRIANGLES_STRIP" };
-                            static const char* item_current2 = items2[model->matHandle.listMaterials[i]->RawDrawType()];  // Here our selection is a single pointer stored outside the object.
-                            if (ImGui::BeginCombo("combo 2", item_current2)) // The second parameter is the label previewed before opening the combo.
-                            {
-                                for (int n = 0; n < IM_ARRAYSIZE(items2); n++)
-                                {
-                                    bool is_selected = (item_current2 == items2[n]);
-                                    if (ImGui::Selectable(items2[n], is_selected))
-                                        item_current2 = items2[n];
                                     if (is_selected)
                                     {
                                         ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
-                                        model->matHandle.listMaterials[i]->SetRawDrawType(n);
+                                        
                                     }
                                 }
                                 ImGui::EndCombo();
@@ -387,9 +404,9 @@ void GUISystem::DrawPropertyWindow()
 
                             for (unsigned int j = 0; j < model->matHandle.listMaterials[i]->textures.size(); j++)
                             {
-                                ImGui::PushID(16 + j);                      // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
+                                ImGui::PushID(16 + uid + j);                      // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
                                 ImGui::AlignTextToFramePadding();  // Text and Tree nodes are less high than regular widgets, here we add vertical spacing to make the tree lines equal high.
-                                bool node_texture_open = ImGui::TreeNode("Texture", "%s", std::to_string(j).c_str());
+                                bool node_texture_open = ImGui::TreeNode("Texture", "Texture %s", std::to_string(j).c_str());
                                 ImGui::NextColumn();
                                 ImGui::AlignTextToFramePadding();
 
@@ -401,7 +418,7 @@ void GUISystem::DrawPropertyWindow()
                                     ImGui::TreeNodeEx("FieldIDTex", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "ID Texture");
                                     ImGui::NextColumn();
                                     ImGui::SetNextItemWidth(-1);
-                                    ImGui::DragFloat3("(X, Y, Z)", model->transform->RawPosition(), 0.01f, -100000.0f, 100000.0f); //model->matHandle.listMaterials[i]->textures[j].ID
+                                    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), ("ID: " + std::to_string(model->matHandle.listMaterials[i]->textures[j].ID)).c_str());
                                     ImGui::NextColumn();
                                     ImGui::PopID();
 
@@ -410,7 +427,7 @@ void GUISystem::DrawPropertyWindow()
                                     ImGui::TreeNodeEx("FieldTexPath", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Texture Path");
                                     ImGui::NextColumn();
                                     ImGui::SetNextItemWidth(-1);
-                                    ImGui::DragFloat3("(X, Y, Z)", model->transform->RawPosition(), 0.01f, -100000.0f, 100000.0f); //model->matHandle.listMaterials[i]->textures[j].path
+                                    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), model->matHandle.listMaterials[i]->textures[j].GetRawPath());
                                     ImGui::NextColumn();
                                     ImGui::PopID();
                                     
@@ -419,19 +436,23 @@ void GUISystem::DrawPropertyWindow()
                                     ImGui::TreeNodeEx("FieldTexType", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Texture Type");
                                     ImGui::NextColumn();
                                     ImGui::SetNextItemWidth(-1);
-                                    const char* items3[] = { "DIFFUSE", "SPECULAR", "NORMAL", "HEIGHT", "EMISSIVE", "CUBEMAP", "AO", "ROUGHNESS", "METALLIC", "BUMP", "HDR_SKYBOX", "NOISE" };
-                                    static const char* item_current3 = items3[model->matHandle.listMaterials[i]->textures[j].type];  // Here our selection is a single pointer stored outside the object.
+
+                                    char* items3[] = { "DIFFUSE", "SPECULAR", "NORMAL", "HEIGHT", "EMISSIVE", "CUBEMAP", "AO", "ROUGHNESS", "METALLIC", "BUMP", "HDR_SKYBOX", "NOISE" };
+                                    char* item_current3 = items3[model->matHandle.listMaterials[i]->textures[j].RawTypeTexture()];  // Here our selection is a single pointer stored outside the object.
                                     if (ImGui::BeginCombo("combo 3", item_current3)) // The second parameter is the label previewed before opening the combo.
                                     {
+                                        item_current3 = items3[model->matHandle.listMaterials[i]->textures[j].RawTypeTexture()];
                                         for (int n = 0; n < IM_ARRAYSIZE(items3); n++)
                                         {
                                             bool is_selected = (item_current3 == items3[n]);
                                             if (ImGui::Selectable(items3[n], is_selected))
+                                            {
                                                 item_current3 = items3[n];
+                                                model->matHandle.listMaterials[i]->textures[j].SetRawTypeTexture(n);
+                                            }
                                             if (is_selected)
                                             {
                                                 ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
-                                                model->matHandle.listMaterials[i]->textures[j].SetRawTypeTexture(n);
                                             }
                                         }
                                         ImGui::EndCombo();
@@ -476,7 +497,7 @@ void GUISystem::DrawPropertyWindow()
     if (isOpenLightPropertyWindow)
     {
         ImGui::SetNextWindowSize(ImVec2(630, 450), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Light Editor", NULL);
+        ImGui::Begin("Light Editor", &isOpenLightPropertyWindow);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         ImGui::Columns(2);
@@ -650,7 +671,7 @@ void GUISystem::DrawPropertyWindow()
     if (isOpenCameraPropertyWindow)
     {
         ImGui::SetNextWindowSize(ImVec2(630, 450), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Camera Editor", NULL);
+        ImGui::Begin("Camera Editor", &isOpenCameraPropertyWindow);
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
         ImGui::Columns(2);
