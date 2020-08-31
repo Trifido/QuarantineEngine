@@ -26,98 +26,133 @@ Collider::Collider(ColliderType typeCollider)
     else if (type == ColliderType::SPHERE)
     {
         LoadMesh("./resources/3DModels/sphere/sphere.obj");
+        radius = 1.0f;
     }
     else
     {
         std::vector<Vertex> verticesVertex;
-        std::vector<unsigned int> indices;
+        std::vector<unsigned int> indicesV;
 
-        float vertices[] = {
-            // positions          // normals           // texture coords
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-
-            //BIEN
-            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-            //BIEN
-            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-            //BIEN
-             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-             //SUPERIOR
-            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-            //INFERIOR
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f
+        float verticesV[] = {
+            // positions         
+            -0.5f, -0.5f, -0.5f,// 0
+             0.5f, -0.5f, -0.5f,// 1
+             0.5f,  0.5f, -0.5f,// 2
+            -0.5f,  0.5f, -0.5f,// 3
+             
+            -0.5f, -0.5f, 0.5f, // 4
+             0.5f, -0.5f, 0.5f, // 5
+             0.5f,  0.5f, 0.5f, // 6
+            -0.5f,  0.5f, 0.5f  // 7
         };
 
-        unsigned int NUMCOMP = 8;
-        for (int i = 0; i < 36; i++)
+        unsigned int COUNT = 8;
+        for (int i = 0; i < COUNT; i++)
         {
-            unsigned int index = i * NUMCOMP;
+            unsigned int index = i * 3;
 
             Vertex vertex;
             glm::vec3 vector;
 
-            vector.x = vertices[index];
-            vector.y = vertices[index + 1];
-            vector.z = vertices[index + 2];
+            vector.x = verticesV[index];
+            vector.y = verticesV[index + 1];
+            vector.z = verticesV[index + 2];
             vertex.Position = vector;
 
-            vector.x = vertices[index + 3];
-            vector.y = vertices[index + 4];
-            vector.z = vertices[index + 5];
-            vertex.Normal = vector;
-
-            glm::vec2 vec;
-            vec.x = vertices[index + 6];
-            vec.y = vertices[index + 7];
-            vertex.TexCoords = vec;
-
             verticesVertex.push_back(vertex);
-            indices.push_back(i);
         }
 
-        meshCollider.MeshCollider(verticesVertex, indices, matHandle);
+        indicesV.push_back(0);
+        indicesV.push_back(1);
+        indicesV.push_back(2);
+        indicesV.push_back(3);
+        indicesV.push_back(0);
+        indicesV.push_back(4);
+        indicesV.push_back(5);
+        indicesV.push_back(1);
+        indicesV.push_back(2);
+        indicesV.push_back(6);
+        indicesV.push_back(5);
+        indicesV.push_back(4);
+        indicesV.push_back(7);
+        indicesV.push_back(6);
+        indicesV.push_back(2);
+        indicesV.push_back(3);
+        indicesV.push_back(7);
+        indicesV.push_back(4);
+        indicesV.push_back(0);
+        indicesV.push_back(3);
+
+        meshCollider.MeshCollider(verticesVertex, indicesV, matHandle);
     }
 }
 
 void Collider::DrawCollider()
 {
+    SetHierarchy();
     matHandle.shader->use();
     meshCollider.material->ptrShader->setMat4("model", transform->finalModelMatrix);
 
     glBindVertexArray(meshCollider.GetVAO());
-    glDrawElements(GL_LINES, meshCollider.indices.size(), GL_UNSIGNED_INT, 0);
+
+    switch (type)
+    {
+    case ColliderType::BOX:
+        glDrawElements(GL_LINE_STRIP, meshCollider.indices.size(), GL_UNSIGNED_INT, 0);
+        break;
+    case ColliderType::SPHERE:
+    case ColliderType::MESH:
+        glDrawElements(GL_LINES, meshCollider.indices.size(), GL_UNSIGNED_INT, 0);
+        break;
+    }
+    
+}
+
+bool Collider::IsRayCollision(UIRay* ray)
+{
+    float distRay = FLT_MAX;
+    glm::vec4 ray_eye = inverse(ray->PV * transform->finalModelMatrix) * glm::vec4(ray->ray_dir, 1.0);
+    glm::vec3 ray_wor = glm::normalize(ray_eye);
+    glm::vec3 ray_orig = inverse(transform->finalModelMatrix) * glm::vec4(ray->ray_orig, 1.0f);
+
+    if (type == ColliderType::BOX)
+    {
+        float dist = CheckCollider(ray_orig, ray_wor);
+        if (dist > 0.0f && dist < distRay)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+float Collider::CheckCollider(glm::vec3 origin, glm::vec3 dir)
+{
+    float intersectionDist;
+    float distancePoint = FLT_MAX;
+
+    switch (type)
+    {
+        case ColliderType::MESH:
+            for (unsigned idTri = 0; idTri < meshCollider.indices.size(); idTri += 3)
+            {
+                if (meshCollider.RayIntersectsTriangle(origin, dir, idTri, intersectionDist, transform->model))
+                {
+                    if (distancePoint > intersectionDist)
+                        distancePoint = intersectionDist;
+                }
+            }
+            break;
+        case ColliderType::SPHERE:
+            break;
+        case ColliderType::BOX:
+            break;
+    }
+
+    
+
+    return distancePoint;
 }
 
 void Collider::LoadMesh(std::string path)
@@ -185,4 +220,20 @@ void Collider::processMesh(aiMesh* mesh, const aiScene* scene)
     }
 
     meshCollider.MeshCollider(vertices, indices, matHandle);
+}
+
+void Collider::SetHierarchy()
+{
+    transform->finalModelMatrix = transform->model;
+
+    if (transform->parent != nullptr)
+    {
+        Transform* parent = transform->parent;
+
+        while (parent != nullptr)
+        {
+            transform->finalModelMatrix *= parent->model;
+            parent = parent->parent;
+        }
+    }
 }

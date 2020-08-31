@@ -18,7 +18,7 @@ public:
     Model* GetModel() { return pivotModel; }
     void AttachModel(Model* model);
     void DrawPivot();
-    void CheckXAxis(glm::vec2 clickPosition);
+    void CheckXAxis(glm::vec2 clickPosition, UIRay* ray);
     void CheckYAxis(glm::vec2 clickPosition);
 };
 

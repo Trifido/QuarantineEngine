@@ -12,6 +12,8 @@ Pivot::Pivot()
     pivotModel->TranslationTo(glm::vec3(3.0, 0.0, 0.0));
     isRendered = false;
     pivotModel->colliders.push_back(new Collider(ColliderType::BOX));
+
+    pivotModel->colliders.at(0)->transform->AttachTo(pivotModel->transform);
 }
 
 void Pivot::AttachModel(Model* model)
@@ -33,9 +35,9 @@ void Pivot::DrawPivot()
     }
 }
 
-void Pivot::CheckXAxis(glm::vec2 clickPosition)
+void Pivot::CheckXAxis(glm::vec2 clickPosition, UIRay *ray)
 {
-    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && pivotModel->colliders.at(0)->IsRayCollision(ray))
     {
         if (firstMouse)
         {

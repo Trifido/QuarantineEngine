@@ -714,7 +714,6 @@ float Model::checkClickMouse(glm::vec3 origin, glm::vec3 dir)
     if (!isSelectableModel)
         return FLT_MAX;
 
-    bool existIntesection = false;
     float intersectionDist;
     float distancePoint = FLT_MAX;
 
