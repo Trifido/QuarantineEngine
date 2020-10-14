@@ -28,6 +28,7 @@ public:
     std::vector<Vertex> vertices;
     std::vector<ProceduralVertex> proceduralVertices;
     std::vector<unsigned int> indices;
+    std::vector<unsigned int> stripTrianglesIndices;
     //Material info
     Material *material;
     /*  Functions  */
@@ -38,8 +39,10 @@ public:
     Mesh(std::vector<ProceduralVertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle, glm::vec2* instances = NULL);
 
     void MeshCollider(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle);
+    void ScaleMeshCollider(glm::vec3 scalevert);
     void Draw(bool isOutline=false, bool isActive=false);
     void DrawShadow();
+    void DrawVolumeShadow();
     void DelteGPUInfo();
     void inline SetShininess(float shini) { material->shininess = shini; }
 
@@ -53,14 +56,17 @@ public:
     bool inline GetIsBoundingLight() { return isBoundingLight; }
     void SetBoundingLight(bool value);
     unsigned int GetVAO() { return VAO; }
+    void ChangeIndexSystem(bool isCommonIndex);
 private:
     bool isBoundingLight = false;
+    bool isTriangleIndexSystem = true;
     /*  Render data  */
     unsigned int VAO, VBO, EBO;
     /*  Functions    */
     void setupMesh(); 
     void setupProceduralMesh(glm::vec2* instances = NULL);
     void SetRenderMode();
+    void DetermineAdjacency();
 };
 
 

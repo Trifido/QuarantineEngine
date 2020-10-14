@@ -18,6 +18,7 @@ RenderPlane::RenderPlane()
     ssao = new Shader("shaders/deferredLighting.vert", "shaders/ssao.frag");
     ssao_blur = new Shader("shaders/deferredLighting.vert", "shaders/ssao_blur.frag");
     rayMarching = new Shader("shaders/rmSky.vert", "shaders/rmSky.frag");
+    screenRenderVolumeShadow = new Shader("shaders/renderPass.vert", "shaders/renderPassVolume.frag");
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
 }
 
@@ -114,6 +115,17 @@ void RenderPlane::FinalRenderBloom()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, fboSystem->GetPingPongRender(!pingpongIdPass));
     }
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void RenderPlane::FinalRenderShadowVolume()
+{
+    screenRenderVolumeShadow->use();
+    screenRenderVolumeShadow->setFloat("gamma", hdrGui->gammaParameter);
+    screenRenderVolumeShadow->setFloat("exposure", hdrGui->exposureParameter);
+    glBindVertexArray(quadVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetVolumeShadowRender(0));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 

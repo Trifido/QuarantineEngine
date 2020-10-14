@@ -26,6 +26,7 @@ public:
     Shader* shader2;
     Shader* shaderShadow;
     Shader* shaderPointShadow;
+    Shader* shaderVolumeShadow;
     bool isAmbientReflective;
     bool isChangeNumInstances;
     bool generalDrawMode = true;

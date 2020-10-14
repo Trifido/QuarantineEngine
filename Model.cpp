@@ -58,11 +58,7 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
     int numDir, numPoint, numSpot;
     numDir = numPoint = numSpot = 0;
 
-    //for(int i = 0; i < lights.size(); i++)
-    //    if(numDir )
-
     matHandle.shader->use();
-
 
     if (!isOutline || !isSelectableModel || !isSelectedModel)
     {
@@ -165,6 +161,20 @@ void Model::DrawShadow(std::vector<glm::mat4> &shadowTransforms, glm::vec3 &ligh
                 meshes[i].material->ptrShaderPointShadow->setMat4("shadowMatrices[" + std::to_string(j) + "]", shadowTransforms[j]);
 
             meshes[i].DrawShadow();
+        }
+    }
+}
+
+void Model::DrawVolumeShadow(glm::vec3& lightPos)
+{
+    if (CAST_SHADOW)
+    {
+        matHandle.shaderVolumeShadow->use();
+        matHandle.shaderVolumeShadow->setMat4("model", transform->finalModelMatrix);
+        matHandle.shaderVolumeShadow->setVec3("lightPos", lightPos);
+        for (unsigned int i = 0; i < meshes.size(); i++)
+        {
+            meshes[i].DrawVolumeShadow();
         }
     }
 }
@@ -790,6 +800,12 @@ void Model::AddCamera(Camera* cam)
     //    //for (int i = 0; i < meshes.size(); i++)
     //    //    (*meshes.at(i).material->shader2)->mainCamera = cam;
     //}
+}
+
+void Model::ChangeIndexSystem(bool indexSystem)
+{
+    for (int i = 0; i < meshes.size(); i++)
+        meshes.at(i).ChangeIndexSystem(indexSystem);
 }
 
 Bone* Model::FindBone(std::string name)

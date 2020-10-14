@@ -33,37 +33,47 @@ public:
 
             clickPos = glm::vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y);
 
-            CheckRayGeometry(window, cam, pivote->GetModel());
             //First CheckPivot
             if (!isClicked || !pivote->isRendered)
             {
                 for (unsigned int i = 1; i < sceneModels.size(); i++)
                 {
                     CheckRayGeometry(window, cam, sceneModels.at(i));
-                }
-
-                for (unsigned int i = 1; i < sceneModels.size(); i++)
                     sceneModels.at(i)->isSelected(false);
+                }
 
                 if (isClicked)
                 {
-                    pivote->AttachModel(modelSelected);
+                    //pivote->AttachModel(modelSelected);
                     pivote->isRendered = true;
                     modelSelected->isSelected(true);
+                    pivote->isRendered = pivote->CheckCollision(clickPos, ray);
                 }
                 else
                 {
-                    pivote->isRendered = false;
+                    if(pivote->isRendered)
+                        pivote->isRendered = pivote->CheckCollision(clickPos, ray);
                 }
             }
         }
 
-        if (pivote->isRendered)
+        if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
         {
-            //Check Pivote X axis
-            pivote->CheckXAxis(clickPos, ray);
-            //Check Pivote Y axis
-            //Check Pivote Z axis
+            if (pivote->isRendered)
+            {
+               //pivote->CheckXAxis(clickPos, ray);
+                //if (!pivote->CheckXAxis(clickPos, ray))
+                //    if(!pivote->CheckYAxis(clickPos, ray))
+                //        pivote->CheckZAxis(clickPos, ray);
+
+                //vote->CheckYAxis(clickPos, ray);
+                //pivote->CheckZAxis(clickPos, ray);
+            }
+        }
+        else
+        {
+            pivote->isFirstDragX = true;
+            pivote->isFirstDragY = true;
         }
     }
 
@@ -84,6 +94,7 @@ public:
         glm::vec3 ray_orig = inverse(model->transform->model) * glm::vec4(cam->cameraPos, 1.0f);
 
         this->ray = new UIRay(cam->cameraPos, ray_clip, cam->projection * cam->view);
+        //this->ray = new UIRay(cam->cameraPos, ray_wor, cam->projection * cam->view);
 
         float dist = model->checkClickMouse(ray_orig, ray_wor);
         if (dist > 0.0f && dist < distRay)

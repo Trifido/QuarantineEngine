@@ -1,6 +1,6 @@
 #version 430 core
-layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 BrightColor;
+layout (location = 0) out vec4 Ambient;
+layout (location = 1) out vec4 DiffSpec;
 
 #define NUM_TEXTURES 1
 #define NR_DIR_LIGHTS 8
@@ -121,11 +121,6 @@ vec3 CalcSpotLight(SpotLight light, int idLight, vec3 normal, vec3 viewDir, vec2
 
 //-- PARALLAX FUNCTION --
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
-
-//-- SHADOW COMPUTE --
-float PointShadowCalculation(int idLight);
-float DirShadowCalculation(int idLight);
-float SpotShadowCalculation(int idLight);
 
 vec3 sampleOffsetDirections[20] = vec3[]
 (
@@ -273,13 +268,11 @@ void main()
     vec3 ambient = (kD * diffuse + specular) * ao;
 
     vec3 color = ambient + Lo;
-    FragColor = vec4(color, 1.0);
 
-    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
-    if(brightness > 64.0)//material.bloomBrightness
-        BrightColor = vec4(result, 1.0);
-    else
-        BrightColor = vec4(0.0, 0.0, 0.0, 1.0); 
+    Ambient = vec4(ambient, 1.0);
+    //Ambient = vec4(0.0, 0.0, 1.0, 1.0);
+
+    DiffSpec = vec4(color, 1.0);
 }
 
 vec3 CalcPointLight(PointLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords)
@@ -329,12 +322,8 @@ vec3 CalcPointLight(PointLight light, int idLight, vec3 normal, vec3 viewDir, ve
     // scale light by NdotL
     float NdotL = max(dot(normal, L), 0.0);        
 
-    float shadow = 0.0;
-    if(light.isCastShadow && light.shadowMode == 0)
-        shadow = PointShadowCalculation(idLight);
-
     // add to outgoing radiance Lo
-    return (kD * albedo * (1.0 - shadow) / PI + (specular * (1.0 - shadow))) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+    return (kD * albedo / PI + (specular)) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 }
 
 vec3 CalcDirLight(DirLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords)
@@ -383,12 +372,8 @@ vec3 CalcDirLight(DirLight light, int idLight, vec3 normal, vec3 viewDir, vec2 t
     // scale light by NdotL
     float NdotL = max(dot(normal, L), 0.0);        
 
-    float shadow = 0.0;
-    if(light.isCastShadow && light.shadowMode == 0)
-        shadow = DirShadowCalculation(idLight);
-
     // add to outgoing radiance Lo
-    return (kD * albedo * (1.0 - shadow) / PI + (specular * (1.0 - shadow))) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+    return (kD * albedo / PI + (specular)) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 }
 
 vec3 CalcSpotLight(SpotLight light, int idLight, vec3 normal, vec3 viewDir, vec2 texCoords)
@@ -443,12 +428,8 @@ vec3 CalcSpotLight(SpotLight light, int idLight, vec3 normal, vec3 viewDir, vec2
     // scale light by NdotL
     float NdotL = max(dot(normal, L), 0.0);        
 
-    float shadow = 0.0;
-    if(light.isCastShadow && light.shadowMode == 0)
-        shadow = SpotShadowCalculation(idLight);
-
     // add to outgoing radiance Lo
-    return (kD * albedo * (1.0 - shadow) / PI + (specular * (1.0 - shadow))) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+    return (kD * albedo / PI + (specular)) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 }
 
 //PARALLAX MAPPING
@@ -487,99 +468,4 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
     vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
 
     return finalTexCoords;  
-}
-
-float PointShadowCalculation(int idLight)
-{
-    float shadow  = 0.0;
-    float bias   = 0.000f;
-    int samples = 20;
-    float viewDistance;
-    vec3 fragToLight;
-
-    viewDistance = length(viewPos - fs_in.FragPos);
-    fragToLight = fs_in.FragPos - pointLights[idLight].position;
-
-    float diskRadius = (1.0 + (viewDistance / pointLights[idLight].far_plane)) / 25.0; 
-    float currentDepth = length(fragToLight);
-
-    float closestDepth = texture(pointLights[idLight].shadowCubeMap, fragToLight).r;
-
-    closestDepth *= pointLights[idLight].far_plane;   // Undo mapping [0;1]
-
-    shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0; 
-
-    return shadow;
-}
-
-float DirShadowCalculation(int idLight)
-{
-    vec3 normal, lightDir;
-
-    normal = normalize(fs_in.Normal);
-    lightDir = normalize(-dirLights[idLight].direction);
-
-    if(dot(normal, lightDir) < 0.0)
-        return 0.0;
-         
-    // Projection coords in range [0,1]
-    vec3 projCoords = fs_in.FragPosDirLightSpace[idLight].xyz / fs_in.FragPosDirLightSpace[idLight].w;
-    projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(dirLights[idLight].shadowMap, projCoords.xy).r; 
-    float currentDepth = projCoords.z ;
-
-    float bias = max(0.000005 * (1.0 - dot(normal, lightDir)), 0.000005);
-    float shadow = 0.0;
-
-    if(projCoords.z < 1.0)
-    {
-        vec2 texelSize = 1.0 / textureSize(dirLights[idLight].shadowMap, 0);
-        for(int x = -1; x <= 1; ++x)
-        {
-            for(int y = -1; y <= 1; ++y)
-            {
-                float pcfDepth = texture(dirLights[idLight].shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-                shadow += currentDepth + bias > pcfDepth ? 1.0 : 0.0;        
-            }    
-        }
-        shadow /= 9.0;
-    }
-
-    return shadow;
-}
-
-float SpotShadowCalculation(int idLight)
-{
-    vec3 normal, lightDir;
-
-    normal = normalize(fs_in.Normal);
-    lightDir = normalize(-spotLights[idLight].direction);
-
-    if(dot(normal, lightDir) < 0.0)
-        return 0.0;
-         
-    // Projection coords in range [0,1]
-    vec3 projCoords = fs_in.FragPosSpotLightSpace[idLight].xyz / fs_in.FragPosSpotLightSpace[idLight].w;
-    projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(spotLights[idLight].shadowMap, projCoords.xy).r; 
-    float currentDepth = projCoords.z ;
-
-    float bias = max(0.000005 * (1.0 - dot(normal, lightDir)), 0.000005);
-    float shadow = 0.0;
-
-    if(projCoords.z < 1.0)
-    {
-        vec2 texelSize = 1.0 / textureSize(spotLights[idLight].shadowMap, 0);
-        for(int x = -1; x <= 1; ++x)
-        {
-            for(int y = -1; y <= 1; ++y)
-            {
-                float pcfDepth = texture(spotLights[idLight].shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-                shadow += currentDepth + bias > pcfDepth ? 1.0 : 0.0;        
-            }    
-        }
-        shadow /= 9.0;
-    }
-
-    return shadow;
 }

@@ -28,6 +28,7 @@ public:
     Mesh meshCollider;
     MaterialHandle matHandle;
     float radius;
+    glm::vec3 aabb_min, aabb_max;
 
     Collider();
     Collider(ColliderType typeCollider);
@@ -41,6 +42,8 @@ private:
     void processNode(aiNode* node, const aiScene* scene);
     void processMesh(aiMesh* mesh, const aiScene* scene);
     void SetHierarchy();
+    bool RaySphereIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir);
+    float RayBoxOBBIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir);
 };
 
 #endif

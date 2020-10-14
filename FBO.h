@@ -15,7 +15,8 @@ enum FBOType
     LIGHTING_VOLUME_FBO,
     SSAO_FBO,
     SKYBOX_FBO,
-    PREFILTER_FBO
+    PREFILTER_FBO,
+    VOLUME_SHADOW_FBO
 };
 
 enum FBOComponent
@@ -34,6 +35,7 @@ class FBO
         unsigned int *idFBO;
         unsigned int numFBOs; 
         unsigned int rbo;
+        unsigned int rbo2;
         unsigned int samples; 
         unsigned int *texture_buffers;
         unsigned int num_mrt; 
@@ -60,6 +62,7 @@ class FBO
         void CheckFBO();
         void SetIrradianceCubemap();
         void Set2DLUT();
+        void SetVolumenShadowFBO();
 };
 
 #endif

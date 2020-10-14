@@ -4,6 +4,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Mate
 { 
     this->vertices = vertices;
     this->indices = indices;
+    this->DetermineAdjacency();
     material = new Material(matHandle.shader, matHandle.shader2);
     material->ptrShaderShadow = matHandle.shaderShadow;
     material->ptrShaderPointShadow = matHandle.shaderPointShadow; 
@@ -16,6 +17,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 {
     this->vertices = vertices;
     this->indices = indices;
+    this->DetermineAdjacency();
     material=new Material(matHandle.shader, matHandle.shader2);
     material->ptrShaderShadow = matHandle.shaderShadow;
     material->ptrShaderPointShadow = matHandle.shaderPointShadow;
@@ -29,6 +31,7 @@ Mesh::Mesh(std::vector<ProceduralVertex> vertices, std::vector<unsigned int> ind
 {
     this->proceduralVertices = vertices;
     this->indices = indices;
+    this->DetermineAdjacency();
     material = new Material(matHandle.shader);
     material->ptrShaderShadow = matHandle.shaderShadow;
     material->ptrShaderPointShadow = matHandle.shaderPointShadow;
@@ -149,6 +152,21 @@ void Mesh::MeshCollider(std::vector<Vertex> vertices, std::vector<unsigned int> 
     setupMesh();
 }
 
+void Mesh::ScaleMeshCollider(glm::vec3 scalevert)
+{
+    for (unsigned int i = 0; i < vertices.size(); i++)
+    {
+        if(scalevert.x != 1.0f)
+            vertices.at(i).Position.x *= scalevert.x;
+        if (scalevert.y != 1.0f)
+            vertices.at(i).Position.y *= scalevert.y;
+        if (scalevert.z != 1.0f)
+            vertices.at(i).Position.z *= scalevert.z;
+    }
+
+    setupMesh();
+}
+
 void Mesh::Draw(bool isOutline, bool isActive)
 {
     if (!isOutline || !isActive)
@@ -201,6 +219,19 @@ void Mesh::Draw(bool isOutline, bool isActive)
 void Mesh::DrawShadow()
 {
     SetRenderMode();
+}
+
+void Mesh::DrawVolumeShadow()
+{
+    glBindVertexArray(VAO);
+
+    if (material->type != MaterialType::INSTANCE)
+        glDrawElements(GL_TRIANGLES_ADJACENCY, stripTrianglesIndices.size(), GL_UNSIGNED_INT, 0);
+    else
+        glDrawElementsInstanced(GL_TRIANGLES_ADJACENCY, stripTrianglesIndices.size(), GL_UNSIGNED_INT, 0, material->numInstances);
+
+    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::DelteGPUInfo()
@@ -310,12 +341,26 @@ void Mesh::SetRenderMode()
             glDrawArraysInstanced(GL_LINE_STRIP, 0, 6, 100);
         break;
     case DrawMode::DTRIANGLES:
-        if (material->type != MaterialType::INSTANCE)
-            glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        if (isTriangleIndexSystem)
+        {
+            if (material->type != MaterialType::INSTANCE)
+                glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+            else
+                glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, material->numInstances);
+        }
         else
-            glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, material->numInstances);
+        {
+            if (material->type != MaterialType::INSTANCE)
+                glDrawElements(GL_TRIANGLES_ADJACENCY, stripTrianglesIndices.size(), GL_UNSIGNED_INT, 0);
+            else
+                glDrawElementsInstanced(GL_TRIANGLES_ADJACENCY, stripTrianglesIndices.size(), GL_UNSIGNED_INT, 0, material->numInstances);
+        }
         break;
     case DrawMode::DTRIANGLES_STRIP:
+        if (material->type != MaterialType::INSTANCE)
+            glDrawElements(GL_TRIANGLES_ADJACENCY, stripTrianglesIndices.size(), GL_UNSIGNED_INT, 0);
+        else
+            glDrawElementsInstanced(GL_TRIANGLES_ADJACENCY, stripTrianglesIndices.size(), GL_UNSIGNED_INT, 0, material->numInstances);
         break;
     }
 
@@ -353,4 +398,128 @@ void Mesh::SetBoundingLight(bool value)
 {
     isBoundingLight = value;
     material->isBounding = value;
+}
+
+void Mesh::ChangeIndexSystem(bool isCommonIndex)
+{
+    glBindVertexArray(VAO);
+
+    if (isCommonIndex != isTriangleIndexSystem)
+    {
+        if (isCommonIndex == true)
+        {
+            if (indices.size() > 0)
+            {
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+            }
+        }
+        else
+        {
+            if (stripTrianglesIndices.size() > 0)
+            {
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+                glBufferData(GL_ELEMENT_ARRAY_BUFFER, stripTrianglesIndices.size() * sizeof(unsigned int), &stripTrianglesIndices[0], GL_STATIC_DRAW);
+            }
+        }
+    }
+    glBindVertexArray(0);
+
+    isTriangleIndexSystem = isCommonIndex;
+}
+
+void Mesh::DetermineAdjacency()
+{
+    // Copy and make room for adjacency info
+    for (GLuint i = 0; i < indices.size(); i += 3)
+    {
+        stripTrianglesIndices.push_back(indices[i]);
+        stripTrianglesIndices.push_back(-1);
+        stripTrianglesIndices.push_back(indices[i + 1]);
+        stripTrianglesIndices.push_back(-1);
+        stripTrianglesIndices.push_back(indices[i + 2]);
+        stripTrianglesIndices.push_back(-1);
+    }
+
+    // Find matching edges
+    for (GLuint i = 0; i < stripTrianglesIndices.size(); i += 6)
+    {
+        // A triangle
+        int a1 = stripTrianglesIndices[i];
+        int b1 = stripTrianglesIndices[i + 2];
+        int c1 = stripTrianglesIndices[i + 4];
+
+        // Scan subsequent triangles
+        for (GLuint j = i + 6; j < stripTrianglesIndices.size(); j += 6)
+        {
+            int a2 = stripTrianglesIndices[j];
+            int b2 = stripTrianglesIndices[j + 2];
+            int c2 = stripTrianglesIndices[j + 4];
+
+            // Edge 1 == Edge 1
+            if ((a1 == a2 && b1 == b2) || (a1 == b2 && b1 == a2))
+            {
+                stripTrianglesIndices[i + 1] = c2;
+                stripTrianglesIndices[j + 1] = c1;
+            }
+            // Edge 1 == Edge 2
+            if ((a1 == b2 && b1 == c2) || (a1 == c2 && b1 == b2))
+            {
+                stripTrianglesIndices[i + 1] = a2;
+                stripTrianglesIndices[j + 3] = c1;
+            }
+            // Edge 1 == Edge 3
+            if ((a1 == c2 && b1 == a2) || (a1 == a2 && b1 == c2))
+            {
+                stripTrianglesIndices[i + 1] = b2;
+                stripTrianglesIndices[j + 5] = c1;
+            }
+            // Edge 2 == Edge 1
+            if ((b1 == a2 && c1 == b2) || (b1 == b2 && c1 == a2))
+            {
+                stripTrianglesIndices[i + 3] = c2;
+                stripTrianglesIndices[j + 1] = a1;
+            }
+            // Edge 2 == Edge 2
+            if ((b1 == b2 && c1 == c2) || (b1 == c2 && c1 == b2))
+            {
+                stripTrianglesIndices[i + 3] = a2;
+                stripTrianglesIndices[j + 3] = a1;
+            }
+            // Edge 2 == Edge 3
+            if ((b1 == c2 && c1 == a2) || (b1 == a2 && c1 == c2))
+            {
+                stripTrianglesIndices[i + 3] = b2;
+                stripTrianglesIndices[j + 5] = a1;
+            }
+            // Edge 3 == Edge 1
+            if ((c1 == a2 && a1 == b2) || (c1 == b2 && a1 == a2))
+            {
+                stripTrianglesIndices[i + 5] = c2;
+                stripTrianglesIndices[j + 1] = b1;
+            }
+            // Edge 3 == Edge 2
+            if ((c1 == b2 && a1 == c2) || (c1 == c2 && a1 == b2))
+            {
+                stripTrianglesIndices[i + 5] = a2;
+                stripTrianglesIndices[j + 3] = b1;
+            }
+            // Edge 3 == Edge 3
+            if ((c1 == c2 && a1 == a2) || (c1 == a2 && a1 == c2))
+            {
+                stripTrianglesIndices[i + 5] = b2;
+                stripTrianglesIndices[j + 5] = b1;
+            }
+        }
+    }
+
+    // Look for any outside edges
+    for (GLuint i = 0; i < stripTrianglesIndices.size(); i += 6)
+    {
+        if (stripTrianglesIndices[i + 1] == -1) stripTrianglesIndices[i + 1] = stripTrianglesIndices[i + 4];
+        if (stripTrianglesIndices[i + 3] == -1) stripTrianglesIndices[i + 3] = stripTrianglesIndices[i];
+        if (stripTrianglesIndices[i + 5] == -1) stripTrianglesIndices[i + 5] = stripTrianglesIndices[i + 2];
+    }
+
+    //indices = stripTrianglesIndices;
 }

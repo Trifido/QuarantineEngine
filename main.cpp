@@ -101,17 +101,25 @@ int main(int, char**)
 
 
     std::vector<Texture> textures_pbr;
-    Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
-    Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
-    Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
-    Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
-    Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
+    //Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
+    //Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
+    //Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
+    //Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
+    //Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
+
+    Texture pbrDiff("resources/PBR_Textures/ironKiwi/New_Graph_diffuse.jpg", TypeTexture::DIFFUSE);
+    Texture pbrNorm("resources/PBR_Textures/ironKiwi/New_Graph_normal.jpg", TypeTexture::NORMAL);
+    Texture pbrME("resources/PBR_Textures/ironKiwi/New_Graph_specular.jpg", TypeTexture::METALLIC);
+    Texture pbrRO("resources/PBR_Textures/ironKiwi/New_Graph_glossiness.jpg", TypeTexture::ROUGHNESS);
+    Texture pbrBUMP("resources/PBR_Textures/ironKiwi/New_Graph_height.jpg", TypeTexture::HEIGHT);
+    //Texture pbrAO("resources/PBR_Textures/ironKiwi/rustediron2_roughness.png", TypeTexture::AO);
 
     textures_pbr.push_back(pbrDiff);
     textures_pbr.push_back(pbrNorm);
     textures_pbr.push_back(pbrME);
     textures_pbr.push_back(pbrRO);
-    textures_pbr.push_back(pbrAO);
+    textures_pbr.push_back(pbrBUMP);
+    //textures_pbr.push_back(pbrAO);
 
     //std::vector<Texture> textures_pbr_floor;
     //Texture floor_pbrDiff("resources/materials/metal/Metal_Plate_013_basecolor.jpg", TypeTexture::DIFFUSE);
@@ -167,9 +175,9 @@ int main(int, char**)
 
     ///MODEL 3D
     ///--NANOSUIT  
-    //Model ourModel("./resources/3DModels/box/box.fbx");
+    //Model ourModel("./resources/morgue/window/model.dae");
     //Model ourModel("./resources/3DModels/Mountain_Snow.fbx");
-    //Model ourModel("./resources/3DModels/colt/model.obj");
+    Model ourModel("./resources/3DModels/colt/model.obj");
     //Model ourModel("./resources/3DModels/fps_m16/dae/arm.fbx");
     //Model ourModel("./resources/space/station/SpaceShip.obj");
     //Model ourModel("./resources/3DModels/sponza/sponza.obj");
@@ -181,15 +189,15 @@ int main(int, char**)
     //ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
     */
-    //ourModel.ScaleTo(glm::vec3(0.05f));
-    //ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
-    //ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(-10.0f), glm::vec3(1.0, 0.0, 0.0));
+    ourModel.ScaleTo(glm::vec3(0.5f));
+    ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+    ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(-10.0f), glm::vec3(1.0, 0.0, 0.0));
     //ourModel.Rotation(glm::radians(180.0f),glm::vec3(0.0, 1.0, 0.0));
     //ourModel.transform->model = glm::translate(ourModel.transform->model, glm::vec3(-2.5, 0.0, 5.0));
     //ourModel.TranslationTo(glm::vec3(-2.0, 0.0, 0.0));
 
     //ourModel.matHandle.EditMaterial(MaterialComponent::TEXTURE, textures_pbr);
-    //renderkernel.AddModel(&ourModel);
+    renderkernel.AddModel(&ourModel);
 
     //ourModel.AttachCamera(&mainCamera);
     //BoundingLight* bdLight = new BoundingLight();
@@ -216,12 +224,11 @@ int main(int, char**)
     Model cubeModel(vertices, 36, textures_pbr);
     cubeModel.isSelectableModel = true;
     //cubeModel.AddMaterial(rmMaterial);
-    cubeModel.TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
     cubeModel.ScaleTo(glm::vec3(4.0f, 4.0f, 4.0f));
-    cubeModel.TranslationTo(glm::vec3(0.0f, 0.1f, 0.0f));
+    cubeModel.TranslationTo(glm::vec3(0.0f, 1.1f, 0.0f));
 
     cubeModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::OUTLINE);
-    renderkernel.AddModel(&cubeModel);
+    //renderkernel.AddModel(&cubeModel);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
     //cubeModel.isSelectable(true);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 8.0f);
@@ -261,7 +268,7 @@ int main(int, char**)
     floorModel.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
     //floorModel.transform->model = glm::rotate(floorModel.transform->model, glm::radians(90.0f), glm::normalize(glm::vec3(0.0, 0.0, 1.0)));
     //floorModel.transform->model = glm::translate(floorModel.transform->model, glm::vec3(0.0, -9.0, 0.0));
-    //renderkernel.AddModel(&floorModel);
+    renderkernel.AddModel(&floorModel);
 
     Model floorModel2(floorVertices, 6, textures_parallax);
     floorModel2.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
@@ -322,7 +329,7 @@ int main(int, char**)
 
     // LIGHT
     
-    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(5.0f, 1.0f, 0.0f)); 
+    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 5.0f, 0.0f)); 
     //pointLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.01, -1.0, 0.01));
     pointLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
     pointLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));

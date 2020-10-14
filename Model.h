@@ -64,6 +64,7 @@ public:
 	void DrawCastShadow(std::vector<Light*> lights, bool isOutline = false);
     void DrawShadow(glm::mat4 VPShadow);
     void DrawShadow(std::vector<glm::mat4>& shadowTransforms, glm::vec3& lightPos, float far_plane);
+    void DrawVolumeShadow(glm::vec3& lightPos);
     //void Model::DrawCastShadow(Light* light, bool isOutline = false);
 
     void Rotation(float radians, glm::vec3 axis);
@@ -92,7 +93,7 @@ public:
     void AddShader(Shader* shader);
     void AddLight(std::vector<Light*> lights);
     void AddCamera(Camera* cam);
-
+    void ChangeIndexSystem(bool indexSystem);
     //ANIMATION
     Bone* FindBone(std::string name);
     aiNode* FindAiNode(std::string name);

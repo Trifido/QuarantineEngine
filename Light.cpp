@@ -142,6 +142,45 @@ float* Light::GetRawAmbient()
     return &ambient[0];
 }
 
+void Light::SetShadowCastMode(ShadowType mode)
+{
+    switch (mode)
+    {
+    case SHADOW_MAP:
+        isShadowMap = true;
+        isVolumeShadow = false;
+        isCascadeShadow = false;
+        break;
+    case SHADOW_VOL:
+        isShadowMap = false;
+        isVolumeShadow = true;
+        isCascadeShadow = false;
+        break;
+    case SHADOW_CAS:
+        isShadowMap = false;
+        isVolumeShadow = false;
+        isCascadeShadow = true;
+        break;
+    default:
+        isShadowMap = true;
+        isVolumeShadow = false;
+        isCascadeShadow = false;
+        break;
+    }
+}
+
+int Light::GetShadowMode()
+{
+    if (isShadowMap)
+        return 0;
+    if (isVolumeShadow)
+        return 1;
+    if (isCascadeShadow)
+        return 2;
+
+    return 0;
+}
+
 void Light::ComputeShadowProjection()
 {
     switch (type)

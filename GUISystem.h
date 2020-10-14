@@ -51,7 +51,11 @@ private:
     bool isOpenMaterialPropertyWindow = false;
     bool isOpenLightPropertyWindow = false;
     bool isOpenCameraPropertyWindow = false;
+    bool isOpenFPS = false;
+    bool isChangeShadow = false;
     DrawMode draw_mode = DrawMode::DTRIANGLES;
+    ShadowType shadow_mode = ShadowType::SHADOW_MAP;
+    ShadowType last_shadow_mode = ShadowType::SHADOW_MAP;
 public:
     BloomGUI* bloomGui;
     HdrGUI* HdrGui;
@@ -66,10 +70,12 @@ public:
     void DrawMainMenuBar();
     void DrawPostProcessWindow();
     void DrawPropertyWindow();
+    void DrawAnalysisWindow();
     RenderType GetRenderModeSelected();
     bool isShutDown();
     bool isSave();
     DrawMode GetDrawMode() { return draw_mode; }
+    ShadowType GetShadowMode() { return shadow_mode; }
     BloomGUI* GetBloomParameters() { return bloomGui; }
     void SetBloomParameters(bool enableParam, int rangeParam);
     void SetHDRParameters(float gammaParam, float exposureParam);
@@ -77,6 +83,7 @@ public:
     void SetLightInfoGui(std::vector<Light*>* lights);
     void SetCameraInfoGui(std::vector<Camera*>* cameras);
     void SetModelInfoGui(std::vector<Model*>* models);
+    bool isChangeShadowMode() { return isChangeShadow; }
 };
 
 #endif

@@ -3,6 +3,8 @@
 Collider::Collider()
 {
     type = ColliderType::BOX;
+    aabb_min = glm::vec3(-1.0f);
+    aabb_max = glm::vec3(1.0f);
     transform = new Transform();
     matHandle.type = MaterialType::LIT;
     Shader *colliderShader = new Shader("shaders/colliderShader.vert","shaders/colliderShader.frag");
@@ -30,20 +32,22 @@ Collider::Collider(ColliderType typeCollider)
     }
     else
     {
+        aabb_min = glm::vec3(-1.0f);
+        aabb_max = glm::vec3(1.0f);
         std::vector<Vertex> verticesVertex;
         std::vector<unsigned int> indicesV;
 
         float verticesV[] = {
             // positions         
-            -0.5f, -0.5f, -0.5f,// 0
-             0.5f, -0.5f, -0.5f,// 1
-             0.5f,  0.5f, -0.5f,// 2
-            -0.5f,  0.5f, -0.5f,// 3
+            -1.0f, -1.0f, -1.0f,// 0
+             1.0f, -1.0f, -1.0f,// 1
+             1.0f,  1.0f, -1.0f,// 2
+            -1.0f,  1.0f, -1.0f,// 3
              
-            -0.5f, -0.5f, 0.5f, // 4
-             0.5f, -0.5f, 0.5f, // 5
-             0.5f,  0.5f, 0.5f, // 6
-            -0.5f,  0.5f, 0.5f  // 7
+            -1.0f, -1.0f, 1.0f, // 4
+             1.0f, -1.0f, 1.0f, // 5
+             1.0f,  1.0f, 1.0f, // 6
+            -1.0f,  1.0f, 1.0f  // 7
         };
 
         unsigned int COUNT = 8;
@@ -89,7 +93,7 @@ Collider::Collider(ColliderType typeCollider)
 
 void Collider::DrawCollider()
 {
-    SetHierarchy();
+    //SetHierarchy();
     matHandle.shader->use();
     meshCollider.material->ptrShader->setMat4("model", transform->finalModelMatrix);
 
@@ -111,20 +115,18 @@ void Collider::DrawCollider()
 bool Collider::IsRayCollision(UIRay* ray)
 {
     float distRay = FLT_MAX;
-    glm::vec4 ray_eye = inverse(ray->PV * transform->finalModelMatrix) * glm::vec4(ray->ray_dir, 1.0);
+    glm::vec4 ray_eye = inverse(ray->PV * transform->model) * glm::vec4(ray->ray_dir, 1.0);
     glm::vec3 ray_wor = glm::normalize(ray_eye);
-    glm::vec3 ray_orig = inverse(transform->finalModelMatrix) * glm::vec4(ray->ray_orig, 1.0f);
+    glm::vec3 ray_orig = inverse(transform->model) * glm::vec4(ray->ray_orig, 1.0f);
 
-    if (type == ColliderType::BOX)
-    {
-        float dist = CheckCollider(ray_orig, ray_wor);
-        if (dist > 0.0f && dist < distRay)
-        {
-            return true;
-        }
-    }
+    //glm::vec3 ray_wor = ray->ray_dir;
+    //glm::vec3 ray_orig = inverse(transform->model) * glm::vec4(ray->ray_orig, 1.0f);
 
-    return false;
+    float dist = CheckCollider(ray_orig, ray_wor);
+
+    std::cout << "MAX DIST: " << FLT_MAX << std::endl;
+    std::cout << "Contact: " << (dist > 0.0f && dist < distRay) << " - " << distRay << std::endl;
+    return (dist > 0.0f && dist < distRay);
 }
 
 float Collider::CheckCollider(glm::vec3 origin, glm::vec3 dir)
@@ -145,12 +147,12 @@ float Collider::CheckCollider(glm::vec3 origin, glm::vec3 dir)
             }
             break;
         case ColliderType::SPHERE:
+            distancePoint = (RaySphereIntersection(origin, dir)) ? 1.0f : FLT_MAX;
             break;
         case ColliderType::BOX:
+            distancePoint = RayBoxOBBIntersection(origin, dir);
             break;
     }
-
-    
 
     return distancePoint;
 }
@@ -236,4 +238,134 @@ void Collider::SetHierarchy()
             parent = parent->parent;
         }
     }
+}
+
+bool Collider::RaySphereIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir)
+{
+    glm::vec3 m = ray_orig - transform->position;
+    float b = glm::dot(m, ray_dir);
+    float c = glm::dot(m, m) - radius * radius;
+
+    // Exit if r’s origin outside s (c > 0) and r pointing away from s (b > 0) 
+    if (c > 0.0f && b > 0.0f) return false;
+    float discr = b * b - c;
+
+    // A negative discriminant corresponds to ray missing sphere 
+    if (discr < 0.0f) return false;
+
+    // Ray now found to intersect sphere, compute smallest t value of intersection
+    float t = -b - sqrt(discr);
+
+    // If t is negative, ray started inside sphere so clamp t to zero 
+    if (t < 0.0f) return false;
+
+    return true;
+}
+
+float Collider::RayBoxOBBIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir)
+{
+    float tMin = 0.0f;
+    float tMax = FLT_MAX;
+
+    glm::vec3 OBBposition_worldspace(transform->finalModelMatrix[3]);
+
+    glm::vec3 delta = OBBposition_worldspace - ray_orig;
+
+    // Test intersection with the 2 planes perpendicular to the OBB's X axis
+    {
+        glm::vec3 xaxis(transform->finalModelMatrix[0]);
+        float e = glm::dot(xaxis, delta);
+        float f = glm::dot(ray_dir, xaxis);
+
+        if (fabs(f) > 0.001f) { // Standard case
+
+            float t1 = (e + aabb_min.x) / f; // Intersection with the "left" plane
+            float t2 = (e + aabb_max.x) / f; // Intersection with the "right" plane
+            // t1 and t2 now contain distances betwen ray origin and ray-plane intersections
+
+            // We want t1 to represent the nearest intersection, 
+            // so if it's not the case, invert t1 and t2
+            if (t1 > t2) {
+                float w = t1; t1 = t2; t2 = w; // swap t1 and t2
+            }
+
+            // tMax is the nearest "far" intersection (amongst the X,Y and Z planes pairs)
+            if (t2 < tMax)
+                tMax = t2;
+            // tMin is the farthest "near" intersection (amongst the X,Y and Z planes pairs)
+            if (t1 > tMin)
+                tMin = t1;
+
+            // And here's the trick :
+            // If "far" is closer than "near", then there is NO intersection.
+            // See the images in the tutorials for the visual explanation.
+            if (tMax < tMin)
+                return false;
+
+        }
+        else { // Rare case : the ray is almost parallel to the planes, so they don't have any "intersection"
+            if (-e + aabb_min.x > 0.0f || -e + aabb_max.x < 0.0f)
+                return false;
+        }
+    }
+
+
+    // Test intersection with the 2 planes perpendicular to the OBB's Y axis
+    // Exactly the same thing than above.
+    {
+        glm::vec3 yaxis(transform->finalModelMatrix[1]);
+        float e = glm::dot(yaxis, delta);
+        float f = glm::dot(ray_dir, yaxis);
+
+        if (fabs(f) > 0.001f) {
+
+            float t1 = (e + aabb_min.y) / f;
+            float t2 = (e + aabb_max.y) / f;
+
+            if (t1 > t2) { float w = t1; t1 = t2; t2 = w; }
+
+            if (t2 < tMax)
+                tMax = t2;
+            if (t1 > tMin)
+                tMin = t1;
+            if (tMin > tMax)
+                return false;
+
+        }
+        else {
+            if (-e + aabb_min.y > 0.0f || -e + aabb_max.y < 0.0f)
+                return false;
+        }
+    }
+
+
+    // Test intersection with the 2 planes perpendicular to the OBB's Z axis
+    // Exactly the same thing than above.
+    {
+        glm::vec3 zaxis(transform->finalModelMatrix[2]);
+        float e = glm::dot(zaxis, delta);
+        float f = glm::dot(ray_dir, zaxis);
+
+        if (fabs(f) > 0.001f) {
+
+            float t1 = (e + aabb_min.z) / f;
+            float t2 = (e + aabb_max.z) / f;
+
+            if (t1 > t2) { float w = t1; t1 = t2; t2 = w; }
+
+            if (t2 < tMax)
+                tMax = t2;
+            if (t1 > tMin)
+                tMin = t1;
+            if (tMin > tMax)
+                return false;
+
+        }
+        else {
+            if (-e + aabb_min.z > 0.0f || -e + aabb_max.z < 0.0f)
+                return false;
+        }
+    }
+
+    return tMin;
 }

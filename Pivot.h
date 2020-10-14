@@ -10,16 +10,24 @@ class Pivot
 private:
     Model* pivotModel;
     Shader* pivotShader;
-    bool firstMouse = false;
+
     float lastX, lastY;
 public:
+    bool isFirstDragX = true;
+    bool isFirstDragY = true;
+    bool activeDragX = false;
+    bool activeDragY = false;
+    bool activeDragZ = false;
+
     bool isRendered = false;
     Pivot();
     Model* GetModel() { return pivotModel; }
     void AttachModel(Model* model);
     void DrawPivot();
-    void CheckXAxis(glm::vec2 clickPosition, UIRay* ray);
-    void CheckYAxis(glm::vec2 clickPosition);
+    bool CheckXAxis(glm::vec2 clickPosition, UIRay* ray);
+    bool CheckYAxis(glm::vec2 clickPosition, UIRay* ray);
+    bool CheckZAxis(glm::vec2 clickPosition, UIRay* ray);
+    bool CheckCollision(glm::vec2 clickPosition, UIRay* ray);
 };
 
 #endif

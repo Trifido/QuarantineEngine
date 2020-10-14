@@ -1,0 +1,94 @@
+#version 430 core
+
+layout( triangles_adjacency ) in;
+layout( triangle_strip, max_vertices = 18 ) out;
+
+
+layout (std140) uniform Matrices
+{
+    mat4 projection;
+    mat4 view;
+};
+
+in VS_OUT {
+    vec3 VPosition;
+} gs_in[];
+
+//LIGHTS
+uniform vec3 lightPos;
+
+float EPSILON = 0.01;
+
+bool facesLight( vec3 a, vec3 b, vec3 c )
+{
+    vec3 n = cross( b - a, c - a );
+    vec3 da = lightPos - a;
+    vec3 db = lightPos - b;
+    vec3 dc = lightPos - c;
+    return dot(n, da) > 0 || dot(n, db) > 0 || dot(n, dc) > 0;
+}
+
+void emitEdgeQuad( vec3 a, vec3 b ) {
+    vec3 LightDir = normalize(a - lightPos); 
+    vec3 deviation = LightDir * EPSILON;
+
+    gl_Position = projection * vec4(a + deviation, 1);
+    EmitVertex();
+
+    gl_Position = projection * vec4(LightDir, 0);
+    EmitVertex();
+
+    LightDir = normalize(b - lightPos);
+    deviation = LightDir * EPSILON;
+    gl_Position = projection * vec4(b + deviation, 1);
+    EmitVertex();
+
+    gl_Position = projection * vec4(LightDir, 0);
+    EmitVertex();
+
+    EndPrimitive();
+}
+
+void main()
+{
+     if( facesLight(gs_in[0].VPosition, gs_in[2].VPosition, gs_in[4].VPosition) ) {
+        if( ! facesLight(gs_in[0].VPosition,gs_in[1].VPosition,gs_in[2].VPosition) )
+            emitEdgeQuad(gs_in[0].VPosition,gs_in[2].VPosition);
+        if( ! facesLight(gs_in[2].VPosition,gs_in[3].VPosition,gs_in[4].VPosition) )
+            emitEdgeQuad(gs_in[2].VPosition,gs_in[4].VPosition);
+        if( ! facesLight(gs_in[4].VPosition,gs_in[5].VPosition,gs_in[0].VPosition) )
+            emitEdgeQuad(gs_in[4].VPosition,gs_in[0].VPosition);
+
+        //FRONT CAP
+		vec3 LightDir = normalize(gs_in[0].VPosition - lightPos); 
+		vec3 deviation = LightDir * EPSILON;
+		gl_Position = projection * vec4(gs_in[0].VPosition + deviation, 1);
+		EmitVertex();
+
+		LightDir = normalize(gs_in[2].VPosition - lightPos); 
+		deviation = LightDir * EPSILON;
+		gl_Position =  projection * vec4(gs_in[2].VPosition + deviation, 1);
+		EmitVertex();
+
+		LightDir = normalize(gs_in[4].VPosition - lightPos); 
+		deviation = LightDir * EPSILON;
+		gl_Position =  projection * vec4(gs_in[4].VPosition + deviation, 1);
+		EmitVertex();
+	    EndPrimitive();
+		
+		//BACK CAP
+		LightDir = normalize(gs_in[0].VPosition - lightPos); 
+		gl_Position = projection * vec4(LightDir, 0);
+		EmitVertex();
+
+		LightDir = normalize(gs_in[4].VPosition - lightPos); 
+		gl_Position =  projection * vec4(LightDir, 0);
+		EmitVertex();
+
+		LightDir = normalize(gs_in[2].VPosition - lightPos); 
+		gl_Position =  projection * vec4(LightDir, 0);
+		EmitVertex();
+
+	    EndPrimitive();
+    }
+}

@@ -60,6 +60,25 @@ void GUISystem::DrawMainMenuBar()
                 if (ImGui::MenuItem("Point", NULL)) { draw_mode = DrawMode::DPOINTS; }
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("Shadow Mode"))
+            {
+                if (ImGui::MenuItem("Shadow Mapping", NULL)) {
+                    shadow_mode = ShadowType::SHADOW_MAP;
+                    isChangeShadow = last_shadow_mode != shadow_mode;
+                    last_shadow_mode = shadow_mode;
+                }
+                if (ImGui::MenuItem("Shadow Volume", NULL)) {
+                    shadow_mode = ShadowType::SHADOW_VOL;
+                    isChangeShadow = last_shadow_mode != shadow_mode;
+                    last_shadow_mode = shadow_mode;
+                }
+                if (ImGui::MenuItem("Cascade Shadow", NULL)) {
+                    shadow_mode = ShadowType::SHADOW_CAS;
+                    isChangeShadow = last_shadow_mode != shadow_mode;
+                    last_shadow_mode = shadow_mode;
+                }
+                ImGui::EndMenu();
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Edit"))
@@ -98,11 +117,17 @@ void GUISystem::DrawMainMenuBar()
             }
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Analysis"))
+        {
+            if (ImGui::MenuItem("FPS", NULL)) { isOpenFPS = !isOpenFPS; }
+            ImGui::EndMenu();
+        }
         ImGui::EndMainMenuBar();
     }
 
     DrawPostProcessWindow();
     DrawPropertyWindow();
+    DrawAnalysisWindow();
 
     //typeRenderSelected = typeRender;
     isShutdown = isShutdownRender;
@@ -770,6 +795,17 @@ void GUISystem::DrawPropertyWindow()
         ImGui::Columns(1);
         ImGui::Separator();
         ImGui::PopStyleVar();
+        ImGui::End();
+    }
+}
+
+void GUISystem::DrawAnalysisWindow()
+{
+    if (isOpenFPS)
+    {
+        ImGui::SetNextWindowSize(ImVec2(120, 150), ImGuiCond_FirstUseEver);
+        ImGui::Begin("FPS Analysis", &isOpenFPS);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
     }
 }

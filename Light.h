@@ -4,6 +4,13 @@
 
 #include "HeadersRequeriments.h"
 
+enum ShadowType
+{
+    SHADOW_MAP = 0,
+    SHADOW_VOL = 1,
+    SHADOW_CAS = 2
+};
+
 enum LightComponent {
     LIGHT_NEAR_EFFECT,
     LIGHT_FAR_EFFECT,
@@ -55,6 +62,10 @@ private:
     float aspect;
 public:
     bool isCastShadow;
+    bool isShadowMap;
+    bool isVolumeShadow;
+    bool isCascadeShadow;
+
     glm::mat4 lightSpaceMatrix;
     std::vector<glm::mat4> lightSpaceMatrices;
     Light();
@@ -98,6 +109,8 @@ public:
     float inline GetFarplane() { return this->far_plane; }
     float inline GetRadius() { return this->radius; }
     bool* GetRawCastShadow() { return &isCastShadow; }
+    void SetShadowCastMode(ShadowType mode);
+    int GetShadowMode();
 private:
     void ComputeShadowProjection();
     void ComputeShadowCubeMapProjection();

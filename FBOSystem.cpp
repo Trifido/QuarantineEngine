@@ -15,6 +15,7 @@ FBOSystem::FBOSystem(int *width, int *height)
     ssaoFBO = nullptr;
     skyboxFBO = nullptr;
     prefilterFBO = nullptr;
+    volumeShadowFBO = nullptr;
 }
 
 FBO* FBOSystem::GetFBO(FBOType type)
@@ -41,6 +42,8 @@ FBO* FBOSystem::GetFBO(FBOType type)
         return skyboxFBO;
     case FBOType::PREFILTER_FBO:
         return prefilterFBO;
+    case FBOType::VOLUME_SHADOW_FBO:
+        return volumeShadowFBO;
     }
 }
 
@@ -79,6 +82,9 @@ void FBOSystem::AddFBO(FBO* fbo)
         break;
     case FBOType::PREFILTER_FBO:
         prefilterFBO = fbo;
+        break;
+    case FBOType::VOLUME_SHADOW_FBO:
+        volumeShadowFBO = fbo;
         break;
     } 
 }
@@ -145,6 +151,12 @@ void FBOSystem::SkyboxProcessPass()
         skyboxFBO->ActivateFBO();
 }
 
+void FBOSystem::VolumeShadowPass()
+{
+    if (volumeShadowFBO != nullptr)
+        volumeShadowFBO->ActivateFBO();
+}
+
 unsigned int FBOSystem::GetFinalRender()
 {
     if(colorFBO != nullptr)
@@ -205,6 +217,13 @@ unsigned int FBOSystem::GetDirRender(unsigned int id)
 {
     if(dirFBO != nullptr)
         return dirFBO->GetRenderTexture(id);
+    return 0;
+}
+
+unsigned int FBOSystem::GetVolumeShadowRender(unsigned int id)
+{
+    if (volumeShadowFBO != nullptr)
+        return volumeShadowFBO->GetRenderTexture(id);
     return 0;
 }
 

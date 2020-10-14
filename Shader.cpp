@@ -251,6 +251,7 @@ void Shader::ActivateLights()
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
             this->setBool(name + "isCastShadow", lights[i]->isCastShadow);
+            this->setInt(name + "shadowMode", lights[i]->GetShadowMode());
             name = "DirlightPosition[" + std::to_string(numDirLights) + "]";
             this->setVec3(name, lights[i]->GetPosition());
             name = "DirlightDirection[" + std::to_string(numDirLights) + "]";

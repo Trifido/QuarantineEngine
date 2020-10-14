@@ -94,6 +94,7 @@ public:
     void RenderFPSModels();
     void RenderDirectionalShadowMap();
     void RenderOmnidirectionalShadowMap();
+    void RenderVolumeShadow();
     void RenderSolidModels();
     void RenderOutLineModels();
     void RenderTransparentModels();

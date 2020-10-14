@@ -6,12 +6,14 @@ MaterialHandle::MaterialHandle()
     this->isChangeNumInstances = false;
     this->type = MaterialType::LIT;
     this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
-    this->forwardQA = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
+    //this->forwardQA = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
+    this->forwardQA = new Shader("shaders/pbrVolumeShadow.vert", "shaders/pbrVolumeShadow.frag");
     this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     this->shader = forwardQA;
     this->shader2 = new Shader("shaders/outline.vert", "shaders/outline.frag");
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
     this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
+    this->shaderVolumeShadow = new Shader("shaders/volumeGeometryShadow.vert", "shaders/volumeGeometryShadow.gm", "shaders/volumeGeometryShadow.frag");
 }
 
 MaterialHandle::MaterialHandle(Shader* sh)
@@ -25,6 +27,7 @@ MaterialHandle::MaterialHandle(Shader* sh)
     this->shader2 = new Shader("shaders/outline.vert", "shaders/outline.frag");
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
     this->shaderPointShadow = new Shader("shaders/pointShadow.vert", "shaders/pointShadow.gm", "shaders/pointShadow.frag");
+    this->shaderVolumeShadow = new Shader("shaders/volumeGeometryShadow.vert", "shaders/volumeGeometryShadow.gm", "shaders/volumeGeometryShadow.frag");
 }
 
 void MaterialHandle::AddMaterialToList(Material* mat)

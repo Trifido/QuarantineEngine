@@ -18,6 +18,7 @@ private:
     FBO* ssaoFBO;
     FBO* skyboxFBO;
     FBO* prefilterFBO;
+    FBO* volumeShadowFBO;
     int *width, *height;
 public:
     FBOSystem(int *width, int *height);
@@ -33,6 +34,7 @@ public:
     void LightVolumePass();
     void MultisamplingPass();
     void SkyboxProcessPass();
+    void VolumeShadowPass();
     unsigned int GetFinalRender();
     unsigned int GetMRTRender(int idTex = 0);
     unsigned int GetPingPongRender(int idTex = 0);
@@ -44,6 +46,7 @@ public:
     unsigned int GetPrefilterRender(unsigned int id = 0);
     //unsigned int GetOmniRender();
 	unsigned int GetDirRender(unsigned int id = 0);
+	unsigned int GetVolumeShadowRender(unsigned int id = 0);
     //unsigned int GetDirRender();
     void ResizeFBOs();
     void BlitDepthBuffer(FBOType readBuffer, FBOType drawBuffer);

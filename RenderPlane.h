@@ -25,6 +25,8 @@ private:
     Shader* ssao;
     Shader* ssao_blur;
     Shader* rayMarching;
+    Shader* screenRenderVolumeShadow;
+    
     FBOSystem* fboSystem;
     //SSAO
     std::vector<glm::vec3> ssaoKernel;
@@ -39,6 +41,7 @@ public:
     void SetVAORenderPlane();
     void FinalRenderPass();
     void FinalRenderBloom();
+    void FinalRenderShadowVolume();
     void RenderBlur();
     void DefferedRender();
     void RenderSSAO();

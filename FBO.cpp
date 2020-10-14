@@ -374,6 +374,33 @@ void FBO::GenerateFBO(int *width, int *height)
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         // generate mipmaps for the cubemap so OpenGL automatically allocates the required memory.
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        break;
+    case FBOType::VOLUME_SHADOW_FBO:
+        glBindFramebuffer(GL_FRAMEBUFFER, idFBO[0]);
+
+        glGenRenderbuffers(1, &rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, *width, *height);
+        glGenRenderbuffers(1, &rbo2);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo2);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, *width, *height);
+
+        glBindTexture(GL_TEXTURE_2D, texture_buffers[0]);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, *width, *height);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo2);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture_buffers[0], 0);
+
+        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, drawBuffers);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            fprintf(stderr, "ERROR::Volume Shadow Framebuffer not complete!\n");
+
+        break;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -478,6 +505,20 @@ void FBO::Set2DLUT()
         glBindRenderbuffer(GL_RENDERBUFFER, rbo);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_buffers[2], 0);
+    }
+}
+
+void FBO::SetVolumenShadowFBO()
+{
+    if (this->GetType() == FBOType::VOLUME_SHADOW_FBO)
+    {
+        //glBindFramebuffer(GL_FRAMEBUFFER, idFBO[0]);
+        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+        //    GL_RENDERBUFFER, depthBuf);
+        //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        //    GL_RENDERBUFFER, ambBuf);
+        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+        //    GL_TEXTURE_2D, diffSpecTex, 0);
     }
 }
 
