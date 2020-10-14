@@ -661,8 +661,12 @@ void RenderSystem::ForwardRender()
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glBlitFramebuffer(0, 0, display_w, display_h, 0, 0, display_w, display_h, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-        glDepthMask(GL_FALSE);
+        if (!guiSystem->isShowShadowVolumeMode())
+        {
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+            glDepthMask(GL_FALSE);
+        }
+
         glEnable(GL_DEPTH_CLAMP);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

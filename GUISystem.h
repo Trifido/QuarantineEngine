@@ -53,6 +53,7 @@ private:
     bool isOpenCameraPropertyWindow = false;
     bool isOpenFPS = false;
     bool isChangeShadow = false;
+    bool isShowShadowVolume = false;
     DrawMode draw_mode = DrawMode::DTRIANGLES;
     ShadowType shadow_mode = ShadowType::SHADOW_MAP;
     ShadowType last_shadow_mode = ShadowType::SHADOW_MAP;
@@ -84,6 +85,7 @@ public:
     void SetCameraInfoGui(std::vector<Camera*>* cameras);
     void SetModelInfoGui(std::vector<Model*>* models);
     bool isChangeShadowMode() { return isChangeShadow; }
+    bool isShowShadowVolumeMode() { return isShowShadowVolume; }
 };
 
 #endif

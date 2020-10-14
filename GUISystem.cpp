@@ -67,10 +67,22 @@ void GUISystem::DrawMainMenuBar()
                     isChangeShadow = last_shadow_mode != shadow_mode;
                     last_shadow_mode = shadow_mode;
                 }
-                if (ImGui::MenuItem("Shadow Volume", NULL)) {
-                    shadow_mode = ShadowType::SHADOW_VOL;
-                    isChangeShadow = last_shadow_mode != shadow_mode;
-                    last_shadow_mode = shadow_mode;
+                if (ImGui::BeginMenu("Shadow Volume"))
+                {
+                    if (ImGui::MenuItem("Hide Shadow Volume", NULL)) {
+                        shadow_mode = ShadowType::SHADOW_VOL;
+                        isChangeShadow = last_shadow_mode != shadow_mode;
+                        last_shadow_mode = shadow_mode;
+                        isShowShadowVolume = false;
+                    }
+                    if (ImGui::MenuItem("Show Shadow Volume", NULL)) {
+                        shadow_mode = ShadowType::SHADOW_VOL;
+                        isChangeShadow = last_shadow_mode != shadow_mode;
+                        last_shadow_mode = shadow_mode;
+                        isShowShadowVolume = true;
+                    }
+
+                    ImGui::EndMenu();
                 }
                 if (ImGui::MenuItem("Cascade Shadow", NULL)) {
                     shadow_mode = ShadowType::SHADOW_CAS;
