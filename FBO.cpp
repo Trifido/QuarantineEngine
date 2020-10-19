@@ -18,7 +18,7 @@ FBO::FBO(FBOType type, unsigned int samples, unsigned int numTextures)
     for(int id = 0; id < numFBOs; id++)
         glGenFramebuffers(1, &idFBO[id]);
 
-    if (isAntiAliasing || type == FBOType::MULT_RT || type == FBOType::PINGPONG_FBO || type == FBOType::SSAO_FBO || type == FBOType::SKYBOX_FBO)
+    if (isAntiAliasing || type == FBOType::MULT_RT || type == FBOType::PINGPONG_FBO || type == FBOType::SSAO_FBO || type == FBOType::SKYBOX_FBO || type == FBOType::VOLUME_SHADOW_FBO)
     {
         this->num_mrt = 2;
         if (isAntiAliasing && type == FBOType::MULT_RT)
@@ -390,12 +390,23 @@ void FBO::GenerateFBO(int *width, int *height)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+        glBindTexture(GL_TEXTURE_2D, texture_buffers[0]);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, *width, *height);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glBindTexture(GL_TEXTURE_2D, texture_buffers[1]);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, *width, *height);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo2);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture_buffers[0], 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, texture_buffers[1], 0);
 
-        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-        glDrawBuffers(2, drawBuffers);
+        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+        glDrawBuffers(3, drawBuffers);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             fprintf(stderr, "ERROR::Volume Shadow Framebuffer not complete!\n");

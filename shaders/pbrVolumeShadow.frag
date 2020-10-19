@@ -1,6 +1,7 @@
 #version 430 core
 layout (location = 0) out vec4 Ambient;
 layout (location = 1) out vec4 DiffSpec;
+layout (location = 2) out vec4 occlusionTex;
 
 #define NUM_TEXTURES 1
 #define NR_DIR_LIGHTS 8
@@ -231,7 +232,21 @@ void main()
     vec3 result = texture(material.diffuse[0], texCoords).rgb;// * generalAmbient;
 
     for(int i = 0; i < numPointLights; i++)
+    {
         Lo += CalcPointLight(pointLights[i], i, N, V, texCoords);
+
+        //float distLight = length(pointLights[i].position - viewPos);
+
+        vec3 lightDirection = normalize(pointLights[i].position - fs_in.FragPos);
+
+        if(dot(lightDirection, N) > 0.0)
+            occlusionTex = vec4(0.0, 0.0, 0.0, 1.0);
+
+        //if(distLight > gl_FragCoord.z / gl_FragCoord.w)
+        //    occlusionTex = vec4(0.0, 0.0, 0.0, 1.0);
+        //else
+        //    occlusionTex = vec4(1.0, 1.0, 1.0, 1.0);
+    }
 
     for(int i = 0; i < numDirLights; i++)
         Lo += CalcDirLight(dirLights[i], i, N, V, texCoords);
@@ -270,7 +285,6 @@ void main()
     vec3 color = ambient + Lo;
 
     Ambient = vec4(ambient, 1.0);
-    //Ambient = vec4(0.0, 0.0, 1.0, 1.0);
 
     DiffSpec = vec4(color, 1.0);
 }

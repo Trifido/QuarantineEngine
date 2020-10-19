@@ -8,6 +8,7 @@ GUISystem::GUISystem()
     bloomGui = new BloomGUI();
     HdrGui = new HdrGUI();
     msaaGui = new MsaaGUI();
+    atmGUI = new AtmScatGUI();
 }
 
 void GUISystem::DrawGUI()
@@ -127,6 +128,10 @@ void GUISystem::DrawMainMenuBar()
             {
                 isOpenHDRWindow = !isOpenHDRWindow;
             }
+            if (ImGui::MenuItem("Atmopheric Scattering", NULL))
+            {
+                isOpenAtmosphericPropertyWindow = !isOpenAtmosphericPropertyWindow;
+            }
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Analysis"))
@@ -175,6 +180,22 @@ void GUISystem::DrawPostProcessWindow()
         ImGui::End();
 
         SetHDRParameters(gammaParameter, exposureParameter);
+    }
+
+    if (isOpenAtmosphericPropertyWindow)
+    {
+        ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Post-process Tool", &isOpenAtmosphericPropertyWindow);
+        ImGui::Text("Atmospheric Scattering Controller");
+        static float densityParameter = 0.926f;
+        static float decayParameter = 0.96815f;
+        static float weightParameter = 0.587f;
+        ImGui::SliderFloat("Density", &densityParameter, 0.0f, 5.0f);
+        ImGui::SliderFloat("Decay", &decayParameter, 0.0f, 5.0f);
+        ImGui::SliderFloat("Weight", &weightParameter, 0.0f, 5.0f);
+        ImGui::End();
+
+        SetAtmosphericParameters(densityParameter, decayParameter, weightParameter);
     }
 
     if (isOpenOffScreeMSAAWindow)
@@ -847,6 +868,13 @@ void GUISystem::SetHDRParameters(float gammaParam, float exposureParam)
 {
     HdrGui->gammaParameter = gammaParam;
     HdrGui->exposureParameter = exposureParam;
+}
+
+void GUISystem::SetAtmosphericParameters(float densityParam, float decayParam, float weightParam)
+{
+    atmGUI->density = densityParam;
+    atmGUI->decay = decayParam;
+    atmGUI->weight = weightParam;
 }
 
 void GUISystem::SetMSAAParameters(unsigned int msaaSamples, unsigned int offSamples, bool enableMSAA, bool enableOffMSAA)

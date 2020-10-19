@@ -254,7 +254,7 @@ int main(int, char**)
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 32.0f);
     floorModel.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
     floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
-    floorModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::OUTLINE);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::OUTLINE);
     //floorModel.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::MAX_UV, 5.0f); 
     //Shader* sh = new Shader("shaders/parallaxMapping.vert", "shaders/parallaxMapping.frag");
@@ -329,7 +329,7 @@ int main(int, char**)
 
     // LIGHT
     
-    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 5.0f, 0.0f)); 
+    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 2.0f, -3.0f)); 
     //pointLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.01, -1.0, 0.01));
     pointLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
     pointLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));

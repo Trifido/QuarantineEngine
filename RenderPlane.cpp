@@ -18,7 +18,8 @@ RenderPlane::RenderPlane()
     ssao = new Shader("shaders/deferredLighting.vert", "shaders/ssao.frag");
     ssao_blur = new Shader("shaders/deferredLighting.vert", "shaders/ssao_blur.frag");
     rayMarching = new Shader("shaders/rmSky.vert", "shaders/rmSky.frag");
-    screenRenderVolumeShadow = new Shader("shaders/renderPass.vert", "shaders/renderPassVolume.frag");
+    //screenRenderVolumeShadow = new Shader("shaders/renderPass.vert", "shaders/renderPassVolume.frag");
+    screenRenderVolumeShadow = new Shader("shaders/postAtmosphericScattering.vert", "shaders/postAtmosphericScattering.frag");
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
 }
 
@@ -87,6 +88,9 @@ void RenderPlane::SetVAORenderPlane()
     rayMarching->setVec2("resolution", glm::vec2(cam->WIDTH, cam->HEIGHT));
     rayMarching->setVec3("front", cam->cameraFront);
     rayMarching->setFloat("fov", cam->GetFOV());
+
+    //screenRenderVolumeShadow->use();
+    //screenRenderVolumeShadow->setInt("occlusionTexture", 1);
 }
 
 void RenderPlane::FinalRenderPass()
@@ -123,9 +127,24 @@ void RenderPlane::FinalRenderShadowVolume()
     screenRenderVolumeShadow->use();
     screenRenderVolumeShadow->setFloat("gamma", hdrGui->gammaParameter);
     screenRenderVolumeShadow->setFloat("exposure", hdrGui->exposureParameter);
+    screenRenderVolumeShadow->setFloat("decay", atmScatGui->decay);
+    screenRenderVolumeShadow->setFloat("weight", atmScatGui->weight);
+    screenRenderVolumeShadow->setFloat("density", atmScatGui->density);
+
+    glm::vec4 clipSpacePos = cam->projection * cam->view * glm::vec4(scatteringLight->GetPosition(), 1.0);
+    glm::vec3 ndcSpacePos = clipSpacePos;
+
+    if(clipSpacePos.w != 0.0f)
+        ndcSpacePos = ndcSpacePos / clipSpacePos.w;
+
+    glm::vec2 sendSpacePos = ndcSpacePos * 0.5f + 0.5f;
+
+    screenRenderVolumeShadow->setVec2("lightPos", sendSpacePos);
     glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fboSystem->GetVolumeShadowRender(0));
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetVolumeShadowRender(1));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -288,4 +307,14 @@ void RenderPlane::SetBloomParameters(BloomGUI* bloomParameters)
 void RenderPlane::SetHDRParameters(HdrGUI* hdrGui)
 {
     this->hdrGui = hdrGui;
+}
+
+void RenderPlane::SetAtmScatParameters(AtmScatGUI* atmGui)
+{
+    this->atmScatGui = atmGui;
+}
+
+void RenderPlane::AddAtmosphericScatteringLight(Light* lightAtm)
+{
+    scatteringLight = lightAtm;
 }

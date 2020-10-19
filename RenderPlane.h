@@ -36,6 +36,8 @@ private:
     float lerp(float a, float b, float f);
     BloomGUI* bloomGui;
     HdrGUI* hdrGui;
+    AtmScatGUI* atmScatGui;
+    Light* scatteringLight;
 public:
     RenderPlane();
     void SetVAORenderPlane();
@@ -58,6 +60,8 @@ public:
     void AddUBOSystem(UBOSystem* ubo);
     void SetBloomParameters(BloomGUI* bloomParameters);
     void SetHDRParameters(HdrGUI* hdrGui);
+    void SetAtmScatParameters(AtmScatGUI* atmGui);
+    void AddAtmosphericScatteringLight(Light* lightAtm);
 };
 
 #endif

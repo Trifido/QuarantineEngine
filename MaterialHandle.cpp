@@ -8,6 +8,7 @@ MaterialHandle::MaterialHandle()
     this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
     //this->forwardQA = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
     this->forwardQA = new Shader("shaders/pbrVolumeShadow.vert", "shaders/pbrVolumeShadow.frag");
+    //this->forwardQA = new Shader("shaders/shader_test.vert", "shaders/shader_test.frag");
     this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     this->shader = forwardQA;
     this->shader2 = new Shader("shaders/outline.vert", "shaders/outline.frag");
