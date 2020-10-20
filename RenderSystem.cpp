@@ -646,55 +646,56 @@ void RenderSystem::ForwardRender()
 
         //FIRST PASS
         glViewport(0, 0, display_w, display_h);
-        //glClearStencil(0);
+        glClearStencil(0);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //glDepthMask(GL_TRUE);
-        //glDisable(GL_STENCIL_TEST);
-        //glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_MULTISAMPLE);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_STENCIL_TEST);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
 
         fboSystem->VolumeShadowPass(); glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         RenderSolidModels();
+        RenderSkyBox();
         RenderOutLineModels();
 
         ///SECOND PASS
-        //glBindFramebuffer(GL_READ_FRAMEBUFFER, fboSystem->GetFBO(FBOType::VOLUME_SHADOW_FBO)->GetID());
-        //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        //glBlitFramebuffer(0, 0, display_w, display_h, 0, 0, display_w, display_h, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fboSystem->GetFBO(FBOType::VOLUME_SHADOW_FBO)->GetID());
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glBlitFramebuffer(0, 0, display_w, display_h, 0, 0, display_w, display_h, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        //if (!guiSystem->isShowShadowVolumeMode())
-        //{
-        //    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-        //    glDepthMask(GL_FALSE);
-        //}
+        if (!guiSystem->isShowShadowVolumeMode())
+        {
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+            glDepthMask(GL_FALSE);
+        }
 
-        //glEnable(GL_DEPTH_CLAMP);
+        glEnable(GL_DEPTH_CLAMP);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        //glClear(GL_STENCIL_BUFFER_BIT);
-        //glEnable(GL_STENCIL_TEST);
-        //glStencilFunc(GL_ALWAYS, 0, 0xff);
-        //glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
-        //glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
+        glClear(GL_STENCIL_BUFFER_BIT);
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_ALWAYS, 0, 0xff);
+        glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
+        glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
 
-        //RenderVolumeShadow();
+        RenderVolumeShadow();
 
-        //glDisable(GL_DEPTH_CLAMP);
-        //glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glDisable(GL_DEPTH_CLAMP);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-        /////THIRD PASS
-        //glDisable(GL_DEPTH_TEST);
-        //glStencilFunc(GL_EQUAL, 0, 0xffff);
+        ///THIRD PASS
+        glDisable(GL_DEPTH_TEST);
+        glStencilFunc(GL_EQUAL, 0, 0xffff);
 
         renderPass.FinalRenderShadowVolume();
 
-        //glDisable(GL_STENCIL_TEST);
-        //glEnable(GL_DEPTH_TEST);
-        //glDepthFunc(GL_LESS);
+        glDisable(GL_STENCIL_TEST);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
     }
     else
     {

@@ -50,7 +50,7 @@ void main()
     }   
         
     // Output final color with a further scale control factor.    
-    vec3 hdrColor = screenColor + color;
+    vec3 hdrColor = screenColor * color; //screenColor + 
 
     // Exposure tone mapping
     vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);

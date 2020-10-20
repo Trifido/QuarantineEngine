@@ -239,7 +239,7 @@ void main()
 
         vec3 lightDirection = normalize(pointLights[i].position - fs_in.FragPos);
 
-        if(dot(lightDirection, N) > 0.0)
+        //if(dot(lightDirection, N) > 0.0)
             occlusionTex = vec4(0.0, 0.0, 0.0, 1.0);
 
         //if(distLight > gl_FragCoord.z / gl_FragCoord.w)
