@@ -27,6 +27,8 @@ public:
     Shader* shaderShadow;
     Shader* shaderPointShadow;
     Shader* shaderVolumeShadow;
+    Shader* occlussionShader;
+    Shader* forwardVolumeShadowShader;
     bool isAmbientReflective;
     bool isChangeNumInstances;
     bool generalDrawMode = true;
@@ -48,6 +50,7 @@ public:
     void EditMaterial(MaterialComponent component, std::vector<Texture> textures, unsigned int id = NULL);
 	void ActivateShadowMap(unsigned int idTexShadow, unsigned int idLight, TypeLight type = TypeLight::DIRL);
 	void ActivateIrradianceMap(unsigned int idTexIrradiance, unsigned int idTexPrefilter, unsigned int idTexBrdf);
+    void ChangeCurrentShader(MaterialComponent component);
     //void ActivateShadowMap(unsigned int idTexShadow, bool isOmni = false);
 };
 

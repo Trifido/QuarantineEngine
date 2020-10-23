@@ -16,7 +16,8 @@ enum FBOType
     SSAO_FBO,
     SKYBOX_FBO,
     PREFILTER_FBO,
-    VOLUME_SHADOW_FBO
+    VOLUME_SHADOW_FBO,
+    LIGHT_SCATTERING_FBO
 };
 
 enum FBOComponent
@@ -46,6 +47,7 @@ class FBO
 
     public:
         FBO() {};
+        ~FBO();
         unsigned int GetID() { return *idFBO; }
         unsigned int GetRBO() { return rbo; }
         FBO(FBOType type, unsigned int samples=1, unsigned int numTextures = 1);

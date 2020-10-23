@@ -19,6 +19,7 @@ private:
     FBO* skyboxFBO;
     FBO* prefilterFBO;
     FBO* volumeShadowFBO;
+    FBO* lightScatteringFBO;
     int *width, *height;
 public:
     FBOSystem(int *width, int *height);
@@ -35,19 +36,19 @@ public:
     void MultisamplingPass();
     void SkyboxProcessPass();
     void VolumeShadowPass();
+    void LightScatteringPass();
     unsigned int GetFinalRender();
     unsigned int GetMRTRender(int idTex = 0);
     unsigned int GetPingPongRender(int idTex = 0);
     unsigned int GetOmniRender(unsigned int id = 0);
     unsigned int GetDeferredRender(unsigned int id = 0);
     unsigned int GetLightVolumeRender(unsigned int id = 0);
+    unsigned int GetLightScatteringRender(unsigned int id = 0);
     unsigned int GetSSAORender(unsigned int id = 0);
     unsigned int GetSkyboxRender(unsigned int id = 0);
     unsigned int GetPrefilterRender(unsigned int id = 0);
-    //unsigned int GetOmniRender();
 	unsigned int GetDirRender(unsigned int id = 0);
 	unsigned int GetVolumeShadowRender(unsigned int id = 0);
-    //unsigned int GetDirRender();
     void ResizeFBOs();
     void BlitDepthBuffer(FBOType readBuffer, FBOType drawBuffer);
     void SetIrradianceMap();

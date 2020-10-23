@@ -23,6 +23,7 @@ struct HdrGUI
 };
 struct AtmScatGUI
 {
+    bool isEnable = false;
     float decay = 0.96815f;
     float density = 0.587f;
     float weight = 0.926f;
@@ -90,13 +91,14 @@ public:
     BloomGUI* GetBloomParameters() { return bloomGui; }
     void SetBloomParameters(bool enableParam, int rangeParam);
     void SetHDRParameters(float gammaParam, float exposureParam);
-    void SetAtmosphericParameters(float densityParam, float decayParam, float weightParam);
+    void SetAtmosphericParameters(float densityParam, float decayParam, float weightParam, bool isEnableLightScattering);
     void SetMSAAParameters(unsigned int msaaSamples, unsigned int offSamples, bool enableMSAA, bool enableOffMSAA);
     void SetLightInfoGui(std::vector<Light*>* lights);
     void SetCameraInfoGui(std::vector<Camera*>* cameras);
     void SetModelInfoGui(std::vector<Model*>* models);
     bool isChangeShadowMode() { return isChangeShadow; }
     bool isShowShadowVolumeMode() { return isShowShadowVolume; }
+    bool IsLightScattering() { return atmGUI->isEnable; }
 };
 
 #endif

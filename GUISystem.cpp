@@ -187,6 +187,8 @@ void GUISystem::DrawPostProcessWindow()
         ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
         ImGui::Begin("Post-process Tool", &isOpenAtmosphericPropertyWindow);
         ImGui::Text("Atmospheric Scattering Controller");
+        static bool enableLightScattering = false;
+        ImGui::Checkbox("##circlesegmentoverride", &enableLightScattering);
         static float densityParameter = 0.926f;
         static float decayParameter = 0.96815f;
         static float weightParameter = 0.587f;
@@ -195,7 +197,7 @@ void GUISystem::DrawPostProcessWindow()
         ImGui::SliderFloat("Weight", &weightParameter, 0.0f, 5.0f);
         ImGui::End();
 
-        SetAtmosphericParameters(densityParameter, decayParameter, weightParameter);
+        SetAtmosphericParameters(densityParameter, decayParameter, weightParameter, enableLightScattering);
     }
 
     if (isOpenOffScreeMSAAWindow)
@@ -870,8 +872,9 @@ void GUISystem::SetHDRParameters(float gammaParam, float exposureParam)
     HdrGui->exposureParameter = exposureParam;
 }
 
-void GUISystem::SetAtmosphericParameters(float densityParam, float decayParam, float weightParam)
+void GUISystem::SetAtmosphericParameters(float densityParam, float decayParam, float weightParam, bool isEnableLightScattering)
 {
+    atmGUI->isEnable = isEnableLightScattering;
     atmGUI->density = densityParam;
     atmGUI->decay = decayParam;
     atmGUI->weight = weightParam;

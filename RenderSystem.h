@@ -99,6 +99,7 @@ public:
     void RenderOutLineModels();
     void RenderTransparentModels();
     void RenderInternalModels();
+    void RenderOcclusionLightScattering();
     void ProcessBoundingModels();
     void PreRender();
     void PreRenderHDRSkybox();

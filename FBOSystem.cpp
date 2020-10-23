@@ -16,6 +16,7 @@ FBOSystem::FBOSystem(int *width, int *height)
     skyboxFBO = nullptr;
     prefilterFBO = nullptr;
     volumeShadowFBO = nullptr;
+    lightScatteringFBO = nullptr;
 }
 
 FBO* FBOSystem::GetFBO(FBOType type)
@@ -44,6 +45,8 @@ FBO* FBOSystem::GetFBO(FBOType type)
         return prefilterFBO;
     case FBOType::VOLUME_SHADOW_FBO:
         return volumeShadowFBO;
+    case FBOType::LIGHT_SCATTERING_FBO:
+        return lightScatteringFBO;
     }
 }
 
@@ -85,6 +88,9 @@ void FBOSystem::AddFBO(FBO* fbo)
         break;
     case FBOType::VOLUME_SHADOW_FBO:
         volumeShadowFBO = fbo;
+        break;
+    case FBOType::LIGHT_SCATTERING_FBO:
+        lightScatteringFBO = fbo;
         break;
     } 
 }
@@ -157,6 +163,12 @@ void FBOSystem::VolumeShadowPass()
         volumeShadowFBO->ActivateFBO();
 }
 
+void FBOSystem::LightScatteringPass()
+{
+    if (lightScatteringFBO != nullptr)
+        lightScatteringFBO->ActivateFBO();
+}
+
 unsigned int FBOSystem::GetFinalRender()
 {
     if(colorFBO != nullptr)
@@ -196,6 +208,13 @@ unsigned int FBOSystem::GetLightVolumeRender(unsigned int id)
 {
     if (lightVolumeFBO != nullptr)
         return lightVolumeFBO->GetRenderTexture(id);
+    return 0;
+}
+
+unsigned int FBOSystem::GetLightScatteringRender(unsigned int id)
+{
+    if (lightScatteringFBO != nullptr)
+        return lightScatteringFBO->GetRenderTexture(id);
     return 0;
 }
 
@@ -248,6 +267,18 @@ void FBOSystem::ResizeFBOs()
         lightVolumeFBO->GenerateFBO(width, height);
     if (ssaoFBO != nullptr)
         ssaoFBO->GenerateFBO(width, height);
+    if (volumeShadowFBO != nullptr)
+    {
+        delete volumeShadowFBO;
+        AddFBO(new FBO(FBOType::VOLUME_SHADOW_FBO));
+        //volumeShadowFBO->GenerateFBO(width, height);
+    }
+    if (lightScatteringFBO != nullptr)
+    {
+        delete lightScatteringFBO;
+        AddFBO(new FBO(FBOType::LIGHT_SCATTERING_FBO));
+        //lightScatteringFBO->GenerateFBO(width, height);
+    }
 }
 
 void FBOSystem::BlitDepthBuffer(FBOType readBuffer, FBOType drawBuffer)

@@ -267,3 +267,103 @@ void Material::AssignRenderTextures()
     ptrShader->ActivateLights();
 
 }
+
+void Material::AssignRenderTextures(Shader* sh)
+{
+    unsigned int diffuseNr = 0;
+    unsigned int specularNr = 0;
+    unsigned int normalNr = 0;
+    unsigned int heightNr = 0;
+    unsigned int emissiveNr = 0;
+    unsigned int aoNr = 0;
+    unsigned int metallicNr = 0;
+    unsigned int roughnessNr = 0;
+    unsigned int bumpNr = 0;
+    unsigned int noiseNr = 0;
+
+    numTextures = textures.size();
+
+    for (unsigned int i = 0; i < numTextures; i++)
+    {
+
+        std::string name;
+
+        switch (textures[i].type)
+        {
+        default:
+        case TypeTexture::DIFFUSE:
+            name = "material.diffuse[" + std::to_string(diffuseNr++) + "]";
+            break;
+        case TypeTexture::SPECULAR:
+            name = "material.specular[" + std::to_string(specularNr++) + "]";
+            break;
+        case TypeTexture::NORMAL:
+            name = "material.normal[" + std::to_string(normalNr++) + "]";
+            break;
+        case TypeTexture::HEIGHT:
+            name = "material.height[" + std::to_string(heightNr++) + "]";
+            break;
+        case TypeTexture::EMISSIVE:
+            name = "material.emissive[" + std::to_string(emissiveNr++) + "]";
+            break;
+        case TypeTexture::AO:
+            name = "material.ao[" + std::to_string(aoNr++) + "]";
+            break;
+        case TypeTexture::METALLIC:
+            name = "material.metallic[" + std::to_string(metallicNr++) + "]";
+            break;
+        case TypeTexture::ROUGHNESS:
+            name = "material.roughness[" + std::to_string(roughnessNr++) + "]";
+            break;
+        case TypeTexture::BUMP:
+            name = "material.bump[" + std::to_string(bumpNr++) + "]";
+            break;
+        case TypeTexture::NOISE:
+            name = "material.noise[" + std::to_string(noiseNr++) + "]";
+            break;
+        }
+
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, textures[i].ID);
+
+        sh->use();
+        sh->setInt((name).c_str(), i);
+    }
+    sh->use();
+    sh->setInt("material.num_diffuse", diffuseNr);
+    sh->setInt("material.num_specular", specularNr);
+    sh->setInt("material.num_normal", normalNr);
+    sh->setInt("num_normal", normalNr);
+    sh->setInt("material.num_height", heightNr);
+    sh->setInt("material.num_emissive", emissiveNr);
+    sh->setInt("material.num_ao", aoNr);
+    sh->setInt("material.num_metallic", metallicNr);
+    sh->setInt("material.num_roughness", roughnessNr);
+    sh->setInt("material.num_bump", bumpNr);
+    sh->setInt("material.num_noise", noiseNr);
+    sh->setFloat("material.shininess", shininess);
+    sh->setBool("material.blinn", isBlinnShading);
+    sh->setBool("material.isAmbientReflective", isAmbientReflective);
+    sh->setBool("material.isAmbientRefractive", isAmbientRefractive);
+    sh->setInt("material.isBoundingLight", isBounding);
+    sh->setFloat("material.refractiveIndex", refractiveIndex);
+    sh->setFloat("material.heightScale", parallax_displacement);
+    sh->setFloat("generalAmbient", 0.4f);
+    sh->setFloat("material.min_uv", min_uv);
+    sh->setFloat("material.max_uv", max_uv);
+    sh->setFloat("material.bloomBrightness", bloomBrightness);
+
+    if (isAmbientReflective || isAmbientRefractive)
+    {
+        glActiveTexture(GL_TEXTURE0 + textures.size());
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture->ID);
+
+        sh->use();
+        sh->setInt("skybox", textures.size());
+    }
+
+    sh->use();
+
+    sh->ActivateCamera();
+    sh->ActivateLights();
+}

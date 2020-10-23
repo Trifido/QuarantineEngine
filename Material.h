@@ -30,6 +30,8 @@ enum MaterialComponent
     SHADER_DEFERRED,
     SHADER_SHADOW,
     SHADER_POINT_SHADOW,
+    SHADER_FORWARD_QA,
+    SHADER_VOLUME_SHADOW,
     TEXTURE,
     MIN_UV,
     MAX_UV,
@@ -93,6 +95,7 @@ public:
 	void ActivateIrradianceMap(unsigned int idTexIrradiance, unsigned int idTexPrefilter, unsigned int idTexBrdf);
     void AddMultTextures(std::vector<Texture> texturesIN);
     void AssignRenderTextures();
+    void AssignRenderTextures(Shader* sh);
 
     unsigned int RawMaterialType() { return type; }
     unsigned int RawDrawType() { return drawtype; }
