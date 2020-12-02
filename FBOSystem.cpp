@@ -17,6 +17,8 @@ FBOSystem::FBOSystem(int *width, int *height)
     prefilterFBO = nullptr;
     volumeShadowFBO = nullptr;
     lightScatteringFBO = nullptr;
+    depthMapFBO = nullptr;
+    waterFBO = nullptr;
 }
 
 FBO* FBOSystem::GetFBO(FBOType type)
@@ -47,6 +49,10 @@ FBO* FBOSystem::GetFBO(FBOType type)
         return volumeShadowFBO;
     case FBOType::LIGHT_SCATTERING_FBO:
         return lightScatteringFBO;
+    case FBOType::DEPTH_MAP_FBO:
+        return depthMapFBO;
+    case FBOType::WATER_FBO:
+        return waterFBO;
     }
 }
 
@@ -91,6 +97,12 @@ void FBOSystem::AddFBO(FBO* fbo)
         break;
     case FBOType::LIGHT_SCATTERING_FBO:
         lightScatteringFBO = fbo;
+        break;
+    case FBOType::DEPTH_MAP_FBO:
+        depthMapFBO = fbo;
+        break;
+    case FBOType::WATER_FBO:
+        waterFBO = fbo;
         break;
     } 
 }
@@ -167,6 +179,18 @@ void FBOSystem::LightScatteringPass()
 {
     if (lightScatteringFBO != nullptr)
         lightScatteringFBO->ActivateFBO();
+}
+
+void FBOSystem::DepthMapPass()
+{
+    if (depthMapFBO != nullptr)
+        depthMapFBO->ActivateFBO();
+}
+
+void FBOSystem::WaterPass(unsigned int idFBO)
+{
+    if (waterFBO != nullptr)
+        waterFBO->ActivateFBO(idFBO);
 }
 
 unsigned int FBOSystem::GetFinalRender()
@@ -246,6 +270,20 @@ unsigned int FBOSystem::GetVolumeShadowRender(unsigned int id)
     return 0;
 }
 
+unsigned int FBOSystem::GetDepthMapRender(unsigned int id)
+{
+    if (depthMapFBO != nullptr)
+        return depthMapFBO->GetRenderTexture(id);
+    return 0;
+}
+
+unsigned int FBOSystem::GetWaterRender(unsigned int id)
+{
+    if (waterFBO != nullptr)
+        return waterFBO->GetRenderTexture(id);
+    return 0;
+}
+
 unsigned int FBOSystem::GetPrefilterRender(unsigned int id)
 {
     if(prefilterFBO != nullptr)
@@ -278,6 +316,11 @@ void FBOSystem::ResizeFBOs()
         delete lightScatteringFBO;
         AddFBO(new FBO(FBOType::LIGHT_SCATTERING_FBO));
         //lightScatteringFBO->GenerateFBO(width, height);
+    }
+    if (waterFBO != nullptr)
+    {
+        delete waterFBO;
+        AddFBO(new FBO(FBOType::WATER_FBO));
     }
 }
 

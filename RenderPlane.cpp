@@ -17,9 +17,9 @@ RenderPlane::RenderPlane()
     deferredLighting = new Shader("shaders/deferredLighting.vert", "shaders/deferredLighting.frag");
     ssao = new Shader("shaders/deferredLighting.vert", "shaders/ssao.frag");
     ssao_blur = new Shader("shaders/deferredLighting.vert", "shaders/ssao_blur.frag");
-    rayMarching = new Shader("shaders/rmSky.vert", "shaders/rmSky.frag");
-    //screenRenderVolumeShadow = new Shader("shaders/renderPass.vert", "shaders/renderPassVolume.frag");
-    screenRenderVolumeShadow = new Shader("shaders/postAtmosphericScattering.vert", "shaders/postAtmosphericScattering.frag");
+    rayMarching = new Shader("shaders/rmTest.vert", "shaders/rmTest.frag");
+    screenRenderVolumeShadow = new Shader("shaders/renderPass.vert", "shaders/renderPassVolume.frag");
+    screenLightScattering = new Shader("shaders/postAtmosphericScattering.vert", "shaders/postAtmosphericScattering.frag");
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
 }
 
@@ -88,6 +88,8 @@ void RenderPlane::SetVAORenderPlane()
     rayMarching->setVec2("resolution", glm::vec2(cam->WIDTH, cam->HEIGHT));
     rayMarching->setVec3("front", cam->cameraFront);
     rayMarching->setFloat("fov", cam->GetFOV());
+    rayMarching->setInt("screenTexture", 0);
+    rayMarching->setInt("depthMap", 1);
 
     //screenRenderVolumeShadow->use();
     //screenRenderVolumeShadow->setInt("occlusionTexture", 1);
@@ -113,7 +115,8 @@ void RenderPlane::FinalRenderBloom()
     shaderBloomFinal->setFloat("exposure", hdrGui->exposureParameter);
     glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0)); //fboSystem->GetDirRender());//
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0)); //fboSystem->GetDirRender());//fboSystem->GetWaterRender(0));//
+
     if (bloomGui->enable)
     {
         glActiveTexture(GL_TEXTURE1);
@@ -124,45 +127,65 @@ void RenderPlane::FinalRenderBloom()
 
 void RenderPlane::FinalRenderShadowVolume()
 {
-    screenRenderVolumeShadow->use();
-    screenRenderVolumeShadow->setFloat("gamma", hdrGui->gammaParameter);
-    screenRenderVolumeShadow->setFloat("exposure", hdrGui->exposureParameter);
-    screenRenderVolumeShadow->setFloat("decay", atmScatGui->decay);
-    screenRenderVolumeShadow->setFloat("weight", atmScatGui->weight);
-    screenRenderVolumeShadow->setFloat("density", atmScatGui->density);
+    if (atmScatGui->isEnable)
+    {
+        screenLightScattering->use();
+        screenLightScattering->setFloat("gamma", hdrGui->gammaParameter);
+        screenLightScattering->setFloat("exposure", hdrGui->exposureParameter);
+        screenLightScattering->setFloat("decay", atmScatGui->decay);
+        screenLightScattering->setFloat("weight", atmScatGui->weight);
+        screenLightScattering->setFloat("density", atmScatGui->density);
 
-    glm::vec4 clipSpacePos = cam->projection * cam->view * glm::vec4(scatteringLight->GetPosition(), 1.0);
-    glm::vec3 ndcSpacePos = clipSpacePos;
+        glm::vec4 clipSpacePos = cam->projection * cam->view * glm::vec4(scatteringLight->GetPosition(), 1.0);
+        glm::vec3 ndcSpacePos = clipSpacePos;
 
-    if(clipSpacePos.w != 0.0f)
-        ndcSpacePos = ndcSpacePos / clipSpacePos.w;
+        if (clipSpacePos.w != 0.0f)
+            ndcSpacePos = ndcSpacePos / clipSpacePos.w;
 
-    glm::vec2 sendSpacePos = ndcSpacePos * 0.5f + 0.5f;
+        glm::vec2 sendSpacePos = ndcSpacePos * 0.5f + 0.5f;
 
-    screenRenderVolumeShadow->setVec2("lightPos", sendSpacePos);
-    glBindVertexArray(quadVAO);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fboSystem->GetVolumeShadowRender(0));
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, fboSystem->GetVolumeShadowRender(1));
+        screenLightScattering->setVec2("lightPos", sendSpacePos);
+        glBindVertexArray(quadVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, fboSystem->GetVolumeShadowRender(0));
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, fboSystem->GetLightScatteringRender(0));
+    }
+    else
+    {
+        screenRenderVolumeShadow->use();
+        screenRenderVolumeShadow->setFloat("gamma", hdrGui->gammaParameter);
+        screenRenderVolumeShadow->setFloat("exposure", hdrGui->exposureParameter);
+        glBindVertexArray(quadVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, fboSystem->GetVolumeShadowRender(0));
+    }
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void RenderPlane::FinalRenderRayMarching()
 {
-    glBindVertexArray(quadVAO);
     rayMarching->use();
     rayMarching->ActivateCamera();
 
     rayMarching->setMat4("view", cam->view);
+    rayMarching->setVec2("resolution", glm::vec2(cam->WIDTH, cam->HEIGHT));
     rayMarching->setVec3("front", cam->cameraFront);
     rayMarching->setMat4("projection", cam->projection);
+    rayMarching->setFloat("near", *cam->GetRawNearPlane());
+    rayMarching->setFloat("far", *cam->GetRawFarPlane());
     rayMarching->setVec3("viewPos", cam->cameraPos);
     rayMarching->setFloat("gamma", hdrGui->gammaParameter);
     rayMarching->setFloat("exposure", hdrGui->exposureParameter);
+    rayMarching->setFloat("time", glfwGetTime());
 
+    glBindVertexArray(quadVAO);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0)); //fboSystem->GetDirRender());//
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetMRTRender(0));
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, fboSystem->GetDepthMapRender());
+
     if (bloomGui->enable)
     {
         glActiveTexture(GL_TEXTURE1);

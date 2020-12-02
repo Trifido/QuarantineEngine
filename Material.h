@@ -5,6 +5,7 @@
 
 #include "Shader.h"
 #include "Texture.h"
+#include "ProceduralTexture.h"
 
 enum MaterialType
 {
@@ -18,7 +19,8 @@ enum MaterialType
     EMISSIVE_LIT = 7,
     BOUNDING_VOLUME = 8,
     FPS = 9,
-    INTERNAL = 10
+    INTERNAL = 10,
+    FRESNEL = 11
 };
 
 enum MaterialComponent
@@ -33,6 +35,7 @@ enum MaterialComponent
     SHADER_FORWARD_QA,
     SHADER_VOLUME_SHADOW,
     TEXTURE,
+    PROCEDURAL_TEXTURE,
     MIN_UV,
     MAX_UV,
     SHININESS,
@@ -68,6 +71,7 @@ public:
     Shader* ptrShaderShadow;
     Shader* ptrShaderPointShadow;
     std::vector<Texture> textures;
+    std::vector<ProceduralTexture> procedural_textures;
     Texture* skyboxTexture;
     float shininess;
     float refractiveIndex;
@@ -86,6 +90,7 @@ public:
     Material(Shader* shader);
     Material(Shader* shader, Shader* shader2, MaterialType mattype = MaterialType::LIT);
     Material(Shader* shader, std::vector<Texture> textures);
+    Material(Shader* shader, std::vector<ProceduralTexture> textures);
     Material(Shader* shader, Shader* shader2, std::vector<Texture> textures);
     void CopyMaterial(Material mat);
 
@@ -94,6 +99,7 @@ public:
 	void ActivateShadowTexture(unsigned int idTexShadow, int idLight, TypeLight type = TypeLight::DIRL);
 	void ActivateIrradianceMap(unsigned int idTexIrradiance, unsigned int idTexPrefilter, unsigned int idTexBrdf);
     void AddMultTextures(std::vector<Texture> texturesIN);
+    void AddMultProceduralTextures(std::vector<ProceduralTexture> texturesIN);
     void AssignRenderTextures();
     void AssignRenderTextures(Shader* sh);
 
@@ -110,6 +116,7 @@ public:
     bool* RawIsAmbientRefractive() { return &isAmbientRefractive; }
     bool* RawIsBlinnShading() { return &isBlinnShading; }
     float* RawColorOutline() { return &colorOutline[0]; }
+    void SetNumTextures(int num) { numTextures = num; }
 };
 
 #endif

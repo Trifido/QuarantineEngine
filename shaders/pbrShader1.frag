@@ -59,7 +59,9 @@ struct DirLight {
     vec3 direction;
     float constant;
     float linear;
-    float quadratic;  
+    float quadratic;
+    float bias;
+    int samples;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -76,6 +78,8 @@ struct SpotLight {
     float constant;
     float linear;
     float quadratic; 
+    float bias;
+    int samples;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -90,6 +94,8 @@ struct PointLight {
     float constant;
     float linear;
     float quadratic;
+    float bias;
+    int samples;
     float far_plane;
     samplerCube shadowCubeMap;
     bool isCastShadow;
@@ -492,8 +498,8 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 float PointShadowCalculation(int idLight)
 {
     float shadow  = 0.0;
-    float bias   = 0.000f;
-    int samples = 20;
+    float bias = pointLights[idLight].bias;//0.000f;
+    int samples = pointLights[idLight].samples;
     float viewDistance;
     vec3 fragToLight;
 
@@ -503,11 +509,15 @@ float PointShadowCalculation(int idLight)
     float diskRadius = (1.0 + (viewDistance / pointLights[idLight].far_plane)) / 25.0; 
     float currentDepth = length(fragToLight);
 
-    float closestDepth = texture(pointLights[idLight].shadowCubeMap, fragToLight).r;
+    for(int i = 0; i < samples; ++i)
+    {
+        float closestDepth = texture(pointLights[idLight].shadowCubeMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+        closestDepth *= pointLights[idLight].far_plane;   // Undo mapping [0;1]
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0;
+    }
 
-    closestDepth *= pointLights[idLight].far_plane;   // Undo mapping [0;1]
-
-    shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0; 
+    shadow /= float(samples); 
 
     return shadow;
 }
@@ -528,7 +538,7 @@ float DirShadowCalculation(int idLight)
     float closestDepth = texture(dirLights[idLight].shadowMap, projCoords.xy).r; 
     float currentDepth = projCoords.z ;
 
-    float bias = max(0.000005 * (1.0 - dot(normal, lightDir)), 0.000005);
+    float bias = max(dirLights[idLight].bias * (1.0 - dot(normal, lightDir)), 0.000005);
     float shadow = 0.0;
 
     if(projCoords.z < 1.0)
@@ -564,7 +574,7 @@ float SpotShadowCalculation(int idLight)
     float closestDepth = texture(spotLights[idLight].shadowMap, projCoords.xy).r; 
     float currentDepth = projCoords.z ;
 
-    float bias = max(0.000005 * (1.0 - dot(normal, lightDir)), 0.000005);
+    float bias = max(spotLights[idLight].bias * (1.0 - dot(normal, lightDir)), 0.000005);
     float shadow = 0.0;
 
     if(projCoords.z < 1.0)

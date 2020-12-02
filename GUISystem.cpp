@@ -96,6 +96,11 @@ void GUISystem::DrawMainMenuBar()
         }
         if (ImGui::BeginMenu("Edit"))
         {
+            if (ImGui::MenuItem("Water Tool", NULL))
+            {
+                isWaterTool = !isWaterTool;
+            }
+
             if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
             if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
             ImGui::Separator();
@@ -145,10 +150,146 @@ void GUISystem::DrawMainMenuBar()
     DrawPostProcessWindow();
     DrawPropertyWindow();
     DrawAnalysisWindow();
+    DrawEditWindow();
 
     //typeRenderSelected = typeRender;
     isShutdown = isShutdownRender;
     isSaveScene = isSaveSceneRender;
+}
+
+void GUISystem::DrawEditWindow()
+{
+    /*
+    if (isWaterTool)
+    {
+        ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Water Tool", &isWaterTool);
+        ImGui::Text("Water Controller");
+
+        static float clipParameter = -0.316f;
+        ImGui::SliderFloat("Clip Plane", &clipParameter, -10.0f, 10.0f);
+        ImGui::End();
+        static int tileParameter = 1;
+        ImGui::SliderInt("Tiling", &tileParameter, 1, 20.0f);
+        ImGui::End();
+        static float speedParameter = 0.03f;
+        ImGui::SliderFloat("Speed Wave", &speedParameter, 0.0f, 5.0f);
+        ImGui::End();
+
+        //ImGui::PushID(14 + i);
+        ImGui::AlignTextToFramePadding();
+        ImGui::TreeNodeEx("FieldColorWater", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Water Color");
+        ImGui::NextColumn();
+        ImGui::SetNextItemWidth(-1);
+        //static float *colorWater;
+        ImGui::ColorPicker3("MyColorWater##3", &waterGui->waterColor[0], ImGuiColorEditFlags_NoAlpha);
+
+        SetWaterParameters(clipParameter, tileParameter, speedParameter);
+    }*/
+
+    if (isWaterTool)
+    {
+        ImGui::SetNextWindowSize(ImVec2(630, 450), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Water Editor", &isWaterTool);
+
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+        ImGui::Columns(2);
+        ImGui::Separator();
+
+        static float clipParameter = -0.316f;
+        struct funcs
+        {
+            static void ShowDummyObject(const char* prefix, int uid, Water* water)
+            {
+                ImGui::PushID(uid);                      // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
+                ImGui::AlignTextToFramePadding();  // Text and Tree nodes are less high than regular widgets, here we add vertical spacing to make the tree lines equal high.
+                bool node_open = ImGui::TreeNode("Object", "%s", prefix);
+                ImGui::NextColumn();
+                ImGui::AlignTextToFramePadding();
+
+                ImGui::NextColumn();
+                if (node_open)
+                {
+                    //CLIP PLANE
+                    ImGui::PushID(1);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldPosition", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "ClipPlane");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("Clip Plane", &clipParameter, -10.0f, 10.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+                    //TILING
+                    ImGui::PushID(2);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldTile", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Tile");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderInt("Tiling", water->GetTiling(), 1, 20.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    //SPEED
+                    ImGui::PushID(3);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldSpeed", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Speed");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("Speed Wave", water->GetWaveSpeed(), 0.0f, 5.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    //WATER COLOR
+                    ImGui::PushID(4);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldWaterColor", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Water Color");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::ColorPicker3("MyColor##3", water->GetWaterColor(), ImGuiColorEditFlags_NoAlpha);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    //COLOR FACTOR
+                    ImGui::PushID(5);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldFactorColor", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Water Color Factor");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("Color Factor", water->GetWaterColorFactor(), 0.0f, 1.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    //REFRACTIVE FACTOR
+                    ImGui::PushID(6);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldFactorRefractive", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Water Refractive Factor");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("Refractive Factor", water->GetWaterRefractiveFactor(), 0.0f, 10.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    ImGui::TreePop();
+                }
+                ImGui::PopID();
+            }
+        };
+
+        clipPlaneH = clipParameter;
+
+        unsigned int idWater = 1;
+        // Iterate dummy objects with dummy members (all the same data)
+        for (int obj_i = 0; obj_i < waterModels->size(); obj_i++)
+        {
+            funcs::ShowDummyObject(("WaterModel_" + std::to_string(idWater)).c_str(), obj_i, waterModels->at(obj_i));
+            idWater++;
+        }
+
+        ImGui::Columns(1);
+        ImGui::Separator();
+        ImGui::PopStyleVar();
+        ImGui::End();
+    }
 }
 
 void GUISystem::DrawPostProcessWindow()
@@ -694,6 +835,45 @@ void GUISystem::DrawPropertyWindow()
                     ImGui::NextColumn();
                     ImGui::PopID();
 
+                    if (light->isCastShadow)
+                    {
+                        ImGui::PushID(11);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldNear", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Near");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::DragFloat("", light->GetRawNearplane(), 0.01f, 0.01f, 100.0f);
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+
+                        ImGui::PushID(12);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldFar", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Far");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::DragFloat("", light->GetRawFarplane(), 0.01f, 0.01f, 100.0f);
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+
+                        ImGui::PushID(13);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldBias", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Bias");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::DragFloat("", light->GetRawBiasShadow(), 0.0001f, 0.00000f, 1.0f);
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+
+                        ImGui::PushID(14);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldSamples", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Samples");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::DragInt("", light->GetRawSamplesShadow(), 1, 1, 80);
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+                    }
+
                     ImGui::TreePop();
                 }
                 ImGui::PopID();
@@ -914,6 +1094,11 @@ void GUISystem::SetCameraInfoGui(std::vector<Camera*>* cameras)
 void GUISystem::SetModelInfoGui(std::vector<Model*>* models)
 {
     this->models = models;
+}
+
+void GUISystem::SetWaterModelInfoGui(std::vector<Water*>* models)
+{
+    this->waterModels = models;
 }
 
 

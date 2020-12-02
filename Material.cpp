@@ -60,6 +60,22 @@ Material::Material(Shader* shader, std::vector<Texture> textures)
     refractiveIndex = 1.0f;
 }
 
+Material::Material(Shader* shader, std::vector<ProceduralTexture> textures)
+{
+    type = MaterialType::LIT;
+    drawtype = DrawMode::DTRIANGLES;
+    ptrShader = shader;
+    this->procedural_textures = textures;
+    shininess = 1.0f;
+    colorOutline = glm::vec4(1.0f);
+    numInstances = 0;
+    parallax_displacement = 0.0f;
+    min_uv = 0.0f;
+    max_uv = 1.0f;
+    bloomBrightness = 1.0f;
+    refractiveIndex = 1.0f;
+}
+
 Material::Material(Shader* shader, Shader* shader2, std::vector<Texture> textures)
 {
     type = MaterialType::OUTLINE;
@@ -167,6 +183,14 @@ void Material::AddMultTextures(std::vector<Texture> texturesIN)
     } 
 }
 
+void Material::AddMultProceduralTextures(std::vector<ProceduralTexture> texturesIN)
+{  
+    for (int i = 0; i < texturesIN.size(); i++)
+    { 
+        this->procedural_textures.push_back(texturesIN[i]);
+    } 
+}
+
 void Material::AssignRenderTextures()
 {
     unsigned int diffuseNr = 0;
@@ -179,6 +203,8 @@ void Material::AssignRenderTextures()
     unsigned int roughnessNr = 0;
     unsigned int bumpNr = 0;
     unsigned int noiseNr = 0;
+    unsigned int worleyNr = 0;
+    unsigned int perlinNr = 0;
 
     numTextures = textures.size();
 
@@ -228,6 +254,23 @@ void Material::AssignRenderTextures()
         ptrShader->use();
         ptrShader->setInt((name).c_str(), i);
     }
+
+    for (unsigned int i = 0; i < procedural_textures.size(); i++)
+    {
+        std::string name;
+
+        switch (procedural_textures[i].typeNoise)
+        {
+        default:
+        case NoiseType::PERLIN:
+            name = "material.perlin[" + std::to_string(perlinNr++) + "]";
+            break;
+        case NoiseType::WORLEY:
+            name = "material.worley[" + std::to_string(worleyNr++) + "]";
+            break;
+        }
+    }
+
     ptrShader->use();
     ptrShader->setInt("material.num_diffuse", diffuseNr);
     ptrShader->setInt("material.num_specular", specularNr);
@@ -240,6 +283,8 @@ void Material::AssignRenderTextures()
     ptrShader->setInt("material.num_roughness", roughnessNr);
     ptrShader->setInt("material.num_bump", bumpNr);
     ptrShader->setInt("material.num_noise", noiseNr);
+    ptrShader->setInt("material.num_worley", worleyNr);
+    ptrShader->setInt("material.num_perlin", perlinNr);
     ptrShader->setFloat("material.shininess", shininess);
     ptrShader->setBool("material.blinn", isBlinnShading);
     ptrShader->setBool("material.isAmbientReflective", isAmbientReflective);
@@ -280,6 +325,8 @@ void Material::AssignRenderTextures(Shader* sh)
     unsigned int roughnessNr = 0;
     unsigned int bumpNr = 0;
     unsigned int noiseNr = 0;
+    unsigned int worleyNr = 0;
+    unsigned int perlinNr = 0;
 
     numTextures = textures.size();
 
@@ -329,6 +376,23 @@ void Material::AssignRenderTextures(Shader* sh)
         sh->use();
         sh->setInt((name).c_str(), i);
     }
+
+    for (unsigned int i = 0; i < procedural_textures.size(); i++)
+    {
+        std::string name;
+
+        switch (procedural_textures[i].typeNoise)
+        {
+        default:
+        case NoiseType::PERLIN:
+            name = "material.perlin[" + std::to_string(perlinNr++) + "]";
+            break;
+        case NoiseType::WORLEY:
+            name = "material.worley[" + std::to_string(worleyNr++) + "]";
+            break;
+        }
+    }
+
     sh->use();
     sh->setInt("material.num_diffuse", diffuseNr);
     sh->setInt("material.num_specular", specularNr);
@@ -341,6 +405,8 @@ void Material::AssignRenderTextures(Shader* sh)
     sh->setInt("material.num_roughness", roughnessNr);
     sh->setInt("material.num_bump", bumpNr);
     sh->setInt("material.num_noise", noiseNr);
+    sh->setInt("material.num_worley", worleyNr);
+    sh->setInt("material.num_perlin", perlinNr);
     sh->setFloat("material.shininess", shininess);
     sh->setBool("material.blinn", isBlinnShading);
     sh->setBool("material.isAmbientReflective", isAmbientReflective);

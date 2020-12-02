@@ -12,6 +12,9 @@ out VS_OUT {
     vec3 FragPos;
     vec3 Normal;
     vec2 TexCoords;
+    vec2 TexCoordsUV;
+    vec4 clipSpace;
+    vec3 viewVector;
     vec3 TangentViewPos;
     vec3 TangentFragPos;
     vec4 FragPosDirLightSpace[NR_DIR_LIGHTS];
@@ -26,24 +29,21 @@ layout (std140) uniform Matrices
 
 uniform mat4 model;
 uniform vec3 viewPos;
+uniform float tiling;
+
 uniform mat4 DirlightSpaceMatrix[NR_DIR_LIGHTS];
 uniform int numDirLights;
 uniform mat4 SpotlightSpaceMatrix[NR_SPOT_LIGHTS];
 uniform int numSpotLights;
 
-uniform bool isClipPlane;
-uniform vec4 clip_plane;
-
 void main()
 {
-    vs_out.TexCoords = aTexCoords;
+    vs_out.TexCoordsUV = aTexCoords * tiling;
+    vs_out.TexCoords = vec2(aPos.x/2.0 + 0.5, aPos.y/2.0 + 0.5) * tiling;
     vs_out.Normal = mat3(model) * aNormal;
     vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
-
-    if(isClipPlane == false)
-    {
-        gl_ClipDistance[0] = dot(model * vec4(aPos, 1.0), clip_plane);
-    }
+    vs_out.clipSpace = projection * view * model * vec4(aPos.x, -0.947, aPos.z, 1.0);
+    vs_out.viewVector = viewPos - vs_out.FragPos;
 
     vec3 T = normalize(vec3(model * vec4(aTangents,   0.0)));
     vec3 B = normalize(vec3(model * vec4(aBitangents, 0.0)));
@@ -63,6 +63,6 @@ void main()
     { 
         vs_out.FragPosSpotLightSpace[i] = SpotlightSpaceMatrix[i] * vec4(vs_out.FragPos, 1.0);
     }
-
-    gl_Position = projection * view * vec4(vs_out.FragPos, 1.0); //mat4(1.0)
+  
+    gl_Position = vs_out.clipSpace;//projection * view * vec4(vs_out.FragPos, 1.0);
 }

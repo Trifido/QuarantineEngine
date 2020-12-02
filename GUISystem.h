@@ -6,6 +6,7 @@
 #include "MaterialHandle.h"
 #include "Light.h"
 #include "Model.h"
+#include "Water.h"
 
 struct BloomGUI
 {
@@ -64,9 +65,10 @@ private:
     bool isOpenFPS = false;
     bool isChangeShadow = false;
     bool isShowShadowVolume = false;
+    bool isWaterTool = false;
     DrawMode draw_mode = DrawMode::DTRIANGLES;
-    ShadowType shadow_mode = ShadowType::SHADOW_MAP;
-    ShadowType last_shadow_mode = ShadowType::SHADOW_MAP;
+    ShadowType shadow_mode = ShadowType::SHADOW_CAS;
+    ShadowType last_shadow_mode = ShadowType::SHADOW_CAS;
 public:
     BloomGUI* bloomGui;
     HdrGUI* HdrGui;
@@ -76,6 +78,8 @@ public:
     std::vector<Light*>* lights;
     std::vector<Camera*>* cameras;
     std::vector<Model*>* models;
+    std::vector<Water*>* waterModels;
+    float clipPlaneH = -0.316f;
 
     GUISystem();
     void DrawGUI();
@@ -83,6 +87,7 @@ public:
     void DrawPostProcessWindow();
     void DrawPropertyWindow();
     void DrawAnalysisWindow();
+    void DrawEditWindow();
     RenderType GetRenderModeSelected();
     bool isShutDown();
     bool isSave();
@@ -96,6 +101,7 @@ public:
     void SetLightInfoGui(std::vector<Light*>* lights);
     void SetCameraInfoGui(std::vector<Camera*>* cameras);
     void SetModelInfoGui(std::vector<Model*>* models);
+    void SetWaterModelInfoGui(std::vector<Water*>* models);
     bool isChangeShadowMode() { return isChangeShadow; }
     bool isShowShadowVolumeMode() { return isShowShadowVolume; }
     bool IsLightScattering() { return atmGUI->isEnable; }

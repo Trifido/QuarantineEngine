@@ -1,5 +1,15 @@
 #include "Mesh.h"
 
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Shader* shader)
+{ 
+    this->vertices = vertices;
+    this->indices = indices;
+    this->DetermineAdjacency();
+    this->material = new Material(shader);
+    this->material->AddMultTextures(textures);
+    setupMesh();
+}
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle)
 { 
     this->vertices = vertices;
@@ -132,6 +142,36 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }
 
+void Mesh::setupVolumetricMesh()
+{
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+    if (indices.size() > 0)
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+    }
+
+    // vertex positions
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    // vertex normals
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+    // vertex texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+    
+    glBindVertexArray(0);
+}
+
 void Mesh::setUpInstanceMesh(unsigned int ID)
 {
     //set instance data
@@ -149,7 +189,8 @@ void Mesh::MeshCollider(std::vector<Vertex> vertices, std::vector<unsigned int> 
     material = new Material(matHandle.shader, matHandle.shader2);
     matHandle.AddMaterialToList(material);
 
-    setupMesh();
+    setupVolumetricMesh();
+    //setupMesh();
 }
 
 void Mesh::ScaleMeshCollider(glm::vec3 scalevert)
@@ -232,6 +273,12 @@ void Mesh::DrawVolumeShadow()
 
     glBindVertexArray(0);
     glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::DrawOcclusionScattering(Shader* sh)
+{
+    material->AssignRenderTextures(sh);
+    SetRenderMode();
 }
 
 void Mesh::DelteGPUInfo()

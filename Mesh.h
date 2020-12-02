@@ -33,6 +33,7 @@ public:
     Material *material;
     /*  Functions  */
     Mesh() {};
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, Shader* shader);
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, MaterialHandle& matHandle);
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, MaterialHandle &matHandle);
     Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, MaterialHandle& matHandle);
@@ -43,6 +44,7 @@ public:
     void Draw(bool isOutline=false, bool isActive=false);
     void DrawShadow();
     void DrawVolumeShadow();
+    void DrawOcclusionScattering(Shader* sh);
     void DelteGPUInfo();
     void inline SetShininess(float shini) { material->shininess = shini; }
 
@@ -63,7 +65,8 @@ private:
     /*  Render data  */
     unsigned int VAO, VBO, EBO;
     /*  Functions    */
-    void setupMesh(); 
+    void setupMesh();
+    void setupVolumetricMesh();
     void setupProceduralMesh(glm::vec2* instances = NULL);
     void SetRenderMode();
     void DetermineAdjacency();

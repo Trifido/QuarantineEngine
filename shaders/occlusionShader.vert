@@ -31,19 +31,11 @@ uniform int numDirLights;
 uniform mat4 SpotlightSpaceMatrix[NR_SPOT_LIGHTS];
 uniform int numSpotLights;
 
-uniform bool isClipPlane;
-uniform vec4 clip_plane;
-
 void main()
-{
+{ 
     vs_out.TexCoords = aTexCoords;
     vs_out.Normal = mat3(model) * aNormal;
     vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
-
-    if(isClipPlane == false)
-    {
-        gl_ClipDistance[0] = dot(model * vec4(aPos, 1.0), clip_plane);
-    }
 
     vec3 T = normalize(vec3(model * vec4(aTangents,   0.0)));
     vec3 B = normalize(vec3(model * vec4(aBitangents, 0.0)));
@@ -64,5 +56,5 @@ void main()
         vs_out.FragPosSpotLightSpace[i] = SpotlightSpaceMatrix[i] * vec4(vs_out.FragPos, 1.0);
     }
 
-    gl_Position = projection * view * vec4(vs_out.FragPos, 1.0); //mat4(1.0)
+    gl_Position = projection * view * vec4(vs_out.FragPos, 1.0); 
 }

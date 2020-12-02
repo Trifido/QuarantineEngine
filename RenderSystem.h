@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "BoundingLight.h"
 #include "Model.h"
+#include "RenderVolume.h"
 #include "Pivot.h"
 #include "FBOSystem.h"
 #include "UBOSystem.h"
@@ -15,6 +16,8 @@
 #include "RenderPlane.h"
 #include "KeyInput.h"
 #include "SkyBox.h"
+#include "Water.h"
+#include "ParticleSystem.h"
 #include "GUISystem.h"
 
 #include <GLFW/glfw3.h>
@@ -31,6 +34,9 @@ private:
     std::vector<Model*> outLineModels;
     std::vector<Model*> transparentModels;
     std::vector<Model*> internalModels;
+    std::vector<Water*> fresnelModels;
+    std::vector<ParticleSystem*> particleSystems;
+    std::vector<RenderVolume*> renderVolumes;
     std::vector<BoundingLight*> boundingModels;
     std::vector<Light*> shadowCastDirLights;
     std::vector<Light*> shadowCastOmniLights;
@@ -84,6 +90,9 @@ public:
     void AddLight(BoundingLight* lights);
     void AddCamera(Camera* cam);
     void AddModel(Model* model3D);
+    void AddFresnelModel(Water* fresnelModel);
+    void AddParticleSystem(ParticleSystem* system);
+    void AddRenderVolume(RenderVolume* volume);
     void AddPreCookSkybox(Skybox* skyHDR);
 
     void SetRenderMode();
@@ -95,11 +104,16 @@ public:
     void RenderDirectionalShadowMap();
     void RenderOmnidirectionalShadowMap();
     void RenderVolumeShadow();
+    void RenderDepthMap();
     void RenderSolidModels();
     void RenderOutLineModels();
     void RenderTransparentModels();
     void RenderInternalModels();
+    void RenderVolumes();
     void RenderOcclusionLightScattering();
+    void RenderClipPlane(glm::vec4 plane);
+    void RenderFresnelModels();
+    void RenderParticleSystems();
     void ProcessBoundingModels();
     void PreRender();
     void PreRenderHDRSkybox();

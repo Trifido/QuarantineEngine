@@ -144,3 +144,18 @@ void Camera::CheckCameraAttributes(float* positionCamera, float* frontCamera, fl
     }
 }
 
+void Camera::InvertPitch(float heightPos)
+{
+    cameraPos.y = cameraPos.y + heightPos;
+    
+    pitch = -pitch;
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+    cameraFront = glm::normalize(front);
+    //cameraUp = -cameraUp;
+    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+}
+

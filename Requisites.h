@@ -57,9 +57,12 @@ using namespace gl;
 #include "Model.h"
 #include "RawGeometry.h"
 #include "RenderPlane.h"
+#include "RenderVolume.h"
+#include "Water.h"
 #include "FBOSystem.h"
 #include "RenderSystem.h"
 #include "SkyBox.h"
+#include "ParticleSystem.h"
 
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>

@@ -35,12 +35,15 @@ public:
     Shader(const char* vertexPath, const char* geomtryPath, const char* fragmentPath);
     // use/activate the shader
     void use();
+    void unuse();
     // utility uniform functions
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;
     void setVec3(const std::string& name, float x, float y, float z);
     void setVec3(const std::string& name, glm::vec3& pos) const;
+    void setVec4(const std::string& name, float x, float y, float z, float w);
+    void setVec4(const std::string& name, glm::vec4& pos) const;
     void setVec2(const std::string& name, glm::vec2& pos) const;
     void setMat3(const std::string& name, glm::mat3& mat) const;
     void setMat4(const std::string& name, glm::mat4& mat) const;

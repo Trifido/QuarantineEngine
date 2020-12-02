@@ -30,10 +30,20 @@ void RenderSystem::Clean()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    for (int i = 0; i < models.size(); i++)
+    for (unsigned int i = 0; i < models.size(); i++)
     {
         models.at(i)->DeleteGPUInfo();
         //delete models.at(i);
+    }
+
+    for(unsigned int i = 0; i < fresnelModels.size(); i++)
+    {
+        fresnelModels.at(i)->DeleteGPUInfo();
+    }
+
+    for(unsigned int i = 0; i < particleSystems.size(); i++)
+    {
+        particleSystems.at(i)->DeleteGPUInfo();
     }
 
     glfwDestroyWindow(window);
@@ -103,6 +113,21 @@ void RenderSystem::AddCamera(Camera* cam)
 void RenderSystem::AddModel(Model* model)
 {
     this->models.push_back(model);
+}
+
+void RenderSystem::AddFresnelModel(Water* fresnelModel)
+{
+    this->fresnelModels.push_back(fresnelModel);
+}
+
+void RenderSystem::AddParticleSystem(ParticleSystem* system)
+{
+    this->particleSystems.push_back(system);
+}
+
+void RenderSystem::AddRenderVolume(RenderVolume* volume)
+{
+    this->renderVolumes.push_back(volume);
 }
 
 void RenderSystem::AddPreCookSkybox(Skybox* skyHDR)
@@ -205,6 +230,23 @@ void RenderSystem::RenderVolumeShadow()
     glEnable(GL_CULL_FACE);
 }
 
+void RenderSystem::RenderDepthMap()
+{
+    //glDisable(GL_CULL_FACE);
+    for (int i = 0; i < solidModels.size(); i++)
+    {
+        solidModels[i]->SetModelHierarchy();
+        solidModels[i]->DrawDepthMap(*cameras[0]->GetRawNearPlane(), *cameras[0]->GetRawFarPlane());
+    }
+
+    for (int i = 0; i < outLineModels.size(); i++)
+    {
+        outLineModels[i]->SetModelHierarchy();
+        outLineModels[i]->DrawDepthMap(*cameras[0]->GetRawNearPlane(), *cameras[0]->GetRawFarPlane());
+    }
+    //glEnable(GL_CULL_FACE);
+}
+
 void RenderSystem::RenderSolidModels()
 {
     glDisable(GL_CULL_FACE);
@@ -254,6 +296,7 @@ void RenderSystem::RenderSolidModels()
                 }
             }
 
+            solidModels[i]->matHandle.shader->setBool("isClipPlane", false);
             solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
         }
         else
@@ -286,6 +329,7 @@ void RenderSystem::RenderFPSModels()
             for (int idLight = 0; idLight < this->shadowCastOmniLights.size(); idLight++)
                 fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLight), idLight, TypeLight::POINTLIGHT);
 
+            fpsModels[i]->matHandle.shader->setBool("isClipPlane", false);
             fpsModels[i]->DrawCastShadow(shadowCastGeneralLights);
         }
         else
@@ -316,6 +360,18 @@ void RenderSystem::RenderInternalModels()
     pivot->DrawPivot();
 
     glEnable(GL_DEPTH_TEST);
+}
+
+void RenderSystem::RenderVolumes()
+{
+    glEnable(GL_CULL_FACE);
+    
+    for (unsigned int i = 0; i < renderVolumes.size(); i++)
+    {
+        renderVolumes.at(i)->DrawRenderVolume();
+    }
+
+    glDisable(GL_CULL_FACE);
 }
 
 void RenderSystem::RenderOcclusionLightScattering()
@@ -389,7 +445,7 @@ void RenderSystem::RenderOutLineModels()
                     outLineModels[i]->matHandle.ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
                 }
             }
-
+            outLineModels[i]->matHandle.shader->setBool("isClipPlane", false);
             outLineModels[i]->DrawCastShadow(shadowCastGeneralLights, true);
         }
         else
@@ -397,6 +453,133 @@ void RenderSystem::RenderOutLineModels()
             outLineModels[i]->Draw();
         }
     }
+}
+
+void RenderSystem::RenderClipPlane(glm::vec4 plane)
+{
+    glEnable(GL_CULL_FACE);
+    for (int i = 0; i < solidModels.size(); i++)
+    {
+        //Comprobamos la jerarquía de los modelos 3D
+        solidModels[i]->SetModelHierarchy();
+
+        //Añadimos el mapa de irradiancia
+        solidModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
+
+        solidModels[i]->matHandle.shader->setBool("isClipPlane", false);
+        solidModels[i]->matHandle.shader->setVec4("clip_plane", plane);
+
+        if (solidModels[i]->CAST_SHADOW)
+        {
+            for (int idLightD = 0; idLightD < LIMIT_DIR_CAST_SHADOW; idLightD++)
+            {
+                if (idLightD < this->shadowCastDirLights.size())
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightD), idLightD, TypeLight::DIRL);
+                }
+                else
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightD, TypeLight::DIRL);
+                }
+            }
+
+            for (int idLightS = 0; idLightS < LIMIT_SPOT_CAST_SHADOW; idLightS++)
+            {
+                if (idLightS < this->shadowCastSpotLights.size())
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightS), idLightS, TypeLight::SPOTL);
+                }
+                else
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightS, TypeLight::SPOTL);
+                }
+            }
+
+            for (int idLightP = 0; idLightP < LIMIT_OMNI_CAST_SHADOW; idLightP++)
+            {
+                if (idLightP < this->shadowCastOmniLights.size())
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLightP), idLightP, TypeLight::POINTLIGHT);
+                }
+                else
+                {
+                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
+                }
+            }
+
+            solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
+        }
+        else
+        {
+            solidModels[i]->Draw();
+        }
+    }
+    glDisable(GL_CULL_FACE);
+}
+
+void RenderSystem::RenderFresnelModels()
+{
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (unsigned int i = 0; i < fresnelModels.size(); i++)
+    {
+        ////Comprobamos la jerarquía de los modelos 3D
+        fresnelModels[i]->SetModelHierarchy();
+
+        //Añadimos el mapa de irradiancia
+        fresnelModels[i]->ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
+
+        for (int idLightD = 0; idLightD < LIMIT_DIR_CAST_SHADOW; idLightD++)
+        {
+            if (idLightD < this->shadowCastDirLights.size())
+            {
+                fresnelModels[i]->ActivateShadowMap(fboSystem->GetDirRender(idLightD), idLightD, TypeLight::DIRL);
+            }
+            else
+            {
+                fresnelModels[i]->ActivateShadowMap(NULL, idLightD, TypeLight::DIRL);
+            }
+        }
+
+        for (int idLightS = 0; idLightS < LIMIT_SPOT_CAST_SHADOW; idLightS++)
+        {
+            if (idLightS < this->shadowCastSpotLights.size())
+            {
+                fresnelModels[i]->ActivateShadowMap(fboSystem->GetDirRender(idLightS), idLightS, TypeLight::SPOTL);
+            }
+            else
+            {
+                fresnelModels[i]->ActivateShadowMap(NULL, idLightS, TypeLight::SPOTL);
+            }
+        }
+
+        for (int idLightP = 0; idLightP < LIMIT_OMNI_CAST_SHADOW; idLightP++)
+        {
+            if (idLightP < this->shadowCastOmniLights.size())
+            {
+                fresnelModels[i]->ActivateShadowMap(fboSystem->GetOmniRender(idLightP), idLightP, TypeLight::POINTLIGHT);
+            }
+            else
+            {
+                fresnelModels[i]->ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
+            }
+        }
+
+        fresnelModels.at(i)->Render(lights, fboSystem->GetWaterRender(0), fboSystem->GetWaterRender(1));
+    }
+    glDisable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+}
+
+void RenderSystem::RenderParticleSystems()
+{
+    glDisable(GL_CULL_FACE);
+    for (unsigned int i = 0; i < particleSystems.size(); i++)
+    {
+        particleSystems.at(i)->Render();
+    }
+    glEnable(GL_CULL_FACE);
 }
 
 void RenderSystem::PreRenderHDRSkybox()
@@ -462,6 +645,7 @@ void RenderSystem::PreRender()
     guiSystem->SetLightInfoGui(&lights);
     guiSystem->SetCameraInfoGui(&cameras);
     guiSystem->SetModelInfoGui(&models);
+    guiSystem->SetWaterModelInfoGui(&fresnelModels);
 
     //SET REFLECTIVE MATERIALS
     SetAmbientReflectiveMaterials();
@@ -501,12 +685,18 @@ void RenderSystem::PreRender()
         uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.shaderVolumeShadow->ID, "Matrices");
         uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.occlussionShader->ID, "Matrices");
         uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.forwardVolumeShadowShader->ID, "Matrices");
+        uboSytem->SetUniformBlockIndex(models.at(i)->matHandle.depthMapShader->ID, "Matrices");
 
                                                                                                             //TEMPORAL
         for (int i = 0; i < pivot->GetModel()->colliders.size(); i++)
             uboSytem->SetUniformBlockIndex(pivot->GetModel()->colliders.at(i)->matHandle.shader->ID, "Matrices");
 
         renderPass.AddUBOSystem(uboSytem);
+    }
+
+    for (unsigned int i = 0; i < renderVolumes.size(); i++)
+    {
+        uboSytem->SetUniformBlockIndex(renderVolumes.at(i)->matHandle.shader->ID, "Matrices");
     }
 
     for (unsigned int i = 0; i < boundingModels.size(); i++)
@@ -517,12 +707,33 @@ void RenderSystem::PreRender()
     //CREAMOS UBO para VIEW & PROJECTION
     uboSytem->CreateBuffer((sizeof(glm::mat4) * 2) + sizeof(float), 0);
 
-    //AÑADIMOS LUCES
+    //AÑADIMOS LUCES Y CÁMARA
     for (unsigned int i = 0; i < models.size(); i++)
     {
         models.at(i)->AddLight(lights);
         models.at(i)->AddCamera(cameras.at(0));
     }
+
+    for (unsigned int i = 0; i < renderVolumes.size(); i++)
+    {
+        renderVolumes.at(i)->AddCamera(cameras.at(0));
+    }
+
+    for (unsigned int i = 0; i < fresnelModels.size(); i++)
+    {
+        uboSytem->SetUniformBlockIndex(fresnelModels.at(i)->waterShader->ID, "Matrices");
+        fresnelModels.at(i)->AddCamera(cameras.at(0));
+        fresnelModels.at(i)->AddLights(lights);
+    }
+
+    for (unsigned int i = 0; i < particleSystems.size(); i++)
+    {
+        uboSytem->SetUniformBlockIndex(particleSystems.at(i)->particleShader->ID, "Matrices");
+        particleSystems.at(i)->AddCamera(cameras.at(0));
+        //fresnelModels.at(i)->AddLights(lights);
+        particleSystems.at(i)->SetDeltaTime(&deltaTime);
+    }
+
 
     //Añadimos la luz de scattering atmosférico
     if(!shadowCastOmniLights.empty())
@@ -549,6 +760,10 @@ void RenderSystem::PreRender()
     fboSystem->AddFBO(new FBO(FBOType::VOLUME_SHADOW_FBO));
     //Añadimos Light scattering FBO
     fboSystem->AddFBO(new FBO(FBOType::LIGHT_SCATTERING_FBO));
+    //Añadimos Depth map FBO
+    fboSystem->AddFBO(new FBO(FBOType::DEPTH_MAP_FBO));
+    //Añadimos Water FBO
+    fboSystem->AddFBO(new FBO(FBOType::WATER_FBO));
 
     //DEFERRED RENDER
     fboSystem->AddFBO(new FBO(FBOType::DEFFERED));
@@ -578,6 +793,8 @@ void RenderSystem::PreRender()
 
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
+    glEnable(GL_CLIP_DISTANCE0);
+
     //Preparamos el skybox
     if (precookSkybox != nullptr)
     { 
@@ -602,6 +819,11 @@ void RenderSystem::SetRenderMode()
             {
                 for (unsigned int i = 0; i < models.size(); i++)
                     models.at(i)->matHandle.ChangeCurrentShader(MaterialComponent::SHADER_VOLUME_SHADOW);
+            }
+            else
+            {
+                for (unsigned int i = 0; i < models.size(); i++)
+                    models.at(i)->matHandle.ChangeCurrentShader(MaterialComponent::SHADER_FORWARD_QA);
             }
         }
     }
@@ -632,9 +854,9 @@ void RenderSystem::ForwardRender()
             lights.at(idLight)->SetShadowCastMode(guiSystem->GetShadowMode());
 
         for (int id = 0; id < solidModels.size(); id++)
-            solidModels.at(id)->ChangeIndexSystem(guiSystem->GetShadowMode() == ShadowType::SHADOW_MAP);
+            solidModels.at(id)->ChangeIndexSystem(guiSystem->GetShadowMode() == ShadowType::SHADOW_MAP || guiSystem->GetShadowMode() == ShadowType::SHADOW_CAS);
         for(int id = 0; id < outLineModels.size(); id++)
-            outLineModels.at(id)->ChangeIndexSystem(guiSystem->GetShadowMode() == ShadowType::SHADOW_MAP);
+            outLineModels.at(id)->ChangeIndexSystem(guiSystem->GetShadowMode() == ShadowType::SHADOW_MAP || guiSystem->GetShadowMode() == ShadowType::SHADOW_CAS);
     }
 
     if (guiSystem->IsLightScattering())
@@ -677,7 +899,7 @@ void RenderSystem::ForwardRender()
         ///RENDER SOLID MATERIALS
         RenderSolidModels();
         ///RENDER SKYBOX
-        RenderSkyBox();
+        //RenderSkyBox();
         ///RENDER TRANSPARENT MATERIALS
         //RenderTransparentModels();
         //RenderFPSModels();
@@ -752,23 +974,70 @@ void RenderSystem::ForwardRender()
     }
     else
     {
-        //FIRST PASS
+    /*
         glViewport(0, 0, display_w, display_h);
-        glClearStencil(0);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glClearStencil(0);
+        glDepthMask(GL_TRUE);
 
-        fboSystem->VolumeShadowPass();
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        //Renderizamos Sombras
+        RenderDirectionalShadowMap();
+        RenderOmnidirectionalShadowMap();
+
+        
+        glEnable(GL_CLIP_DISTANCE0);
+    
+        //Reflection Pass
+        //float distance_camera = 2 * (cameras[0]->cameraPos.y - 0.947f);
+        float distance_camera = 2 * (cameras[0]->cameraPos.y - guiSystem->clipPlaneH);
+        cameras[0]->InvertPitch(-distance_camera);
+        uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
+
+        fboSystem->WaterPass(0);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        RenderClipPlane(glm::vec4(0, 1, 0, guiSystem->clipPlaneH));
+        RenderSkyBox();
+
+        cameras[0]->InvertPitch(distance_camera);
+        uboSytem->StoreData(cameras.at(0)->view, sizeof(glm::mat4), sizeof(glm::mat4));
+        
+        //Refraction Pass
+        fboSystem->WaterPass(1);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        RenderClipPlane(glm::vec4(0, -1, 0, guiSystem->clipPlaneH));
+        RenderSkyBox();
+
+        glDisable(GL_CLIP_DISTANCE0);
+    */    
+        fboSystem->MRTPass();
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         RenderSolidModels();
-        RenderOutLineModels();
-
+        //RenderFresnelModels();
+        RenderParticleSystems();
+        //RenderSkyBox();
+        
+        ///MULTISAMPLING 
+        fboSystem->MultisamplingPass();
+        ///BLUR POST-PROCESS (BLOOM)
+        renderPass.RenderBlur();
+        
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        renderPass.FinalRenderShadowVolume();
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        renderPass.FinalRenderBloom();
+        
     }
-    
-    //renderPass.FinalRenderRayMarching();
 }
 
 void RenderSystem::DefferedRender()
@@ -870,6 +1139,11 @@ void RenderSystem::StartRender()
                 models.at(i)->SetIntanceModelMatrix();
                 models.at(i)->matHandle.isChangeNumInstances = false;
             }
+        }
+
+        for (int i = 0; i < fresnelModels.size(); i++)
+        {
+            fresnelModels.at(i)->SetDelta(&deltaTime);
         }
 
         //Keyboad functions

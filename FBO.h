@@ -17,7 +17,9 @@ enum FBOType
     SKYBOX_FBO,
     PREFILTER_FBO,
     VOLUME_SHADOW_FBO,
-    LIGHT_SCATTERING_FBO
+    LIGHT_SCATTERING_FBO,
+    DEPTH_MAP_FBO,
+    WATER_FBO
 };
 
 enum FBOComponent
@@ -40,7 +42,7 @@ class FBO
         unsigned int samples; 
         unsigned int *texture_buffers;
         unsigned int num_mrt; 
-        int *width, *height;
+        int width, height;
         int *widthDepthMap, *heightDepthMap;
         FBOType type;
         float borderColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };

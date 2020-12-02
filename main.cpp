@@ -75,16 +75,16 @@ int main(int, char**)
 
     ///TEXTURES
     std::vector<Texture> textures;
-    Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE, true);
-    Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL); 
+    //Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE, true);
+    //Texture texture2("resources/brickwall_normal.jpg", TypeTexture::NORMAL); 
     //Texture texture3("resources/matrix.jpg", TypeTexture::EMISSIVE);
     //Texture texture4("./resources/grass.png", TypeTexture::DIFFUSE, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-    textures.push_back(texture1);
-    textures.push_back(texture2);
+    //textures.push_back(texture1);
+    //textures.push_back(texture2);
     //textures.push_back(texture3);
-    Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE, false);
-    std::vector<Texture> textures_floor;
-    textures_floor.push_back(textureFloor);
+    //Texture textureFloor("./resources/wood.png", TypeTexture::DIFFUSE, false);
+    //std::vector<Texture> textures_floor;
+    //textures_floor.push_back(textureFloor);
 
     Texture parallaxDiff("resources/materials/floor_dirt/Stone_Path_001_baseColor.jpg", TypeTexture::DIFFUSE);
     Texture parallaxNorm("resources/materials/floor_dirt/Stone_Path_001_normal.jpg", TypeTexture::NORMAL);
@@ -101,25 +101,25 @@ int main(int, char**)
 
 
     std::vector<Texture> textures_pbr;
-    //Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
-    //Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
-    //Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
-    //Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
-    //Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
+    Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
+    Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
+    Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
+    Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
+    Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
 
-    Texture pbrDiff("resources/PBR_Textures/ironKiwi/New_Graph_diffuse.jpg", TypeTexture::DIFFUSE);
-    Texture pbrNorm("resources/PBR_Textures/ironKiwi/New_Graph_normal.jpg", TypeTexture::NORMAL);
-    Texture pbrME("resources/PBR_Textures/ironKiwi/New_Graph_specular.jpg", TypeTexture::METALLIC);
-    Texture pbrRO("resources/PBR_Textures/ironKiwi/New_Graph_glossiness.jpg", TypeTexture::ROUGHNESS);
-    Texture pbrBUMP("resources/PBR_Textures/ironKiwi/New_Graph_height.jpg", TypeTexture::HEIGHT);
+    //Texture pbrDiff("resources/PBR_Textures/ironKiwi/New_Graph_diffuse.jpg", TypeTexture::DIFFUSE);
+    //Texture pbrNorm("resources/PBR_Textures/ironKiwi/New_Graph_normal.jpg", TypeTexture::NORMAL);
+    //Texture pbrME("resources/PBR_Textures/ironKiwi/New_Graph_specular.jpg", TypeTexture::METALLIC);
+    //Texture pbrRO("resources/PBR_Textures/ironKiwi/New_Graph_glossiness.jpg", TypeTexture::ROUGHNESS);
+    //Texture pbrBUMP("resources/PBR_Textures/ironKiwi/New_Graph_height.jpg", TypeTexture::HEIGHT);
     //Texture pbrAO("resources/PBR_Textures/ironKiwi/rustediron2_roughness.png", TypeTexture::AO);
 
     textures_pbr.push_back(pbrDiff);
     textures_pbr.push_back(pbrNorm);
     textures_pbr.push_back(pbrME);
     textures_pbr.push_back(pbrRO);
-    textures_pbr.push_back(pbrBUMP);
-    //textures_pbr.push_back(pbrAO);
+    //textures_pbr.push_back(pbrBUMP);
+    textures_pbr.push_back(pbrAO);
 
     //std::vector<Texture> textures_pbr_floor;
     //Texture floor_pbrDiff("resources/materials/metal/Metal_Plate_013_basecolor.jpg", TypeTexture::DIFFUSE);
@@ -177,7 +177,8 @@ int main(int, char**)
     ///--NANOSUIT  
     //Model ourModel("./resources/morgue/window/model.dae");
     //Model ourModel("./resources/3DModels/Mountain_Snow.fbx");
-    Model ourModel("./resources/3DModels/colt/model.obj");
+    //Model ourModel("./resources/3DModels/colt/model.obj");
+    //Model ourModel("./resources/cave/PLATFORM/platform.obj");
     //Model ourModel("./resources/3DModels/fps_m16/dae/arm.fbx");
     //Model ourModel("./resources/space/station/SpaceShip.obj");
     //Model ourModel("./resources/3DModels/sponza/sponza.obj");
@@ -189,30 +190,134 @@ int main(int, char**)
     //ourModel.matHandle.EditMaterial(MaterialComponent::A_REFRACTIVE, true);
     //ourModel.matHandle.EditMaterial(MaterialComponent::REFRACTIVE_INDEX, 1.52f);
     */
-    ourModel.ScaleTo(glm::vec3(0.5f));
-    ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
-    ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(-10.0f), glm::vec3(1.0, 0.0, 0.0));
+    //ourModel.ScaleTo(glm::vec3(0.005f));
+    //ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+    //ourModel.transform->model *= glm::rotate(glm::mat4(1.0), glm::radians(-10.0f), glm::vec3(1.0, 0.0, 0.0));
     //ourModel.Rotation(glm::radians(180.0f),glm::vec3(0.0, 1.0, 0.0));
     //ourModel.transform->model = glm::translate(ourModel.transform->model, glm::vec3(-2.5, 0.0, 5.0));
     //ourModel.TranslationTo(glm::vec3(-2.0, 0.0, 0.0));
 
     //ourModel.matHandle.EditMaterial(MaterialComponent::TEXTURE, textures_pbr);
-    renderkernel.AddModel(&ourModel);
+    //renderkernel.AddModel(&ourModel);
 
-    //ourModel.AttachCamera(&mainCamera);
-    //BoundingLight* bdLight = new BoundingLight();
-    //bdLight->TranslationTo(glm::vec3(0.0f, 0.0f, 0.0f));
-    //renderkernel.AddLight(bdLight);
+    //DEMO
+    //Platform
+    /*
+    Model platform1("./resources/cave/PLATFORM/platform.obj");
+    platform1.RotationTo(0.0f, glm::vec3(0.0, 1.0, 0.0));
+    platform1.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&platform1);
+    Model platform2("./resources/cave/PLATFORM/platform.obj");
+    platform2.RotationTo(90.0f, glm::vec3(0.0, 1.0, 0.0));
+    platform2.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&platform2);
+    Model platform3("./resources/cave/PLATFORM/platform.obj");
+    platform3.RotationTo(180.0f, glm::vec3(0.0, 1.0, 0.0));
+    platform3.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&platform3);
+    Model platform4("./resources/cave/PLATFORM/platform.obj");
+    platform4.RotationTo(270.0f, glm::vec3(0.0, 1.0, 0.0));
+    platform4.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&platform4);
 
+    //Columns
+    Model columns1("./resources/cave/COLUMNS/columns.obj");
+    columns1.RotationTo(0.0f, glm::vec3(0.0, 1.0, 0.0));
+    columns1.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&columns1);
+    Model columns2("./resources/cave/COLUMNS/columns.obj");
+    columns2.RotationTo(90.0f, glm::vec3(0.0, 1.0, 0.0));
+    columns2.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&columns2);
+    Model columns3("./resources/cave/COLUMNS/columns.obj");
+    columns3.RotationTo(180.0f, glm::vec3(0.0, 1.0, 0.0));
+    columns3.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&columns3);
+    Model columns4("./resources/cave/COLUMNS/columns.obj");
+    columns4.RotationTo(270.0f, glm::vec3(0.0, 1.0, 0.0));
+    columns4.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&columns4);
+    
+    //Outside
+    Model columnsDestroyed("./resources/cave/COLUMNS_DESTROYED/outside.obj");
+    columnsDestroyed.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&columnsDestroyed);
+    
+    
+    //Dome
+    Model dome1("./resources/cave/DOME/dome.obj");
+    dome1.RotationTo(0.0f, glm::vec3(0.0, 1.0, 0.0));
+    dome1.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&dome1);
+    Model dome2("./resources/cave/DOME/dome.obj");
+    dome2.RotationTo(180.0f, glm::vec3(0.0, 1.0, 0.0));
+    dome2.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&dome2);
+    
+    //Rock Wall
+    Model mainCave("./resources/cave/MAIN_CAVE/maincave.obj");
+    mainCave.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&mainCave);
+    
+    //Ground MainCave
+    
+    std::vector<Texture> textures_pbr_floor;
+    Texture floor_pbrDiff("./resources/cave/GROUND_CAVE/brown_mud_rocks_01_diff_2k.png", TypeTexture::DIFFUSE);
+    Texture floor_pbrNorm("./resources/cave/GROUND_CAVE/brown_mud_rocks_01_nor_2k.png", TypeTexture::NORMAL);
+    Texture floor_pbrME("./resources/cave/GROUND_CAVE/brown_mud_rocks_01_spec_2k.png", TypeTexture::METALLIC);
+    Texture floor_pbrRO("./resources/cave/GROUND_CAVE/brown_mud_rocks_01_rough_2k.png", TypeTexture::ROUGHNESS);
+    Texture floor_pbrAO("./resources/cave/GROUND_CAVE/brown_mud_rocks_01_AO_2k.png", TypeTexture::AO);
+    Texture floor_pbrHE("./resources/cave/GROUND_CAVE/brown_mud_rocks_01_disp_2k.png", TypeTexture::HEIGHT);
+    textures_pbr_floor.push_back(floor_pbrDiff);
+    textures_pbr_floor.push_back(floor_pbrNorm);
+    textures_pbr_floor.push_back(floor_pbrME);
+    textures_pbr_floor.push_back(floor_pbrRO);
+    textures_pbr_floor.push_back(floor_pbrAO);
+    textures_pbr_floor.push_back(floor_pbrHE);
 
-    ///--SPHERE
-    //Model sphereModel("./resources/3DModels/sphere/sphere.obj");
-    //sphereModel.matHandle.EditMaterial(MaterialComponent::TEXTURE, textures_pbr);
-    //sphereModel.meshes.at(0) = *(bdLight->mesh);
-    //sphereModel.matHandle.listMaterials.at(0) = bdLight->matHandle.listMaterials.at(0);
-    //sphereModel.TranslationTo(glm::vec3(0.0f, 4.0f, 0.0f));
-    //sphereModel.matHandle.listMaterials.at(0)->isBounding = true;
-    //renderkernel.AddModel(&sphereModel);
+    Model groundMainCave(floorVertices, 6, textures_pbr_floor);
+    groundMainCave.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
+    groundMainCave.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
+    groundMainCave.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
+    groundMainCave.matHandle.EditMaterial(MaterialComponent::MAX_UV, 10.0f);
+    groundMainCave.transform->model = glm::translate(groundMainCave.transform->model, glm::vec3(0.0, -1.080, -2.150));
+    groundMainCave.ScaleTo(glm::vec3(2.670f, 1.0f, 2.080f));
+    renderkernel.AddModel(&groundMainCave);
+    */
+    
+    //Ground river
+
+    std::vector<Texture> textures_pbr_floor_river;
+    Texture floor_river_pbrDiff("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_D.bmp", TypeTexture::DIFFUSE);
+    Texture floor_river_pbrNorm("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_N.bmp", TypeTexture::NORMAL);
+    Texture floor_river_pbrRO("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_S.bmp", TypeTexture::ROUGHNESS);
+    textures_pbr_floor_river.push_back(floor_river_pbrDiff);
+    textures_pbr_floor_river.push_back(floor_river_pbrNorm);
+    textures_pbr_floor_river.push_back(floor_river_pbrRO);
+
+    Model groundRiverCave(floorVertices, 6, textures_pbr_floor_river);
+    groundRiverCave.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
+    groundRiverCave.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
+    groundRiverCave.matHandle.EditMaterial(MaterialComponent::MAX_UV, 20.0f);
+    //groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(-12.210f, -1.070f, 35.970f));
+    //groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(0.0f, -1.070f, 0.0f));
+    //groundRiverCave.ScaleTo(glm::vec3(3.210f, 1.0f, 1.740f));
+    renderkernel.AddModel(&groundRiverCave);
+    
+    //Water river
+    //Water *waterPlane = new Water();
+    //renderkernel.AddFresnelModel(waterPlane);
+
+    //Particle System
+    ParticleSystem* particleSystem = new ParticleSystem();
+    renderkernel.AddParticleSystem(particleSystem);
+
+    //Sculpture
+    //Model sculpture_magic("./resources/cave/MAGIC_SCULPTURE/magic_sculpture.obj");
+    //sculpture_magic.RotationTo(-90.0f, glm::vec3(0.0, 1.0, 0.0));
+    //sculpture_magic.transform->model = glm::translate(sculpture_magic.transform->model, glm::vec3(0.0, 2.0, 0.0));
+    //sculpture_magic.ScaleTo(glm::vec3(0.005f));
+    //renderkernel.AddModel(&sculpture_magic);
 
     //RAY MARCHING TECHNIQUE
     //Shader* rmShader = new Shader("shaders/rmclouds.vert", "shaders/rmclouds.frag");
@@ -221,13 +326,15 @@ int main(int, char**)
     //Material* rmMaterial = new Material(rmShader, noiseTextures);
 
     ///--CUBE   
-    Model cubeModel(vertices, 36, textures_pbr);
-    cubeModel.isSelectableModel = true;
+   // Model cubeModel(vertices, 36, textures_pbr);
+   // cubeModel.TranslationTo(glm::vec3(0.0f, 1.1f, 0.0f));
+   // renderkernel.AddModel(&cubeModel);
+   // cubeModel.isSelectableModel = true;
     //cubeModel.AddMaterial(rmMaterial);
-    cubeModel.ScaleTo(glm::vec3(4.0f, 4.0f, 4.0f));
-    cubeModel.TranslationTo(glm::vec3(0.0f, 1.1f, 0.0f));
+   // cubeModel.ScaleTo(glm::vec3(4.0f, 4.0f, 4.0f));
+    //cubeModel.TranslationTo(glm::vec3(0.0f, 1.1f, 0.0f));
 
-    cubeModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::OUTLINE);
+    //cubeModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::OUTLINE);
     //renderkernel.AddModel(&cubeModel);
     //cubeModel.matHandle.EditMaterial(MaterialComponent::BLINN, false);
     //cubeModel.isSelectable(true);
@@ -249,11 +356,11 @@ int main(int, char**)
     //renderkernel.AddModel(&cubeModel3);
 
     ///--FLOOR
-    Model floorModel(floorVertices, 6, textures_parallax);
-    floorModel.isSelectableModel = true;
+    //Model floorModel(floorVertices, 6, textures_parallax);
+    //floorModel.isSelectableModel = true;
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 32.0f);
-    floorModel.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
-    floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
+    //floorModel.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::OUTLINE);
     //floorModel.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::MAX_UV, 5.0f); 
@@ -265,15 +372,15 @@ int main(int, char**)
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHININESS, 64.0f);
     //floorModel.matHandle.EditMaterial(MaterialComponent::BLINN, true);
     //floorModel.matHandle.EditMaterial(MaterialComponent::SHADER1, renderShader);
-    floorModel.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
+    //floorModel.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
     //floorModel.transform->model = glm::rotate(floorModel.transform->model, glm::radians(90.0f), glm::normalize(glm::vec3(0.0, 0.0, 1.0)));
     //floorModel.transform->model = glm::translate(floorModel.transform->model, glm::vec3(0.0, -9.0, 0.0));
-    renderkernel.AddModel(&floorModel);
+    //renderkernel.AddModel(&floorModel);
 
-    Model floorModel2(floorVertices, 6, textures_parallax);
-    floorModel2.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
-    floorModel2.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
-    floorModel2.transform->model = glm::rotate(floorModel2.transform->model, glm::radians(-90.0f), glm::normalize(glm::vec3(0.0, 0.0, 1.0)));
+    //Model floorModel2(floorVertices, 6, textures_parallax);
+    //floorModel2.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
+    //floorModel2.ScaleTo(glm::vec3(1.0, 1.0, 1.0));
+    //floorModel2.transform->model = glm::rotate(floorModel2.transform->model, glm::radians(-90.0f), glm::normalize(glm::vec3(0.0, 0.0, 1.0)));
     //floorModel2.TranslationTo(glm::vec3(1.0, 1.0, 0.0));
     //renderkernel.AddModel(&floorModel2);
 
@@ -327,15 +434,19 @@ int main(int, char**)
     //asteroid.matHandle.EditMaterial(MaterialComponent::SHININESS, 12.0f);
     //renderkernel.AddModel(&asteroid);
 
+    // VOLUME RENDER
+
+    //RenderVolume* rdVolume = new RenderVolume(RenderVolumeType::BOX_VOL, NoiseType::WORLEY);
+    //renderkernel.AddRenderVolume(rdVolume);
+
     // LIGHT
     
-    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 2.0f, -3.0f)); 
+    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 5.0f,-3.0f));//
     //pointLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.01, -1.0, 0.01));
     pointLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
     pointLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
     pointLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f); //glm::vec3(0.23, 1.0, 0.08));
     renderkernel.AddLight(pointLight);
-
     
     Light* spotLight = new Light(TypeLight::SPOTL, glm::vec3(5.0f, 0.5f, 0.0f));
     spotLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-1.0, 0.0, 0.0));
@@ -346,11 +457,10 @@ int main(int, char**)
     spotLight->EditLightComponent(LightComponent::LIGHT_OUTERCUTOFF, 30.0f);
     //renderkernel.AddLight(spotLight);
 
-    Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(5.0f, 5.0f, 5.0f));
+    //Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(25.0f, 25.0f, 25.0f));
     //dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
-    dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
-    dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
-    //dirLight2->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f);
+    //dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
+    //dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
     //renderkernel.AddLight(dirLight);
 
 

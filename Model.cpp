@@ -32,6 +32,7 @@ void Model::Draw(bool isOutline)
         {
             if (matHandle.type != MaterialType::INSTANCE)
             {
+                meshes[i].material->ptrShader->setBool("isClipPlane", false);
                 meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
                 if (meshes[i].material->type == MaterialType::NORMALS)
                     meshes[i].material->ptrShader2->setMat4("model", transform->finalModelMatrix);
@@ -44,6 +45,7 @@ void Model::Draw(bool isOutline)
         for (unsigned int i = 0; i < meshes.size(); i++)
         {
             matHandle.shader->use();
+            meshes[i].material->ptrShader->setBool("isClipPlane", false);
             meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
             matHandle.shader2->use();
             meshes[i].material->ptrShader2->setMat4("model", glm::scale(transform->finalModelMatrix, glm::vec3(1.005f, 1.005f, 1.005f)));
@@ -176,6 +178,57 @@ void Model::DrawVolumeShadow(glm::vec3& lightPos)
         {
             meshes[i].DrawVolumeShadow();
         }
+    }
+}
+
+void Model::DrawDepthMap(float nearp, float farp)
+{
+    matHandle.depthMapShader->use();
+    matHandle.depthMapShader->setMat4("model", transform->finalModelMatrix);
+    matHandle.depthMapShader->setFloat("near", nearp);
+    matHandle.depthMapShader->setFloat("far", farp);
+    for (unsigned int i = 0; i < meshes.size(); i++)
+    {
+        meshes[i].DrawShadow();
+    }
+}
+
+void Model::DrawOcclusion(std::vector<Light*> lights)
+{
+    int numDir, numPoint, numSpot;
+    numDir = numPoint = numSpot = 0;
+
+    matHandle.occlussionShader->use();
+    matHandle.occlussionShader->setMat4("model", transform->finalModelMatrix);
+
+    for (unsigned int i = 0; i < meshes.size(); i++)
+    {
+        if (matHandle.type != MaterialType::INSTANCE)
+        {
+            int idLight;
+            for (idLight = 0; idLight < lights.size(); idLight++)
+            {
+                if (lights.at(idLight)->GetType() == TypeLight::DIRL)
+                {
+                    std::string numLight = std::to_string(numDir);
+                    meshes[i].material->ptrShader->setMat4("DirlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
+                    numDir++;
+                }
+                else if (lights.at(idLight)->GetType() == TypeLight::POINTLIGHT)
+                {
+                    std::string numLight = std::to_string(numPoint);
+                    meshes[i].material->ptrShader->setMat4("PointlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
+                    numPoint++;
+                }
+                else if (lights.at(idLight)->GetType() == TypeLight::SPOTL)
+                {
+                    std::string numLight = std::to_string(numSpot);
+                    meshes[i].material->ptrShader->setMat4("SpotlightSpaceMatrix[" + numLight + "]", lights.at(idLight)->lightSpaceMatrix);
+                    numSpot++;
+                }
+            }
+        }
+        meshes[i].DrawOcclusionScattering(matHandle.occlussionShader);
     }
 }
 

@@ -51,6 +51,8 @@ private:
     float linear;
     float quadratic;
     float radius;
+    float bias;
+    int samples;
 
     TypeLight type;
 
@@ -106,9 +108,16 @@ public:
     float* GetRawLinear() { return &linear; }
     float inline GetQuadratic() { return this->quadratic; }
     float* GetRawQuadratic() { return &quadratic; }
+    float inline GetNearplane() { return this->near_plane; }
+    float* GetRawNearplane() { return &near_plane; }
     float inline GetFarplane() { return this->far_plane; }
+    float* GetRawFarplane() { return &far_plane; }
     float inline GetRadius() { return this->radius; }
     bool* GetRawCastShadow() { return &isCastShadow; }
+    float inline GetBiasShadow() { return this->bias; }
+    float* GetRawBiasShadow() { return &bias; }
+    int inline GetSamplesShadow() { return this->samples; }
+    int* GetRawSamplesShadow() { return &samples; }
     void SetShadowCastMode(ShadowType mode);
     int GetShadowMode();
 private:

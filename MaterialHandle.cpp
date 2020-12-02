@@ -8,7 +8,6 @@ MaterialHandle::MaterialHandle()
     this->deferred = new Shader("shaders/geometryPass.vert", "shaders/geometryPass.frag");
     this->forwardQA = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
     this->forwardVolumeShadowShader = new Shader("shaders/pbrVolumeShadow.vert", "shaders/pbrVolumeShadow.frag");
-    //this->forwardQA = new Shader("shaders/shader_test.vert", "shaders/shader_test.frag");
     this->forward = new Shader("shaders/standardLighting.vert", "shaders/standardLighting.frag");
     this->shader2 = new Shader("shaders/outline.vert", "shaders/outline.frag");
     this->shaderShadow = new Shader("shaders/shadow.vert", "shaders/shadow.frag");
@@ -16,6 +15,7 @@ MaterialHandle::MaterialHandle()
     this->shaderVolumeShadow = new Shader("shaders/volumeGeometryShadow.vert", "shaders/volumeGeometryShadow.gm", "shaders/volumeGeometryShadow.frag");
     this->occlussionShader = new Shader("shaders/occlusionShader.vert", "shaders/occlusionShader.frag");
     this->shader = forwardQA;
+    this->depthMapShader = new Shader("shaders/depthMapShader.vert", "shaders/depthMapShader.frag");
 }
 
 MaterialHandle::MaterialHandle(Shader* sh)
@@ -33,6 +33,7 @@ MaterialHandle::MaterialHandle(Shader* sh)
     this->occlussionShader = new Shader("shaders/occlusionShader.vert", "shaders/occlusionShader.frag");
     this->forwardVolumeShadowShader = new Shader("shaders/pbrVolumeShadow.vert", "shaders/pbrVolumeShadow.frag");
     this->forwardQA = new Shader("shaders/pbrShader1.vert", "shaders/pbrShader1.frag");
+    this->depthMapShader = new Shader("shaders/depthMapShader.vert", "shaders/depthMapShader.frag");
 }
 
 void MaterialHandle::AddMaterialToList(Material* mat)
@@ -49,6 +50,7 @@ void MaterialHandle::AddLights(std::vector<Light*> lights)
     this->forwardVolumeShadowShader->AddLight(lights);
     this->shader2->AddLight(lights);
     this->occlussionShader->AddLight(lights);
+    this->depthMapShader->AddLight(lights);
 }
 
 void MaterialHandle::AddCamera(Camera* mainCamera)
@@ -60,6 +62,7 @@ void MaterialHandle::AddCamera(Camera* mainCamera)
     this->shader2->AddCamera(mainCamera);
     this->occlussionShader->AddCamera(mainCamera);
     this->forwardVolumeShadowShader->AddCamera(mainCamera);
+    this->depthMapShader->AddCamera(mainCamera);
 }
 
 void MaterialHandle::EditMaterial(MaterialComponent component, Shader* sh)
@@ -276,6 +279,28 @@ void MaterialHandle::EditMaterial(MaterialComponent component, std::vector<Textu
         else
         {
             printf("ERROR::CHANGE_TEXTURE::RUN_FAILED\n");
+        }
+    }
+}
+
+void MaterialHandle::EditMaterial(MaterialComponent component, std::vector<ProceduralTexture> procedural_textures, unsigned int id)
+{
+    if (id == NULL)
+    {
+        for (int i = 0; i < listMaterials.size(); i++)
+        {
+            listMaterials.at(i)->procedural_textures = procedural_textures;
+        }
+    }
+    else
+    {
+        if (procedural_textures.size() > id)
+        {
+            listMaterials.at(id)->procedural_textures = procedural_textures;
+        }
+        else
+        {
+            printf("ERROR::CHANGE_PROCEDURAL_TEXTURE::RUN_FAILED\n");
         }
     }
 }

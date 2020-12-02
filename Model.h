@@ -65,6 +65,8 @@ public:
     void DrawShadow(glm::mat4 VPShadow);
     void DrawShadow(std::vector<glm::mat4>& shadowTransforms, glm::vec3& lightPos, float far_plane);
     void DrawVolumeShadow(glm::vec3& lightPos);
+    void DrawDepthMap(float nearp, float farp);
+    void DrawOcclusion(std::vector<Light*> lights);
     //void Model::DrawCastShadow(Light* light, bool isOutline = false);
 
     void Rotation(float radians, glm::vec3 axis);

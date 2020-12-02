@@ -150,6 +150,11 @@ void Shader::use()
     glUseProgram(ID);
 }
 
+void Shader::unuse()
+{
+    glUseProgram(0);
+}
+
 void Shader::AddCamera(Camera* cam)
 {
     mainCamera = cam;
@@ -178,6 +183,16 @@ void Shader::setVec3(const std::string& name, float x, float y, float z)
 void Shader::setVec3(const std::string& name, glm::vec3& pos) const
 {
     glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &pos[0]);
+}
+
+void Shader::setVec4(const std::string& name, float x, float y, float z, float w)
+{
+    glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+}
+
+void Shader::setVec4(const std::string& name, glm::vec4& pos) const
+{
+    glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &pos[0]);
 }
 
 void Shader::setVec2(const std::string& name, glm::vec2& pos) const
@@ -250,6 +265,8 @@ void Shader::ActivateLights()
             this->setFloat(name + "constant", lights[i]->GetConstant());
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
+            this->setFloat(name + "bias", lights[i]->GetBiasShadow());
+            this->setInt(name + "samples", lights[i]->GetSamplesShadow());
             this->setBool(name + "isCastShadow", lights[i]->isCastShadow);
             this->setInt(name + "shadowMode", lights[i]->GetShadowMode());
             name = "DirlightPosition[" + std::to_string(numDirLights) + "]";
@@ -268,6 +285,8 @@ void Shader::ActivateLights()
             this->setFloat(name + "constant", lights[i]->GetConstant());
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
+            this->setFloat(name + "bias", lights[i]->GetBiasShadow());
+            this->setInt(name + "samples", lights[i]->GetSamplesShadow());
             this->setFloat(name + "far_plane", lights[i]->GetFarplane());
             this->setFloat(name + "radius", lights[i]->GetRadius());
             this->setBool(name + "isCastShadow", lights[i]->isCastShadow);
@@ -286,6 +305,8 @@ void Shader::ActivateLights()
             this->setFloat(name + "constant", lights[i]->GetConstant());
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
+            this->setFloat(name + "bias", lights[i]->GetBiasShadow());
+            this->setInt(name + "samples", lights[i]->GetSamplesShadow());
             this->setFloat(name + "cutOff", lights[i]->GetCutOff());
             this->setFloat(name + "outerCutOff", lights[i]->GetOuterCutOff());
             this->setBool(name + "isCastShadow", lights[i]->isCastShadow);
@@ -306,6 +327,8 @@ void Shader::ActivateLights()
             this->setFloat(name + "constant", lights[i]->GetConstant());
             this->setFloat(name + "linear", lights[i]->GetLinear());
             this->setFloat(name + "quadratic", lights[i]->GetQuadratic());
+            this->setFloat(name + "bias", lights[i]->GetBiasShadow());
+            this->setInt(name + "samples", lights[i]->GetSamplesShadow());
             this->setFloat(name + "cutOff", lights[i]->GetCutOff());
             this->setFloat(name + "outerCutOff", lights[i]->GetOuterCutOff());
             this->setBool(name + "isCastShadow", lights[i]->isCastShadow);

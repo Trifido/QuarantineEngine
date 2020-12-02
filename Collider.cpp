@@ -124,8 +124,8 @@ bool Collider::IsRayCollision(UIRay* ray)
 
     float dist = CheckCollider(ray_orig, ray_wor);
 
-    std::cout << "MAX DIST: " << FLT_MAX << std::endl;
-    std::cout << "Contact: " << (dist > 0.0f && dist < distRay) << " - " << distRay << std::endl;
+    //std::cout << "MAX DIST: " << FLT_MAX << std::endl;
+    //std::cout << "Contact: " << (dist > 0.0f && dist < distRay) << " - " << distRay << std::endl;
     return (dist > 0.0f && dist < distRay);
 }
 

@@ -26,6 +26,7 @@ private:
     Shader* ssao_blur;
     Shader* rayMarching;
     Shader* screenRenderVolumeShadow;
+    Shader* screenLightScattering;
     
     FBOSystem* fboSystem;
     //SSAO

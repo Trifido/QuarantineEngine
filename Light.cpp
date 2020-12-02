@@ -235,14 +235,16 @@ void Light::Init()
     //quadratic = 0.032f;
     quadratic = 1.8f;
     float maxRandianceChannel = std::fmaxf(std::fmaxf(diffuse.r, diffuse.g), diffuse.b);
-    radius = (-linear + std::sqrtf(linear * linear - 4.0f * (float)quadratic * (constant - (256.0 / 5.0) * maxRandianceChannel))) / (2.0f * quadratic);
+    radius = (-linear + std::sqrtf(linear * linear - 4.0f * (float)quadratic * (constant - (256.0f / 5.0f) * maxRandianceChannel))) / (2.0f * quadratic);
 
     //Spot
     cutOff = glm::cos(glm::radians(12.5f));
     outerCutOff = glm::cos(glm::radians(17.5f));
 
     near_plane = 0.1f;
-    far_plane = 10.0f;
+    far_plane = 20.0f;
     aspect = 1.0f;
     projDimension = glm::vec4(-10.0f, 10.0f, -10.0f, 10.0f);
+    bias = 0.000005f;
+    samples = 20;
 }
