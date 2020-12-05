@@ -7,6 +7,7 @@
 
 class Particle
 {
+private:
     glm::vec3 position;
     glm::vec3 velocity;
     float gravityEffect;
@@ -16,13 +17,14 @@ class Particle
     float elapsedTime = 0.0f;
     float gravityValue = -9.8f;
     bool isRender = false;
+    bool isInfinity = false;
     glm::vec2 currentOffSet;
     glm::vec2 nextOffSet;
     float blendTextValue;
     void SetTextureOffset(int numRows, glm::vec2& offset, int index);
 public:
     Particle();
-    Particle(glm::vec3 pos, glm::vec3 vel, float gravity, float life, float rot, float scal);
+    Particle(glm::vec3 pos, glm::vec3 vel, float gravity, float life, float rot, float scal, bool isInfinity = false);
     bool Update(float deltaTime);
     glm::vec3 GetPosition() { return position; }
     float GetRotation() { return rotation; }

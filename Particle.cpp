@@ -5,7 +5,7 @@ void Particle::UpdateTexture(int numRows)
     float lifeFactor = elapsedTime / lifeLength;
     int stageCount = numRows * numRows;
     float atlasProgression = lifeFactor * stageCount;
-    int currentIndex = atlasProgression;
+    int currentIndex = (atlasProgression);//floor
     int nextIndex = currentIndex < stageCount - 1 ? currentIndex + 1 : currentIndex;
     float decimal = (int)atlasProgression;
 
@@ -31,7 +31,7 @@ Particle::Particle()
     this->scale = 1.f;
 }
 
-Particle::Particle(glm::vec3 pos, glm::vec3 vel, float gravity, float life, float rot, float scal)
+Particle::Particle(glm::vec3 pos, glm::vec3 vel, float gravity, float life, float rot, float scal, bool isInfinity)
 {
     this->position = pos;
     this->velocity = vel;
@@ -39,6 +39,7 @@ Particle::Particle(glm::vec3 pos, glm::vec3 vel, float gravity, float life, floa
     this->lifeLength = life;
     this->rotation = rot;
     this->scale = scal;
+    this->isInfinity = isInfinity;
 }
 
 bool Particle::Update(float deltaTime)
@@ -54,8 +55,18 @@ bool Particle::Update(float deltaTime)
     glm::vec3 change(velocity);
     
     change *= deltaTime;
-    position += change;//velocity * deltaTime;    
+    position += change;   
     elapsedTime += deltaTime;
 
-    return lifeLength > elapsedTime;
+    if (isInfinity)
+    {
+        if (elapsedTime > elapsedTime)
+            elapsedTime = 0.0f;
+
+        return true;
+    }
+    else
+    {
+        return lifeLength > elapsedTime;
+    }
 }
