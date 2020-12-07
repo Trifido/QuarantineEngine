@@ -421,7 +421,13 @@ void ParticleSystem::EmitParticle(glm::vec3 center) {
         emitCenter += glm::vec3(xPos, 0.0, zPos);
     }
 
-    particles.push_back(Particle(emitCenter, velocity, gravityMass, lifeLengthParticles, particleRotation, particleScale, isInfinity));
+    float rotation = particleRotation;
+    if (isRandomRotation)
+    {
+        rotation = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * randomRotationParticles;// -(emitRadius / 2.0f);
+    }
+
+    particles.push_back(Particle(emitCenter, velocity, gravityMass, lifeLengthParticles, rotation, particleScale, isInfinity));
 }
 
 void ParticleSystem::setupTexture()
@@ -457,31 +463,6 @@ void ParticleSystem::UpdateScale()
     }
 }
 
-void ParticleSystem::UpdateParticleSystem()
-{
-    if (type != ParticleSystemType::BILLBOARD)
-    {
-        GenerateParticles();
-        particles = MergeSort(particles);
-
-        std::list<Particle>::iterator it = particles.begin();
-        while (it != particles.end())
-        {
-            bool stillAlive = it->Update(*deltaTime);
-
-            if (stillAlive)
-            {
-                UpdateColorLife(*it);
-                ++it;
-            }
-            else
-            {
-                it = particles.erase(it);
-            }
-        }
-    }
-}
-
 void ParticleSystem::SetPosition(glm::vec3 pos)
 {
     systemCenter = pos;
@@ -513,7 +494,10 @@ void ParticleSystem::SetProperties(float pps, float lifep, float speedp, float g
 void ParticleSystem::AddColorLife(ParticleLifeColor pColor)
 {
     isColorLife = true;
-    colorLife.push_back(pColor);
+    if(pColor.isColor)
+        colorLife.insert(std::pair<float, ParticleLifeColor>(pColor.percentageTime, pColor));
+    if(pColor.isAlpha)
+        alphaLife.insert(std::pair<float, float>(pColor.percentageTime, pColor.color.a));
 }
 
 void ParticleSystem::UpdateColorLife(Particle &particle)
@@ -523,138 +507,48 @@ void ParticleSystem::UpdateColorLife(Particle &particle)
     {
         if (colorLife.size() == 1)
         {
-            particle.SetColor(colorLife.begin()->color);
+            particle.SetColor(colorLife.begin()->second.color);
         }
         else
         {
-            std::list<ParticleLifeColor>::iterator itFirst = colorLife.begin();
-            std::list<ParticleLifeColor>::iterator itSecond = colorLife.end();
-            std::list<ParticleLifeColor>::iterator itFirstAlpha = colorLife.begin();
-            std::list<ParticleLifeColor>::iterator itSecondAlpha = colorLife.end();
-
-            itSecond--;
-            itSecondAlpha--;
-
-            bool isFirstLimit = false;
-            bool isSecondLimit = false;
-            bool isFirstLimitAlpha = false;
-            bool isSecondLimitAlpha = false;
-
             glm::vec3 firstColor, secondColor;
             float firstAlpha, secondAlpha;
-
             float timeFirstColor, timeSecondColor, timeFirstAlpha, timeSecondAlpha;
 
-            firstColor = itFirst->color;
-            secondColor = itSecond->color;
-            firstAlpha = itFirstAlpha->color.a;
-            secondAlpha = itSecondAlpha->color.a;
+            std::map<float, ParticleLifeColor>::iterator itlowColor, itupColor;
+            std::map<float, float>::iterator itlowAlpha, itupAlpha;
 
-            timeFirstColor = timeFirstAlpha = itFirst->percentageTime;
-            timeSecondColor = timeSecondAlpha = itSecond->percentageTime;
+            itlowColor = (percentageLife > 0.0f) ? --colorLife.lower_bound(percentageLife) : colorLife.lower_bound(percentageLife);
+            itupColor = (percentageLife == 0.0f) ? ++colorLife.lower_bound(percentageLife) : colorLife.lower_bound(percentageLife);
+            itlowAlpha = (percentageLife > 0.0f) ? --alphaLife.lower_bound(percentageLife) : alphaLife.lower_bound(percentageLife);
+            itupAlpha = (percentageLife == 0.0f) ? ++alphaLife.lower_bound(percentageLife) : alphaLife.lower_bound(percentageLife);
 
-            while (!isFirstLimit || !isSecondLimit || !isFirstLimitAlpha || !isSecondLimitAlpha)
-            {
-                if (!isFirstLimit)
-                {
-                    if (std::next(itFirst) != colorLife.end())
-                    {
-                        if (itFirst->isColor)
-                        {
-                            firstColor = itFirst->color;
-                            timeFirstColor = itFirst->percentageTime;
-                        }
-                        if ((std::next(itFirst)->percentageTime > percentageLife) && (std::next(itFirst)->isColor))
-                        {
-                            isFirstLimit = true;
-                        }
-                        else
-                        {
-                            itFirst++;
-                        }
-                    }
-                    else
-                    {
-                        isFirstLimit = true;
-                    }
-                }
+            if (itupColor == colorLife.end()) --itupColor;
+            if (itupAlpha == alphaLife.end()) --itupAlpha;
 
-                if (!isFirstLimitAlpha)
-                {
-                    if (std::next(itFirstAlpha) != colorLife.end())
-                    {
-                        if (itFirstAlpha->isAlpha)
-                        {
-                            firstAlpha = itFirstAlpha->color.a;
-                            timeFirstAlpha = itFirstAlpha->percentageTime;
-                        }
-                        if ((std::next(itFirstAlpha)->percentageTime > percentageLife) && (std::next(itFirstAlpha)->isAlpha))
-                        {
-                            isFirstLimitAlpha = true;
-                        }
-                        else
-                        {
-                            itFirstAlpha++;
-                        }
-                    }
-                    else
-                    {
-                        isFirstLimitAlpha = true;
-                    }
-                }
+            firstColor = itlowColor->second.color;
+            secondColor = itupColor->second.color;
+            firstAlpha = itlowAlpha->second;
+            secondAlpha = itupAlpha->second;
 
-                if (!isSecondLimit)
-                {
-                    if (std::prev(itSecond) != colorLife.begin())
-                    {
-                        if (itSecond->isColor)
-                        {
-                            secondColor = itSecond->color;
-                            timeSecondColor = itSecond->percentageTime;
-                        }
-                        if ((std::prev(itSecond)->percentageTime < percentageLife) && (std::prev(itSecond)->isColor))
-                        {
-                            isSecondLimit = true;
-                        }
-                        else
-                        {
-                            itSecond--;
-                        }
-                    }
-                    else
-                    {
-                        isSecondLimit = true;
-                    }
-                }
-
-                if (!isSecondLimitAlpha)
-                {
-                    if (std::prev(itSecondAlpha) != colorLife.begin())
-                    {
-                        if (itSecondAlpha->isAlpha)
-                        {
-                            secondAlpha = itSecondAlpha->color.a;
-                            timeSecondAlpha = itSecondAlpha->percentageTime;
-                        }
-                        if ((std::prev(itSecondAlpha)->percentageTime < percentageLife) && (std::prev(itSecondAlpha)->isAlpha))
-                        {
-                            isSecondLimitAlpha = true;
-                        }
-                        else
-                        {
-                            itSecondAlpha--;
-                        }
-                    }
-                    else
-                    {
-                        isSecondLimitAlpha = true;
-                    }
-                }
-            }
+            timeFirstColor = itlowColor->first;
+            timeSecondColor = itupColor->first;
+            timeFirstAlpha = itlowAlpha->first;
+            timeSecondAlpha = itupAlpha->first;
 
             glm::vec3 resultColor = firstColor + (((secondColor - firstColor) / (timeSecondColor - timeFirstColor)) * (percentageLife - timeFirstColor));
             float resultAlpha = firstAlpha + (((secondAlpha - firstAlpha) / (timeSecondAlpha - timeFirstAlpha)) * (percentageLife - timeFirstAlpha));
             particle.SetColor(glm::vec4(resultColor, resultAlpha));
         }
+    }
+}
+
+void ParticleSystem::SetRandomRotation(float randomRot)
+{
+    isRandomRotation = (randomRot > 0.0);
+
+    if (isRandomRotation)
+    {
+        randomRotationParticles = randomRot * glm::pi<float>() / 180.0f;
     }
 }

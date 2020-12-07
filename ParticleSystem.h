@@ -8,6 +8,7 @@
 #include "Transform.h"
 #include "Mesh.h"
 #include <list>
+#include <map>
 #include <math.h>
 
 enum ParticleSystemType
@@ -74,8 +75,12 @@ private:
     std::vector<VertexParticle> vertices;
     std::vector<unsigned int> indices;
 
+    bool isRandomRotation = false;
+    float randomRotationParticles = 0.0f;
+
     bool isColorLife;
-    std::list<ParticleLifeColor> colorLife;
+    std::map<float, ParticleLifeColor> colorLife;
+    std::map<float, float> alphaLife;
 
     Transform* transform;
     Camera* camera;
@@ -117,7 +122,6 @@ public:
     void UpdatePosition();
     void UpdateRotation();
     void UpdateScale();
-    void UpdateParticleSystem();
 
     inline float* GetParticlesCenterPosition() { return &systemCenter[0]; }
     inline float* GetParticlesRotation() { return &particleRotation; }
@@ -137,6 +141,7 @@ public:
     void SetProperties(float pps, float lifep, float speedp, float gravityp, float radius, float angle);
     void AddColorLife(ParticleLifeColor pColor);
     void UpdateColorLife(Particle &particle);
+    void SetRandomRotation(float randomRot);
 };
 
 #endif

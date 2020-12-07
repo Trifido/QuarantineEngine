@@ -67,8 +67,8 @@ int main(int, char**)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    //ImVec4* clear_color = new ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-    ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+    ImVec4* clear_color = new ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    //ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
     //RENDER SYSTEM
     RenderSystem renderkernel(window, clear_color);
@@ -287,30 +287,141 @@ int main(int, char**)
     
     //Ground river
 
-    std::vector<Texture> textures_pbr_floor_river;
-    Texture floor_river_pbrDiff("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_D.bmp", TypeTexture::DIFFUSE);
-    Texture floor_river_pbrNorm("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_N.bmp", TypeTexture::NORMAL);
-    Texture floor_river_pbrRO("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_S.bmp", TypeTexture::ROUGHNESS);
-    textures_pbr_floor_river.push_back(floor_river_pbrDiff);
-    textures_pbr_floor_river.push_back(floor_river_pbrNorm);
-    textures_pbr_floor_river.push_back(floor_river_pbrRO);
+    //std::vector<Texture> textures_pbr_floor_river;
+    //Texture floor_river_pbrDiff("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_D.bmp", TypeTexture::DIFFUSE);
+    //Texture floor_river_pbrNorm("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_N.bmp", TypeTexture::NORMAL);
+    //Texture floor_river_pbrRO("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_S.bmp", TypeTexture::ROUGHNESS);
+    //textures_pbr_floor_river.push_back(floor_river_pbrDiff);
+    //textures_pbr_floor_river.push_back(floor_river_pbrNorm);
+    //textures_pbr_floor_river.push_back(floor_river_pbrRO);
 
-    Model groundRiverCave(floorVertices, 6, textures_pbr_floor_river);
-    groundRiverCave.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
-    groundRiverCave.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
-    groundRiverCave.matHandle.EditMaterial(MaterialComponent::MAX_UV, 20.0f);
+    //Model groundRiverCave(floorVertices, 6, textures_pbr_floor_river);
+    //groundRiverCave.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
+    //groundRiverCave.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
+    //groundRiverCave.matHandle.EditMaterial(MaterialComponent::MAX_UV, 20.0f);
     //groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(-12.210f, -1.070f, 35.970f));
     //groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(0.0f, -1.070f, 0.0f));
     //groundRiverCave.ScaleTo(glm::vec3(3.210f, 1.0f, 1.740f));
-    renderkernel.AddModel(&groundRiverCave);
+    //renderkernel.AddModel(&groundRiverCave);
     
     //Water river
     //Water *waterPlane = new Water();
     //renderkernel.AddFresnelModel(waterPlane);
 
     //Particle System
-    ParticleSystem* particleSystem = new ParticleSystem();
-    renderkernel.AddParticleSystem(particleSystem);
+    //ParticleSystem* particleSystem = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/PARTICLE_SYSTEMS/fireHDR.jpg", 8, 4);
+    //renderkernel.AddParticleSystem(particleSystem);
+
+    //FOG
+    //ParticleSystem* fog = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/fog.png", 2, 2);
+    //fog->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
+    //fog->SetRandomRotation(360.f);
+    //fog->SetScale(5.0f);
+    //fog->SetProperties(12.f, 5.0f, 0.0f, 0.0f, 30.0f, 0.0f);
+    //fog->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(1.0f,1.0f,1.0f,0.0f), true, true));
+    //fog->AddColorLife(ParticleLifeColor(50.0f, glm::vec4(1.f, 1.f, 1.f, 0.10f), true, true));
+    //fog->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 1.f, 1.0f, 0.0f), true, true));
+    //renderkernel.AddParticleSystem(fog);
+
+    //Brazier & Fire
+    Model brazier("./resources/cave/BRAZIERS/braziers.obj");
+    brazier.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&brazier);
+    ParticleSystem* fireBrazier1 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/Sparks.png", 1, 1);
+    fireBrazier1->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
+    fireBrazier1->SetScale(0.2f);
+    fireBrazier1->SetProperties(12.f, 1.448f, 2.f, -0.04f, 0.0f, 0.434f);
+    fireBrazier1->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(0.0f), true, true));
+    fireBrazier1->AddColorLife(ParticleLifeColor(13.5f, glm::vec4(1.f, 0.766f, 0.125f, 0.0f), true, false));
+    fireBrazier1->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
+    fireBrazier1->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
+    fireBrazier1->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
+    //renderkernel.AddParticleSystem(fireBrazier1);
+
+    ParticleSystem* fireBrazierGlow = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/Sparks.png", 1, 1);
+    fireBrazierGlow->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
+    fireBrazierGlow->SetScale(3.306f);
+    fireBrazierGlow->SetProperties(16.f, 0.248f, 2.f, -0.04f, 0.0f, 0.699f);
+    fireBrazierGlow->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(0.0f), true, true));
+    fireBrazierGlow->AddColorLife(ParticleLifeColor(13.5f, glm::vec4(1.f, 0.766f, 0.125f, 0.0f), true, false));
+    fireBrazierGlow->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
+    fireBrazierGlow->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
+    fireBrazierGlow->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
+    //renderkernel.AddParticleSystem(fireBrazierGlow);
+
+    ParticleSystem* fireBrazierFlame = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/flame.png", 2, 2);
+    fireBrazierFlame->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
+    fireBrazierFlame->SetScale(1.240f);
+    fireBrazierFlame->SetProperties(16.f, 0.744f, 2.f, -0.04f, 0.0f, 0.223f);
+    fireBrazierFlame->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(0.0f), true, true));
+    fireBrazierFlame->AddColorLife(ParticleLifeColor(13.5f, glm::vec4(1.f, 0.766f, 0.125f, 0.0f), true, false));
+    fireBrazierFlame->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
+    fireBrazierFlame->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
+    fireBrazierFlame->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
+    //renderkernel.AddParticleSystem(fireBrazierFlame);
+
+    ParticleSystem* fireBrazierBigFlame = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/flame.png", 2, 2);
+    fireBrazierBigFlame->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
+    fireBrazierBigFlame->SetScale(1.240f);
+    fireBrazierBigFlame->SetProperties(28.f, 0.992f, 2.f, -0.04f, 0.008f, 0.831f);
+    fireBrazierBigFlame->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(0.4117f, 0.4117f, 0.4117f, 0.0f), true, true));
+    fireBrazierBigFlame->AddColorLife(ParticleLifeColor(14.1f, glm::vec4(1.f, 0.8482f, 0.0f, 0.0f), true, false));
+    fireBrazierBigFlame->AddColorLife(ParticleLifeColor(15.1f, glm::vec4(1.f, 0.8482f, 0.0f, 1.0f), false, true));
+    fireBrazierBigFlame->AddColorLife(ParticleLifeColor(30.0f, glm::vec4(1.f, 0.4472f, 0.1985f, 0.0f), true, false));
+    fireBrazierBigFlame->AddColorLife(ParticleLifeColor(100.f, glm::vec4(0.2205f, 0.0f, 0.0f, 0.0f), true, true));
+    //renderkernel.AddParticleSystem(fireBrazierBigFlame);
+    
+    ParticleSystem* fireBrazier2 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/Sparks.png", 1, 1);
+    fireBrazier2->SetPosition(glm::vec3(7.340f, -0.300f, 16.670f));
+    fireBrazier2->SetScale(0.2f);
+    fireBrazier2->SetProperties(12.f, 1.448f, 2.f, -0.04f, 0.0f, 0.434f);
+    fireBrazier2->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(0.0f), true, true));
+    fireBrazier2->AddColorLife(ParticleLifeColor(13.5f, glm::vec4(1.f, 0.766f, 0.125f, 0.0f), true, false));
+    fireBrazier2->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
+    fireBrazier2->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
+    //fireBrazier2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
+   // renderkernel.AddParticleSystem(fireBrazier2);
+
+    ParticleSystem* fireBrazierGlow2 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/Sparks.png", 1, 1);
+    fireBrazierGlow2->SetPosition(glm::vec3(7.340f, -0.300f, 16.670f));
+    fireBrazierGlow2->SetScale(3.306f);
+    fireBrazierGlow2->SetProperties(16.f, 0.248f, 2.f, -0.04f, 0.0f, 0.699f);
+    fireBrazierGlow2->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(0.0f), true, true));
+    fireBrazierGlow2->AddColorLife(ParticleLifeColor(13.5f, glm::vec4(1.f, 0.766f, 0.125f, 0.0f), true, false));
+    fireBrazierGlow2->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
+    fireBrazierGlow2->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
+    fireBrazierGlow2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
+    //renderkernel.AddParticleSystem(fireBrazierGlow2);
+
+    ParticleSystem* fireBrazierFlame2 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/flame.png", 2, 2);
+    fireBrazierFlame2->SetPosition(glm::vec3(7.340f, -0.300f, 16.670f));
+    fireBrazierFlame2->SetScale(1.240f);
+    fireBrazierFlame2->SetProperties(16.f, 0.744f, 2.f, -0.04f, 0.0f, 0.223f);
+    fireBrazierFlame2->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(0.0f), true, true));
+    fireBrazierFlame2->AddColorLife(ParticleLifeColor(13.5f, glm::vec4(1.f, 0.766f, 0.125f, 0.0f), true, false));
+    fireBrazierFlame2->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
+    fireBrazierFlame2->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
+    fireBrazierFlame2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
+    //renderkernel.AddParticleSystem(fireBrazierFlame2);
+
+    ParticleSystem* fireBrazierBigFlame2 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/flame.png", 2, 2);
+    fireBrazierBigFlame2->SetPosition(glm::vec3(7.340f, -0.300f, 16.670f));
+    fireBrazierBigFlame2->SetScale(1.240f);
+    fireBrazierBigFlame2->SetProperties(28.f, 0.992f, 2.f, -0.04f, 0.008f, 0.831f);
+    fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(0.4117f, 0.4117f, 0.4117f, 0.0f), true, true));
+    fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(14.1f, glm::vec4(1.f, 0.8482f, 0.0f, 0.0f), true, false));
+    fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(15.1f, glm::vec4(1.f, 0.8482f, 0.0f, 1.0f), false, true));
+    fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(30.0f, glm::vec4(1.f, 0.4472f, 0.1985f, 0.0f), true, false));
+    fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(0.2205f, 0.0f, 0.0f, 0.0f), true, true));
+    //renderkernel.AddParticleSystem(fireBrazierBigFlame2);
+    
+    //Nature forest
+    //Model aspen("./resources/cave/NATURE/aspen.obj");
+    //aspen.ScaleTo(glm::vec3(0.005f));
+    //renderkernel.AddModel(&aspen);
+    //Model pines("./resources/cave/NATURE/pines.obj");
+    //pines.ScaleTo(glm::vec3(0.005f));
+    //renderkernel.AddModel(&pines);
 
     //Sculpture
     //Model sculpture_magic("./resources/cave/MAGIC_SCULPTURE/magic_sculpture.obj");

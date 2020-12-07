@@ -646,6 +646,7 @@ void RenderSystem::PreRender()
     guiSystem->SetCameraInfoGui(&cameras);
     guiSystem->SetModelInfoGui(&models);
     guiSystem->SetWaterModelInfoGui(&fresnelModels);
+    guiSystem->SetParticleSystemInfoGui(&particleSystems);
 
     //SET REFLECTIVE MATERIALS
     SetAmbientReflectiveMaterials();
@@ -984,7 +985,6 @@ void RenderSystem::ForwardRender()
         //Renderizamos Sombras
         RenderDirectionalShadowMap();
         RenderOmnidirectionalShadowMap();
-
         
         glEnable(GL_CLIP_DISTANCE0);
     
@@ -1012,7 +1012,6 @@ void RenderSystem::ForwardRender()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         RenderClipPlane(glm::vec4(0, -1, 0, guiSystem->clipPlaneH));
-        RenderSkyBox();
 
         glDisable(GL_CLIP_DISTANCE0);
     */    

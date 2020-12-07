@@ -20,6 +20,7 @@
 #include "ParticleSystem.h"
 #include "GUISystem.h"
 
+#include <thread>
 #include <GLFW/glfw3.h>
 
 class RenderSystem
@@ -42,6 +43,7 @@ private:
     std::vector<Light*> shadowCastOmniLights;
     std::vector<Light*> shadowCastSpotLights;
     std::vector<Light*> shadowCastGeneralLights;
+    std::thread particleSystemThread;
     KeyInput inputSystem;
     Pivot* pivot;
     GLFWwindow* window;
@@ -123,6 +125,8 @@ public:
 
     //Output Scene
     void SaveScene();
+
+    //void UpdateParticleSystem();
 };
 
 
