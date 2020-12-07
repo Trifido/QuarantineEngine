@@ -1,24 +1,24 @@
 #include "Particle.h"
 
-void Particle::UpdateTexture(int numRows)
+void Particle::UpdateTexture(int numRows, int numCols)
 {
     float lifeFactor = elapsedTime / lifeLength;
-    int stageCount = numRows * numRows;
+    int stageCount = numRows * numCols;
     float atlasProgression = lifeFactor * stageCount;
     int currentIndex = (atlasProgression);//floor
     int nextIndex = currentIndex < stageCount - 1 ? currentIndex + 1 : currentIndex;
     float decimal = (int)atlasProgression;
 
     blendTextValue = atlasProgression - decimal;
-    SetTextureOffset(numRows, currentOffSet, currentIndex);
-    SetTextureOffset(numRows, nextOffSet, nextIndex);
+    SetTextureOffset(numRows, numCols, currentOffSet, currentIndex);
+    SetTextureOffset(numRows, numCols, nextOffSet, nextIndex);
 }
 
-void Particle::SetTextureOffset(int numRows, glm::vec2 &offset, int index)
+void Particle::SetTextureOffset(int numRows, int numCols, glm::vec2 &offset, int index)
 {
     int column = index % numRows;
-    int row = index / numRows;
-    offset = glm::vec2((float)column / numRows, (float)row / numRows);
+    int row = index / numCols;
+    offset = glm::vec2((float)column / numRows, (float)row / numCols);
 }
 
 Particle::Particle()

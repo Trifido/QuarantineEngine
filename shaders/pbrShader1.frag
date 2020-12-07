@@ -233,8 +233,8 @@ void main()
     float roughness = texture(material.roughness[0], texCoords).r;
     float ao        = texture(material.ao[0], texCoords).r;
 
-    //if(texture(material.diffuse[0], texCoords).a < 0.1)
-    //    discard; 
+    if(texture(material.diffuse[0], texCoords).a < 0.1)
+        discard; 
 
     //COMPUTE LIGHT
     // reflectance equation

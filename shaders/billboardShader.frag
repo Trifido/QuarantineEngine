@@ -17,5 +17,5 @@ void main()
 
     FragColor = mix(currentColor, nextColor, fs_in.blend);
 
-    BrightColor = vec4(0.0, 0.0, 0.0, 1.0); 
+    BrightColor = FragColor;//vec4(0.0, 0.0, 0.0, 1.0); 
 }

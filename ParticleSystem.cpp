@@ -22,8 +22,13 @@ ParticleSystem::ParticleSystem()
     speed = 15.0f;
     particlesPerSecond = 5.5f;
     lifeLengthParticles = 3.0f;
+    particleScale = 4.0f;
+    particleRotation = 0.0f;
     particleTexture = new Texture("./resources/cave/PARTICLE_SYSTEMS/fire.png", TypeTexture::DIFFUSE);
-    numRowTexture = 8;
+    numRowTexture = numColTexture = 8;
+    emitRadius = 0.0f;
+    emitAngle = 0.0f;
+    isColorLife = false;
 
     instancedAttributes = new InstanceParticleAttr[amount];
 
@@ -33,7 +38,7 @@ ParticleSystem::ParticleSystem()
     setupTexture();
 }
 
-ParticleSystem::ParticleSystem(ParticleSystemType type, std::string nameTexture, int numRows)
+ParticleSystem::ParticleSystem(ParticleSystemType type, std::string nameTexture, int numRows, int numCols)
 {
     this->type = type;
     particleTexture = new Texture(nameTexture, TypeTexture::DIFFUSE);
@@ -41,9 +46,15 @@ ParticleSystem::ParticleSystem(ParticleSystemType type, std::string nameTexture,
     systemCenter = glm::vec3(0.0, 0.0, 0.0);
     gravityMass = 0.5f;
     speed = 15.0f;
+    particleScale = 4.0f;
     particlesPerSecond = 5.5f;
     lifeLengthParticles = 3.0f;
+    particleRotation = 0.0f;
     numRowTexture = numRows;
+    numColTexture = numCols;
+    emitRadius = 0.0f;
+    emitAngle = 0.0f;
+    isColorLife = false;
 
     AddPlane(6);
     setupMesh();
@@ -51,7 +62,8 @@ ParticleSystem::ParticleSystem(ParticleSystemType type, std::string nameTexture,
     switch (this->type)
     {
         case ParticleSystemType::BILLBOARD:
-            particles.push_back(Particle(systemCenter, glm::vec3(0.0), 0.0, 3, 0.0, 3.0, true));
+            isInfinity = true;
+            particles.push_back(Particle(systemCenter, glm::vec3(0.0), 0.0, 10, particleRotation, particleScale, isInfinity));
             instancedAttributes = new InstanceParticleAttr[1];
             particleShader = new Shader("shaders/billboardShader.vert", "shaders/billboardShader.frag");
             break;
@@ -89,21 +101,23 @@ void ParticleSystem::UpdateParticleAttributes(int id, Particle& particleInstance
         transform->model[2][1] = camera->view[1][2];
         transform->model[2][2] = camera->view[2][2];
 
-        //transform->model = glm::rotate(transform->model, particleInstanced.GetRotation(), glm::vec3(0.0f, 0.0f, 1.0f));
+        transform->model = glm::rotate(transform->model, particleInstanced.GetRotation(), glm::vec3(0.0f, 0.0f, 1.0f));
         transform->model = glm::scale(transform->model, glm::vec3(particleInstanced.GetScale()));
 
-        particleInstanced.UpdateTexture(numRowTexture);
+        particleInstanced.UpdateTexture(numRowTexture, numColTexture);
 
         instancedAttributes[id].modelInstance = transform->model;
         instancedAttributes[id].textureOffset = glm::vec4(particleInstanced.GetCurrentOffset(), particleInstanced.GetNextOffset());
-        instancedAttributes[id].blendFactorRow = glm::vec2(particleInstanced.GetBlendValueTextures(), numRowTexture);
+        instancedAttributes[id].blendFactorRow = glm::vec4(particleInstanced.GetBlendValueTextures(), numRowTexture, numColTexture, isColorLife);
+        instancedAttributes[id].lifeColor = *particleInstanced.GetColor();
 
         if (type != ParticleSystemType::BILLBOARD)
         {
             glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
             glBufferSubData(GL_ARRAY_BUFFER, (id * sizeof(InstanceParticleAttr)), sizeof(glm::vec4), &instancedAttributes[id].textureOffset);
-            glBufferSubData(GL_ARRAY_BUFFER, offsetof(InstanceParticleAttr, blendFactorRow) + (id * sizeof(InstanceParticleAttr)), sizeof(glm::vec2), &instancedAttributes[id].blendFactorRow);
+            glBufferSubData(GL_ARRAY_BUFFER, offsetof(InstanceParticleAttr, blendFactorRow) + (id * sizeof(InstanceParticleAttr)), sizeof(glm::vec4), &instancedAttributes[id].blendFactorRow);
             glBufferSubData(GL_ARRAY_BUFFER, offsetof(InstanceParticleAttr, modelInstance) + (id * sizeof(InstanceParticleAttr)), sizeof(glm::mat4), &instancedAttributes[id].modelInstance);
+            glBufferSubData(GL_ARRAY_BUFFER, offsetof(InstanceParticleAttr, lifeColor) + (id * sizeof(InstanceParticleAttr)), sizeof(glm::vec4), &instancedAttributes[id].lifeColor);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
         else
@@ -111,7 +125,8 @@ void ParticleSystem::UpdateParticleAttributes(int id, Particle& particleInstance
             particleShader->use();
             particleShader->setMat4("model", instancedAttributes[id].modelInstance);
             particleShader->setVec4("textureOffset", instancedAttributes[id].textureOffset);
-            particleShader->setVec2("blendFactorRow", instancedAttributes[id].blendFactorRow);
+            particleShader->setVec4("blendFactorRow", instancedAttributes[id].blendFactorRow);
+            //particleShader->setVec4("lifeColor", instancedAttributes[id].lifeColor);
         }
     }
 }
@@ -215,6 +230,7 @@ void ParticleSystem::Render()
 
             if (stillAlive)
             {
+                UpdateColorLife(*it);
                 UpdateParticleAttributes(id, *it);
                 ++it;
                 ++id;
@@ -313,7 +329,7 @@ void ParticleSystem::setupInstanceMesh()
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceParticleAttr), (void*)0);
     //vec2 for blending and row factor
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(InstanceParticleAttr), (void*)offsetof(InstanceParticleAttr, blendFactorRow));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceParticleAttr), (void*)offsetof(InstanceParticleAttr, blendFactorRow));
     // set attribute pointers for model matrix (4 times vec4)
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceParticleAttr), (void*)offsetof(InstanceParticleAttr, modelInstance));
@@ -323,6 +339,8 @@ void ParticleSystem::setupInstanceMesh()
     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceParticleAttr), (void*)(offsetof(InstanceParticleAttr, modelInstance) + 2 * sizeof(glm::vec4)));
     glEnableVertexAttribArray(7);
     glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceParticleAttr), (void*)(offsetof(InstanceParticleAttr, modelInstance) + 3 * sizeof(glm::vec4)));
+    glEnableVertexAttribArray(8);
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceParticleAttr), (void*)(offsetof(InstanceParticleAttr, modelInstance) + 4 * sizeof(glm::vec4)));
 
     glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
@@ -330,6 +348,7 @@ void ParticleSystem::setupInstanceMesh()
     glVertexAttribDivisor(5, 1);
     glVertexAttribDivisor(6, 1);
     glVertexAttribDivisor(7, 1);
+    glVertexAttribDivisor(8, 1);
 
     glBindVertexArray(0);
 }
@@ -382,17 +401,260 @@ void ParticleSystem::GenerateParticles()
 }
 
 void ParticleSystem::EmitParticle(glm::vec3 center) {
-    float dirX = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * 2.f - 1.f;
-    float dirZ = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX))* 2.f - 1.f;
-    glm::vec3 velocity(dirX, 1, dirZ);
-    velocity = glm::normalize(velocity);
+    glm::vec3 emitCone = glm::vec3(0.0, 1.0, 0.0);
+    if (emitAngle > 0)
+    {
+        float dirX = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * emitAngle - (emitAngle/2.0f);
+        float dirZ = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * emitAngle - (emitAngle/2.0f);
+        emitCone = glm::vec3(dirX, 1.0, dirZ);
+    }
+
+    glm::vec3 velocity = glm::normalize(emitCone);
     velocity *= speed;
 
-    particles.push_back(Particle(glm::vec3(center), velocity, gravityMass, lifeLengthParticles, 0.3f, 4.f));
+    glm::vec3 emitCenter = center;
+
+    if (emitRadius > 0)
+    {
+        float xPos = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * emitRadius - (emitRadius/2.0f);
+        float zPos = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) * emitRadius - (emitRadius/2.0f);
+        emitCenter += glm::vec3(xPos, 0.0, zPos);
+    }
+
+    particles.push_back(Particle(emitCenter, velocity, gravityMass, lifeLengthParticles, particleRotation, particleScale, isInfinity));
 }
 
 void ParticleSystem::setupTexture()
 {
     particleShader->use();
     particleShader->setInt("particleTexture", 0);
+}
+
+void ParticleSystem::UpdatePosition()
+{
+    if (type == ParticleSystemType::BILLBOARD)
+    {
+        std::list<Particle>::iterator it = particles.begin();
+        it->SetPostion(systemCenter);
+    }
+}
+
+void ParticleSystem::UpdateRotation()
+{
+    if (type == ParticleSystemType::BILLBOARD)
+    {
+        std::list<Particle>::iterator it = particles.begin();
+        it->SetRotation(particleRotation);
+    }
+}
+
+void ParticleSystem::UpdateScale()
+{
+    if (type == ParticleSystemType::BILLBOARD)
+    {
+        std::list<Particle>::iterator it = particles.begin();
+        it->SetScale(particleScale);
+    }
+}
+
+void ParticleSystem::UpdateParticleSystem()
+{
+    if (type != ParticleSystemType::BILLBOARD)
+    {
+        GenerateParticles();
+        particles = MergeSort(particles);
+
+        std::list<Particle>::iterator it = particles.begin();
+        while (it != particles.end())
+        {
+            bool stillAlive = it->Update(*deltaTime);
+
+            if (stillAlive)
+            {
+                UpdateColorLife(*it);
+                ++it;
+            }
+            else
+            {
+                it = particles.erase(it);
+            }
+        }
+    }
+}
+
+void ParticleSystem::SetPosition(glm::vec3 pos)
+{
+    systemCenter = pos;
+    UpdatePosition();
+}
+
+void ParticleSystem::SetScale(float scal)
+{
+    particleScale = scal;
+    UpdateScale();
+}
+
+void ParticleSystem::SetRotation(float rot)
+{
+    particleRotation = rot;
+    UpdateRotation();
+}
+
+void ParticleSystem::SetProperties(float pps, float lifep, float speedp, float gravityp, float radius, float angle)
+{
+    this->particlesPerSecond = pps;
+    this->lifeLengthParticles = lifep;
+    this->speed = speedp;
+    this->gravityMass = gravityp;
+    this->emitRadius = radius;
+    this->emitAngle = angle;
+}
+
+void ParticleSystem::AddColorLife(ParticleLifeColor pColor)
+{
+    isColorLife = true;
+    colorLife.push_back(pColor);
+}
+
+void ParticleSystem::UpdateColorLife(Particle &particle)
+{
+    float percentageLife = (particle.GetElapsedTime() / lifeLengthParticles) * 100.0f;
+    if (isColorLife && !colorLife.empty())
+    {
+        if (colorLife.size() == 1)
+        {
+            particle.SetColor(colorLife.begin()->color);
+        }
+        else
+        {
+            std::list<ParticleLifeColor>::iterator itFirst = colorLife.begin();
+            std::list<ParticleLifeColor>::iterator itSecond = colorLife.end();
+            std::list<ParticleLifeColor>::iterator itFirstAlpha = colorLife.begin();
+            std::list<ParticleLifeColor>::iterator itSecondAlpha = colorLife.end();
+
+            itSecond--;
+            itSecondAlpha--;
+
+            bool isFirstLimit = false;
+            bool isSecondLimit = false;
+            bool isFirstLimitAlpha = false;
+            bool isSecondLimitAlpha = false;
+
+            glm::vec3 firstColor, secondColor;
+            float firstAlpha, secondAlpha;
+
+            float timeFirstColor, timeSecondColor, timeFirstAlpha, timeSecondAlpha;
+
+            firstColor = itFirst->color;
+            secondColor = itSecond->color;
+            firstAlpha = itFirstAlpha->color.a;
+            secondAlpha = itSecondAlpha->color.a;
+
+            timeFirstColor = timeFirstAlpha = itFirst->percentageTime;
+            timeSecondColor = timeSecondAlpha = itSecond->percentageTime;
+
+            while (!isFirstLimit || !isSecondLimit || !isFirstLimitAlpha || !isSecondLimitAlpha)
+            {
+                if (!isFirstLimit)
+                {
+                    if (std::next(itFirst) != colorLife.end())
+                    {
+                        if (itFirst->isColor)
+                        {
+                            firstColor = itFirst->color;
+                            timeFirstColor = itFirst->percentageTime;
+                        }
+                        if ((std::next(itFirst)->percentageTime > percentageLife) && (std::next(itFirst)->isColor))
+                        {
+                            isFirstLimit = true;
+                        }
+                        else
+                        {
+                            itFirst++;
+                        }
+                    }
+                    else
+                    {
+                        isFirstLimit = true;
+                    }
+                }
+
+                if (!isFirstLimitAlpha)
+                {
+                    if (std::next(itFirstAlpha) != colorLife.end())
+                    {
+                        if (itFirstAlpha->isAlpha)
+                        {
+                            firstAlpha = itFirstAlpha->color.a;
+                            timeFirstAlpha = itFirstAlpha->percentageTime;
+                        }
+                        if ((std::next(itFirstAlpha)->percentageTime > percentageLife) && (std::next(itFirstAlpha)->isAlpha))
+                        {
+                            isFirstLimitAlpha = true;
+                        }
+                        else
+                        {
+                            itFirstAlpha++;
+                        }
+                    }
+                    else
+                    {
+                        isFirstLimitAlpha = true;
+                    }
+                }
+
+                if (!isSecondLimit)
+                {
+                    if (std::prev(itSecond) != colorLife.begin())
+                    {
+                        if (itSecond->isColor)
+                        {
+                            secondColor = itSecond->color;
+                            timeSecondColor = itSecond->percentageTime;
+                        }
+                        if ((std::prev(itSecond)->percentageTime < percentageLife) && (std::prev(itSecond)->isColor))
+                        {
+                            isSecondLimit = true;
+                        }
+                        else
+                        {
+                            itSecond--;
+                        }
+                    }
+                    else
+                    {
+                        isSecondLimit = true;
+                    }
+                }
+
+                if (!isSecondLimitAlpha)
+                {
+                    if (std::prev(itSecondAlpha) != colorLife.begin())
+                    {
+                        if (itSecondAlpha->isAlpha)
+                        {
+                            secondAlpha = itSecondAlpha->color.a;
+                            timeSecondAlpha = itSecondAlpha->percentageTime;
+                        }
+                        if ((std::prev(itSecondAlpha)->percentageTime < percentageLife) && (std::prev(itSecondAlpha)->isAlpha))
+                        {
+                            isSecondLimitAlpha = true;
+                        }
+                        else
+                        {
+                            itSecondAlpha--;
+                        }
+                    }
+                    else
+                    {
+                        isSecondLimitAlpha = true;
+                    }
+                }
+            }
+
+            glm::vec3 resultColor = firstColor + (((secondColor - firstColor) / (timeSecondColor - timeFirstColor)) * (percentageLife - timeFirstColor));
+            float resultAlpha = firstAlpha + (((secondAlpha - firstAlpha) / (timeSecondAlpha - timeFirstAlpha)) * (percentageLife - timeFirstAlpha));
+            particle.SetColor(glm::vec4(resultColor, resultAlpha));
+        }
+    }
 }
