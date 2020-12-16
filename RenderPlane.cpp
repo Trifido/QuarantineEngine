@@ -21,6 +21,7 @@ RenderPlane::RenderPlane()
     screenRenderVolumeShadow = new Shader("shaders/renderPass.vert", "shaders/renderPassVolume.frag");
     screenLightScattering = new Shader("shaders/postAtmosphericScattering.vert", "shaders/postAtmosphericScattering.frag");
     //screenRenderShader = new Shader("shaders/depthRenderShadow.vert", "shaders/depthRenderShadow.frag");
+    hud = new Texture("./resources/cave/HUD/hud2.png", TypeTexture::DIFFUSE, false);
 }
 
 void RenderPlane::SetVAORenderPlane()
@@ -60,6 +61,7 @@ void RenderPlane::SetVAORenderPlane()
     shaderBloomFinal->setFloat("exposure", exposureValue); 
     shaderBloomFinal->setInt("scene", 0);
     shaderBloomFinal->setInt("bloomBlur", 1);
+    shaderBloomFinal->setInt("hud", 2);
 
     deferredLighting->use();
     deferredLighting->setInt("gPosition", 0);
@@ -122,6 +124,10 @@ void RenderPlane::FinalRenderBloom()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, fboSystem->GetPingPongRender(!pingpongIdPass));
     }
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, hud->ID);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 

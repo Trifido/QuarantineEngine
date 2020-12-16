@@ -22,6 +22,8 @@ struct ProceduralVertex
     glm::vec3 Color;
 };
 
+class Skeleton;
+
 class Mesh {
 public:
     /*  Mesh Data  */

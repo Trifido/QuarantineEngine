@@ -5,11 +5,15 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "Skeleton.h"
+//#include "Skeleton.h"
+#include "Animation.h"
+
+//#include "AnimatedMesh.h"
 
 #include <glm/glm.hpp>
 
-class Skeleton;
+//class Skeleton;
+//class AnimatedMesh;
 
 static aiMatrix4x4 GLMMat4ToAi(glm::mat4 mat)
 {
@@ -49,17 +53,34 @@ class Bone
 public:
     int id;
     std::string name;
+    //AnimatedMesh* mesh;
     aiNode* node;
     aiNodeAnim* animNode;
     Bone* parent_bone;
-    Skeleton* parent_skeleton;
+    //Skeleton* parent_skeleton;
     glm::mat4 parent_transforms;
     glm::mat4 offset_matrix;
 
-    Bone() { name = ""; id = -2; }
+    //Keyframe Data
+    glm::vec3 pos;
+    glm::quat rot;
+    glm::vec3 scale;
+    glm::vec3 p1;
+    glm::vec3 p2;
 
-    Bone(unsigned int in_id, std::string in_name, aiMatrix4x4 in_o_mat);
-    Bone(unsigned int in_id, std::string in_name, glm::mat4 in_o_mat);
+    Bone();
+
+    Bone(/*AnimatedMesh* in_mesh, */unsigned int in_id, std::string in_name, aiMatrix4x4 in_o_mat);
+    Bone(/*AnimatedMesh* in_mesh, */unsigned int in_id, std::string in_name, glm::mat4 in_o_mat);
+    Bone(unsigned int in_id, std::string in_name, glm::mat4 in_o_mat, aiNode* node, aiNodeAnim* animNode);
+
+
+    unsigned int FindPosition(float time);
+    glm::vec3 CalcInterpolatedPosition(float time);
+    unsigned int FindRotation(float time);
+    glm::quat CalcInterpolatedRotation(float time);
+
+    void UpdateKeyframeTransform(float time);
 
     glm::mat4 GetParentTransforms();
 };

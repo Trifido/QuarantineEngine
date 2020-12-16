@@ -7,6 +7,7 @@
 #include "Light.h"
 #include "Model.h"
 #include "Water.h"
+#include "ParticleSystem.h"
 
 struct BloomGUI
 {
@@ -66,6 +67,7 @@ private:
     bool isChangeShadow = false;
     bool isShowShadowVolume = false;
     bool isWaterTool = false;
+    bool isPsTool = false;
     DrawMode draw_mode = DrawMode::DTRIANGLES;
     ShadowType shadow_mode = ShadowType::SHADOW_CAS;
     ShadowType last_shadow_mode = ShadowType::SHADOW_CAS;
@@ -79,6 +81,7 @@ public:
     std::vector<Camera*>* cameras;
     std::vector<Model*>* models;
     std::vector<Water*>* waterModels;
+    std::vector<ParticleSystem*>* psModels;
     float clipPlaneH = -0.316f;
 
     GUISystem();
@@ -88,6 +91,7 @@ public:
     void DrawPropertyWindow();
     void DrawAnalysisWindow();
     void DrawEditWindow();
+    void DrawParticleSystemWindow();
     RenderType GetRenderModeSelected();
     bool isShutDown();
     bool isSave();
@@ -102,6 +106,7 @@ public:
     void SetCameraInfoGui(std::vector<Camera*>* cameras);
     void SetModelInfoGui(std::vector<Model*>* models);
     void SetWaterModelInfoGui(std::vector<Water*>* models);
+    void SetParticleSystemInfoGui(std::vector<ParticleSystem*>* psModels);
     bool isChangeShadowMode() { return isChangeShadow; }
     bool isShowShadowVolumeMode() { return isShowShadowVolume; }
     bool IsLightScattering() { return atmGUI->isEnable; }

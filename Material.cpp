@@ -136,10 +136,6 @@ void Material::ActivateShadowTexture(unsigned int idTexShadow, int idLight, Type
         ptrShader->setInt("dirLights[" + std::to_string(idLight) + "].shadowMap", numTextures);
         break;
     case TypeLight::POINTLIGHT:
-        //if(idLight == 0)
-        //    ptrShader->setInt("shadowCubeMap", numTextures);
-        //else
-        //    ptrShader->setInt("shadowCubeMap2", numTextures);
         ptrShader->setInt("pointLights[" + std::to_string(idLight) + "].shadowCubeMap", numTextures);
         break;
     case TypeLight::SPOTL:
@@ -296,6 +292,8 @@ void Material::AssignRenderTextures()
     ptrShader->setFloat("material.min_uv", min_uv);
     ptrShader->setFloat("material.max_uv", max_uv);
     ptrShader->setFloat("material.bloomBrightness", bloomBrightness);
+
+    ptrShader->setBool("isFPS", type == MaterialType::FPS);
 
     if (isAmbientReflective || isAmbientRefractive)
     {

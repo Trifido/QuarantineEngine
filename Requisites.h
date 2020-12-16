@@ -63,6 +63,9 @@ using namespace gl;
 #include "RenderSystem.h"
 #include "SkyBox.h"
 #include "ParticleSystem.h"
+#include "Animator.h"
+#include "AnimatedModel.h"
+#include "GodRay.h"
 
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>

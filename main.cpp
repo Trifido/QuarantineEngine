@@ -1,7 +1,15 @@
 #include "Requisites.h"
 
+#include <Mmsystem.h>
+#include <mciapi.h>
+//these two headers are already included in the <Windows.h> header
+#pragma comment(lib, "Winmm.lib")
+
+
 int main(int, char**)
 {
+    //PlaySound("./resources/soundtrack/base.wav", NULL, SND_ASYNC);
+
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -67,8 +75,8 @@ int main(int, char**)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    ImVec4* clear_color = new ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-    //ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+    //ImVec4* clear_color = new ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
     //RENDER SYSTEM
     RenderSystem renderkernel(window, clear_color);
@@ -86,26 +94,26 @@ int main(int, char**)
     //std::vector<Texture> textures_floor;
     //textures_floor.push_back(textureFloor);
 
-    Texture parallaxDiff("resources/materials/floor_dirt/Stone_Path_001_baseColor.jpg", TypeTexture::DIFFUSE);
-    Texture parallaxNorm("resources/materials/floor_dirt/Stone_Path_001_normal.jpg", TypeTexture::NORMAL);
-    Texture parallaxDisp("resources/materials/floor_dirt/Stone_Path_001_height.png", TypeTexture::HEIGHT);
-    Texture parallaxRoug("resources/materials/floor_dirt/Stone_Path_001_roughness.jpg", TypeTexture::ROUGHNESS);
-    Texture parallaxAO("resources/materials/floor_dirt/Stone_Path_001_ambientOcclusion.jpg", TypeTexture::AO);
+    //Texture parallaxDiff("resources/materials/floor_dirt/Stone_Path_001_baseColor.jpg", TypeTexture::DIFFUSE);
+    //Texture parallaxNorm("resources/materials/floor_dirt/Stone_Path_001_normal.jpg", TypeTexture::NORMAL);
+    //Texture parallaxDisp("resources/materials/floor_dirt/Stone_Path_001_height.png", TypeTexture::HEIGHT);
+    //Texture parallaxRoug("resources/materials/floor_dirt/Stone_Path_001_roughness.jpg", TypeTexture::ROUGHNESS);
+    //Texture parallaxAO("resources/materials/floor_dirt/Stone_Path_001_ambientOcclusion.jpg", TypeTexture::AO);
 
-    std::vector<Texture> textures_parallax;
-    textures_parallax.push_back(parallaxDiff);
-    textures_parallax.push_back(parallaxNorm);
-    textures_parallax.push_back(parallaxDisp);
-    textures_parallax.push_back(parallaxRoug);
-    textures_parallax.push_back(parallaxAO);
+    //std::vector<Texture> textures_parallax;
+    //textures_parallax.push_back(parallaxDiff);
+    //textures_parallax.push_back(parallaxNorm);
+    //textures_parallax.push_back(parallaxDisp);
+    //textures_parallax.push_back(parallaxRoug);
+    //textures_parallax.push_back(parallaxAO);
 
 
-    std::vector<Texture> textures_pbr;
-    Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
-    Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
-    Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
-    Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
-    Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
+    //std::vector<Texture> textures_pbr;
+    //Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
+    //Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
+    //Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
+    //Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
+    //Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
 
     //Texture pbrDiff("resources/PBR_Textures/ironKiwi/New_Graph_diffuse.jpg", TypeTexture::DIFFUSE);
     //Texture pbrNorm("resources/PBR_Textures/ironKiwi/New_Graph_normal.jpg", TypeTexture::NORMAL);
@@ -114,12 +122,12 @@ int main(int, char**)
     //Texture pbrBUMP("resources/PBR_Textures/ironKiwi/New_Graph_height.jpg", TypeTexture::HEIGHT);
     //Texture pbrAO("resources/PBR_Textures/ironKiwi/rustediron2_roughness.png", TypeTexture::AO);
 
-    textures_pbr.push_back(pbrDiff);
-    textures_pbr.push_back(pbrNorm);
-    textures_pbr.push_back(pbrME);
-    textures_pbr.push_back(pbrRO);
-    //textures_pbr.push_back(pbrBUMP);
-    textures_pbr.push_back(pbrAO);
+    //textures_pbr.push_back(pbrDiff);
+    //textures_pbr.push_back(pbrNorm);
+    //textures_pbr.push_back(pbrME);
+    //textures_pbr.push_back(pbrRO);
+    ////textures_pbr.push_back(pbrBUMP);
+    //textures_pbr.push_back(pbrAO);
 
     //std::vector<Texture> textures_pbr_floor;
     //Texture floor_pbrDiff("resources/materials/metal/Metal_Plate_013_basecolor.jpg", TypeTexture::DIFFUSE);
@@ -243,7 +251,6 @@ int main(int, char**)
     columnsDestroyed.ScaleTo(glm::vec3(0.005f));
     renderkernel.AddModel(&columnsDestroyed);
     
-    
     //Dome
     Model dome1("./resources/cave/DOME/dome.obj");
     dome1.RotationTo(0.0f, glm::vec3(0.0, 1.0, 0.0));
@@ -283,26 +290,26 @@ int main(int, char**)
     groundMainCave.transform->model = glm::translate(groundMainCave.transform->model, glm::vec3(0.0, -1.080, -2.150));
     groundMainCave.ScaleTo(glm::vec3(2.670f, 1.0f, 2.080f));
     renderkernel.AddModel(&groundMainCave);
-    */
-    
+
     //Ground river
 
-    //std::vector<Texture> textures_pbr_floor_river;
-    //Texture floor_river_pbrDiff("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_D.bmp", TypeTexture::DIFFUSE);
-    //Texture floor_river_pbrNorm("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_N.bmp", TypeTexture::NORMAL);
-    //Texture floor_river_pbrRO("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_S.bmp", TypeTexture::ROUGHNESS);
-    //textures_pbr_floor_river.push_back(floor_river_pbrDiff);
-    //textures_pbr_floor_river.push_back(floor_river_pbrNorm);
-    //textures_pbr_floor_river.push_back(floor_river_pbrRO);
+    std::vector<Texture> textures_pbr_floor_river;
+    Texture floor_river_pbrDiff("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_D.bmp", TypeTexture::DIFFUSE);
+    Texture floor_river_pbrNorm("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_N.bmp", TypeTexture::NORMAL);
+    Texture floor_river_pbrRO("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_S.bmp", TypeTexture::ROUGHNESS);
+    textures_pbr_floor_river.push_back(floor_river_pbrDiff);
+    textures_pbr_floor_river.push_back(floor_river_pbrNorm);
+    textures_pbr_floor_river.push_back(floor_river_pbrRO);
 
-    //Model groundRiverCave(floorVertices, 6, textures_pbr_floor_river);
-    //groundRiverCave.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
-    //groundRiverCave.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
-    //groundRiverCave.matHandle.EditMaterial(MaterialComponent::MAX_UV, 20.0f);
-    //groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(-12.210f, -1.070f, 35.970f));
-    //groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(0.0f, -1.070f, 0.0f));
-    //groundRiverCave.ScaleTo(glm::vec3(3.210f, 1.0f, 1.740f));
-    //renderkernel.AddModel(&groundRiverCave);
+    Model groundRiverCave(floorVertices, 6, textures_pbr_floor_river);
+    groundRiverCave.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
+    groundRiverCave.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
+    groundRiverCave.matHandle.EditMaterial(MaterialComponent::MAX_UV, 20.0f);
+    groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(-12.210f, -1.070f, 35.970f));
+    groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(0.0f, -1.070f, 0.0f));
+    groundRiverCave.ScaleTo(glm::vec3(3.210f, 1.0f, 1.740f));
+    renderkernel.AddModel(&groundRiverCave);
+    */
     
     //Water river
     //Water *waterPlane = new Water();
@@ -313,16 +320,39 @@ int main(int, char**)
     //renderkernel.AddParticleSystem(particleSystem);
 
     //FOG
-    //ParticleSystem* fog = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/fog.png", 2, 2);
-    //fog->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
-    //fog->SetRandomRotation(360.f);
-    //fog->SetScale(5.0f);
-    //fog->SetProperties(12.f, 5.0f, 0.0f, 0.0f, 30.0f, 0.0f);
-    //fog->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(1.0f,1.0f,1.0f,0.0f), true, true));
-    //fog->AddColorLife(ParticleLifeColor(50.0f, glm::vec4(1.f, 1.f, 1.f, 0.10f), true, true));
-    //fog->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 1.f, 1.0f, 0.0f), true, true));
-    //renderkernel.AddParticleSystem(fog);
+    /*
+    ParticleSystem* fog = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/fog.png", 2, 2);
+    fog->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
+    fog->SetRandomRotation(360.f);
+    fog->SetScale(5.0f);
+    fog->SetProperties(12.f, 5.0f, 0.0f, 0.0f, 30.0f, 0.0f);
+    fog->AddColorLife(ParticleLifeColor(0.0f, glm::vec4(1.0f,1.0f,1.0f,0.0f), true, true));
+    fog->AddColorLife(ParticleLifeColor(50.0f, glm::vec4(1.f, 1.f, 1.f, 0.10f), true, true));
+    fog->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 1.f, 1.0f, 0.0f), true, true));
+    renderkernel.AddParticleSystem(fog);
+    */
+    //ANIMATION MODEL
+    //AnimatedModel* animModel = new AnimatedModel("./resources/cave/ANIMATION_MODELS/model.dae");
+    //Animation* Anim_Test_Walk = new Animation("Walk", glm::vec2(0, 0.8), 2);
+    //animModel->AddAnimation(Anim_Test_Walk);
+    //renderkernel.AddAnimatedModel(animModel);
 
+    //BOARD
+    //Model* board = new Model("./resources/cave/BOARD/boardPBR.obj");
+    //renderkernel.AddModel(board);
+
+    //ARMS
+    //Model* arms = new Model("./resources/cave/ANIMATION_MODELS/arm/arms.obj");
+    //arms->matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::FPS);
+    //arms->transform->model = glm::rotate(arms->transform->model, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+    //arms->transform->model = glm::rotate(arms->transform->model, glm::radians(-25.0f), glm::vec3(1.0, 0.0, 0.0));
+    //arms->transform->model = glm::translate(arms->transform->model, glm::vec3(0.0f, -0.3f, 0.2f));
+    //renderkernel.AddModel(arms);
+    //Model* arms = new Model("./resources/3DModels/shotgun/Quad_Shotgun.obj");
+    //arms->ScaleTo(glm::vec3(1.0f));
+    //renderkernel.AddModel(arms);
+
+/*
     //Brazier & Fire
     Model brazier("./resources/cave/BRAZIERS/braziers.obj");
     brazier.ScaleTo(glm::vec3(0.005f));
@@ -336,7 +366,7 @@ int main(int, char**)
     fireBrazier1->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
     fireBrazier1->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
     fireBrazier1->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
-    //renderkernel.AddParticleSystem(fireBrazier1);
+    renderkernel.AddParticleSystem(fireBrazier1);
 
     ParticleSystem* fireBrazierGlow = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/Sparks.png", 1, 1);
     fireBrazierGlow->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
@@ -347,7 +377,7 @@ int main(int, char**)
     fireBrazierGlow->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
     fireBrazierGlow->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
     fireBrazierGlow->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
-    //renderkernel.AddParticleSystem(fireBrazierGlow);
+    renderkernel.AddParticleSystem(fireBrazierGlow);
 
     ParticleSystem* fireBrazierFlame = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/flame.png", 2, 2);
     fireBrazierFlame->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
@@ -358,7 +388,7 @@ int main(int, char**)
     fireBrazierFlame->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
     fireBrazierFlame->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
     fireBrazierFlame->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
-    //renderkernel.AddParticleSystem(fireBrazierFlame);
+    renderkernel.AddParticleSystem(fireBrazierFlame);
 
     ParticleSystem* fireBrazierBigFlame = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/flame.png", 2, 2);
     fireBrazierBigFlame->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
@@ -369,7 +399,7 @@ int main(int, char**)
     fireBrazierBigFlame->AddColorLife(ParticleLifeColor(15.1f, glm::vec4(1.f, 0.8482f, 0.0f, 1.0f), false, true));
     fireBrazierBigFlame->AddColorLife(ParticleLifeColor(30.0f, glm::vec4(1.f, 0.4472f, 0.1985f, 0.0f), true, false));
     fireBrazierBigFlame->AddColorLife(ParticleLifeColor(100.f, glm::vec4(0.2205f, 0.0f, 0.0f, 0.0f), true, true));
-    //renderkernel.AddParticleSystem(fireBrazierBigFlame);
+    renderkernel.AddParticleSystem(fireBrazierBigFlame);
     
     ParticleSystem* fireBrazier2 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/Sparks.png", 1, 1);
     fireBrazier2->SetPosition(glm::vec3(7.340f, -0.300f, 16.670f));
@@ -379,8 +409,8 @@ int main(int, char**)
     fireBrazier2->AddColorLife(ParticleLifeColor(13.5f, glm::vec4(1.f, 0.766f, 0.125f, 0.0f), true, false));
     fireBrazier2->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
     fireBrazier2->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
-    //fireBrazier2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
-   // renderkernel.AddParticleSystem(fireBrazier2);
+    fireBrazier2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
+    renderkernel.AddParticleSystem(fireBrazier2);
 
     ParticleSystem* fireBrazierGlow2 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/Sparks.png", 1, 1);
     fireBrazierGlow2->SetPosition(glm::vec3(7.340f, -0.300f, 16.670f));
@@ -391,7 +421,7 @@ int main(int, char**)
     fireBrazierGlow2->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
     fireBrazierGlow2->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
     fireBrazierGlow2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
-    //renderkernel.AddParticleSystem(fireBrazierGlow2);
+    renderkernel.AddParticleSystem(fireBrazierGlow2);
 
     ParticleSystem* fireBrazierFlame2 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/flame.png", 2, 2);
     fireBrazierFlame2->SetPosition(glm::vec3(7.340f, -0.300f, 16.670f));
@@ -402,7 +432,7 @@ int main(int, char**)
     fireBrazierFlame2->AddColorLife(ParticleLifeColor(22.6f, glm::vec4(0.f, 0.f, 0.f, 1.0f), false, true));
     fireBrazierFlame2->AddColorLife(ParticleLifeColor(31.2f, glm::vec4(1.f, 0.3661f, 0.0808f, 0.0f), true, false));
     fireBrazierFlame2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 0.103f, 0.0f, 0.0f), true, true));
-    //renderkernel.AddParticleSystem(fireBrazierFlame2);
+    renderkernel.AddParticleSystem(fireBrazierFlame2);
 
     ParticleSystem* fireBrazierBigFlame2 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/flame.png", 2, 2);
     fireBrazierBigFlame2->SetPosition(glm::vec3(7.340f, -0.300f, 16.670f));
@@ -413,8 +443,8 @@ int main(int, char**)
     fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(15.1f, glm::vec4(1.f, 0.8482f, 0.0f, 1.0f), false, true));
     fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(30.0f, glm::vec4(1.f, 0.4472f, 0.1985f, 0.0f), true, false));
     fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(0.2205f, 0.0f, 0.0f, 0.0f), true, true));
-    //renderkernel.AddParticleSystem(fireBrazierBigFlame2);
-    
+    renderkernel.AddParticleSystem(fireBrazierBigFlame2);
+    */
     //Nature forest
     //Model aspen("./resources/cave/NATURE/aspen.obj");
     //aspen.ScaleTo(glm::vec3(0.005f));
@@ -573,7 +603,6 @@ int main(int, char**)
     //dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
     //dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
     //renderkernel.AddLight(dirLight);
-
 
     Texture* textureHDR = new Texture("resources/HDR/Desert_Highway/Road_to_MonumentValley_Ref.hdr",TypeTexture::HDR_SKYBOX);
     Skybox* skybox = new Skybox(true);

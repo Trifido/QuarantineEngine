@@ -39,6 +39,7 @@ private:
     HdrGUI* hdrGui;
     AtmScatGUI* atmScatGui;
     Light* scatteringLight;
+    Texture* hud;
 public:
     RenderPlane();
     void SetVAORenderPlane();

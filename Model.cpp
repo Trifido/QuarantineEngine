@@ -246,7 +246,7 @@ void Model::loadModel(std::string path)
 
     recursiveNodeProcess(scene->mRootNode);
     AnimNodeProcess();
-    glm::mat4 globalInverseTransform = glm::inverse(AiToGLMMat4(scene->mRootNode->mTransformation));
+    //glm::mat4 globalInverseTransform = glm::inverse(AiToGLMMat4(scene->mRootNode->mTransformation));
 
     processNode(scene->mRootNode, scene);
 }
@@ -541,7 +541,8 @@ void Model::SetModelHierarchy()
 
         while (parent != nullptr)
         {
-            transform->finalModelMatrix *= parent->model;
+            //transform->finalModelMatrix *= parent->model;
+            transform->finalModelMatrix = parent->model * transform->model;
             parent = parent->parent;
         }
     }

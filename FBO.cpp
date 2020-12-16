@@ -14,7 +14,7 @@ FBO::FBO(FBOType type, unsigned int samples, unsigned int numTextures)
 {
     this->type = type;
     this->isAntiAliasing = samples > 1;
-    if (isAntiAliasing || type == FBOType::PINGPONG_FBO || type == FBOType::SSAO_FBO)
+    if (isAntiAliasing || type == FBOType::PINGPONG_FBO || type == FBOType::SSAO_FBO || type == FBOType::WATER_FBO)
         numFBOs = 2;
     else if (numTextures > 1 && (type == FBOType::DIR_SHADOW_FBO || type == FBOType::OMNI_SHADOW_FBO))
         numFBOs = numTextures;
@@ -26,12 +26,12 @@ FBO::FBO(FBOType type, unsigned int samples, unsigned int numTextures)
     for(int id = 0; id < numFBOs; id++)
         glGenFramebuffers(1, &idFBO[id]);
 
-    if (isAntiAliasing || type == FBOType::MULT_RT || type == FBOType::PINGPONG_FBO || type == FBOType::SSAO_FBO || type == FBOType::SKYBOX_FBO)
+    if (isAntiAliasing || type == FBOType::MULT_RT || type == FBOType::PINGPONG_FBO || type == FBOType::SSAO_FBO || type == FBOType::SKYBOX_FBO || type == FBOType::WATER_FBO)
     {
         this->num_mrt = 2;
         if (isAntiAliasing && type == FBOType::MULT_RT)
             this->num_mrt = 4;
-        else if(type == FBOType::SKYBOX_FBO)
+        else if(type == FBOType::SKYBOX_FBO || type == FBOType::WATER_FBO)
             this->num_mrt = 3;
     }
     else if (numTextures > 1 && (type == FBOType::DIR_SHADOW_FBO || type == FBOType::OMNI_SHADOW_FBO))
@@ -53,8 +53,8 @@ FBO::FBO(FBOType type, unsigned int samples, unsigned int numTextures)
 
 void FBO::GenerateFBO(int *width, int *height)
 {
-    this->height = height;
-    this->width = width;
+    this->height = *height;
+    this->width = *width;
     switch (type)
     {
     case FBOType::COLOR_FBO:
@@ -399,15 +399,9 @@ void FBO::GenerateFBO(int *width, int *height)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-            //glBindTexture(GL_TEXTURE_2D, texture_buffers[1]);
-            //glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, *width, *height);
-            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo2);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, texture_buffers[0], 0);
-            //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, texture_buffers[1], 0);
 
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
             glDrawBuffers(2, drawBuffers);
@@ -426,15 +420,63 @@ void FBO::GenerateFBO(int *width, int *height)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_buffers[0], 0);
 
-            //glGenRenderbuffers(1, &rbo);
-            //glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-            //glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH24_STENCIL8, *width, *height);
-            //glBindRenderbuffer(GL_RENDERBUFFER, 0);
-            //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 fprintf(stderr, "ERROR::Light Scattering Framebuffer not complete!\n");
         }
+        break;
+    case FBOType::DEPTH_MAP_FBO:
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, idFBO[0]);
+
+        glBindTexture(GL_TEXTURE_2D, texture_buffers[0]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, *width, *height, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_buffers[0], 0);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            fprintf(stderr, "ERROR::DEPTH MAP Framebuffer not complete!\n");
+    }
+        break;
+    case FBOType::WATER_FBO:
+    {
+        //REFLECTION BUFFER
+        glBindFramebuffer(GL_FRAMEBUFFER, idFBO[0]);
+        glBindTexture(GL_TEXTURE_2D, texture_buffers[0]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, *width, *height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_buffers[0], 0);
+
+        glGenRenderbuffers(1, &rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, *width, *height);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        {
+            fprintf(stderr, "ERROR::FRAMEBUFFER_REFLECTION::Framebuffer is not complete!\n");
+        }
+
+        //REFRACTION BUFFER
+        glBindFramebuffer(GL_FRAMEBUFFER, idFBO[1]);
+        glBindTexture(GL_TEXTURE_2D, texture_buffers[1]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, *width, *height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_buffers[1], 0);
+
+        glBindTexture(GL_TEXTURE_2D, texture_buffers[2]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, *width, *height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture_buffers[2], 0);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        {
+            fprintf(stderr, "ERROR::FRAMEBUFFER_REFRACTION::Framebuffer is not complete!\n");
+        }
+    }
         break;
     }
 
@@ -569,7 +611,7 @@ void FBO::SetMultiSamplingFrameBuffer()
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, idFBO[1]);
             glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
-            glBlitFramebuffer(0, 0, *width, *height, 0, 0, *width, *height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
             glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -579,14 +621,14 @@ void FBO::SetMultiSamplingFrameBuffer()
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, idFBO[1]);
             glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-            glBlitFramebuffer(0, 0, *width, *height, 0, 0, *width, *height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
         }
         else
         {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, idFBO[0]); 
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, idFBO[1]); 
 
-            glBlitFramebuffer(0, 0, *width, *height, 0, 0, *width, *height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
         }
     }
 }
@@ -596,6 +638,6 @@ void FBO::SetDepthBuffer(unsigned int readBuffer, unsigned int drawBuffer)
     glBindFramebuffer(GL_READ_FRAMEBUFFER, readBuffer);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawBuffer);
 
-    glBlitFramebuffer(0, 0, *width, *height, 0, 0, *width, *height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

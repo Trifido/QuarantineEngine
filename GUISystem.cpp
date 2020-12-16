@@ -101,6 +101,11 @@ void GUISystem::DrawMainMenuBar()
                 isWaterTool = !isWaterTool;
             }
 
+            if (ImGui::MenuItem("Particle System Tool", NULL))
+            {
+                isPsTool = !isPsTool;
+            }
+
             if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
             if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
             ImGui::Separator();
@@ -159,34 +164,6 @@ void GUISystem::DrawMainMenuBar()
 
 void GUISystem::DrawEditWindow()
 {
-    /*
-    if (isWaterTool)
-    {
-        ImGui::SetNextWindowPos(ImVec2(100, 100), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Water Tool", &isWaterTool);
-        ImGui::Text("Water Controller");
-
-        static float clipParameter = -0.316f;
-        ImGui::SliderFloat("Clip Plane", &clipParameter, -10.0f, 10.0f);
-        ImGui::End();
-        static int tileParameter = 1;
-        ImGui::SliderInt("Tiling", &tileParameter, 1, 20.0f);
-        ImGui::End();
-        static float speedParameter = 0.03f;
-        ImGui::SliderFloat("Speed Wave", &speedParameter, 0.0f, 5.0f);
-        ImGui::End();
-
-        //ImGui::PushID(14 + i);
-        ImGui::AlignTextToFramePadding();
-        ImGui::TreeNodeEx("FieldColorWater", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Water Color");
-        ImGui::NextColumn();
-        ImGui::SetNextItemWidth(-1);
-        //static float *colorWater;
-        ImGui::ColorPicker3("MyColorWater##3", &waterGui->waterColor[0], ImGuiColorEditFlags_NoAlpha);
-
-        SetWaterParameters(clipParameter, tileParameter, speedParameter);
-    }*/
-
     if (isWaterTool)
     {
         ImGui::SetNextWindowSize(ImVec2(630, 450), ImGuiCond_FirstUseEver);
@@ -283,6 +260,178 @@ void GUISystem::DrawEditWindow()
         {
             funcs::ShowDummyObject(("WaterModel_" + std::to_string(idWater)).c_str(), obj_i, waterModels->at(obj_i));
             idWater++;
+        }
+
+        ImGui::Columns(1);
+        ImGui::Separator();
+        ImGui::PopStyleVar();
+        ImGui::End();
+    }
+
+    DrawParticleSystemWindow();
+}
+
+void GUISystem::DrawParticleSystemWindow()
+{
+    if (isPsTool)
+    {
+        ImGui::SetNextWindowSize(ImVec2(630, 450), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Particle System Editor", &isPsTool);
+
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+        ImGui::Columns(2);
+        ImGui::Separator();
+
+        struct funcsPS
+        {
+            static void ShowPSObject(const char* prefix, int uid, ParticleSystem* ps)
+            {
+                ImGui::PushID(uid);                      // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
+                ImGui::AlignTextToFramePadding();  // Text and Tree nodes are less high than regular widgets, here we add vertical spacing to make the tree lines equal high.
+                bool node_open = ImGui::TreeNode("Object", "%s", prefix);
+                ImGui::NextColumn();
+                ImGui::AlignTextToFramePadding();
+
+                ImGui::NextColumn();
+                if (node_open)
+                {
+                    //POSITION
+                    ImGui::PushID(1);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldPosition", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Position");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::DragFloat3("(X, Y, Z)", ps->GetParticlesCenterPosition(), 0.01f, -100000.0f, 100000.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    ps->UpdatePosition();
+
+                    //ROTATION
+                    ImGui::PushID(2);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldRotation", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Rotation");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::DragFloat("Rotation", ps->GetParticlesRotation(), 0.01f, 0.0f, 360.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    ps->UpdateRotation();
+
+                    if (ps->GetType() != ParticleSystemType::BILLBOARD)
+                    {
+                        //AMOUNT
+                        ImGui::PushID(3);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldAmount", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Amount");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::SliderInt("Amount", ps->GetParticlesAmount(), 1, 1000.0f);
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+
+                        //PARTICLES PER SECOND
+                        ImGui::PushID(4);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldPPS", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "PPS");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::SliderFloat("PPS", ps->GetParticlesPerSecond(), 0.0f, *ps->GetParticlesAmount());
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+
+                        //RADIUS EMISSION
+                        ImGui::PushID(5);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldRadius", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Radius");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::SliderFloat("Radius", ps->GetEmitRadius(), 0.0f, 50.0f);
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+
+                        //ANGLE EMISSION
+                        ImGui::PushID(6);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldAngle", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Angle");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::SliderFloat("Angle", ps->GetEmitAngle(), 0.0f, 3.f);
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+                    }
+
+                    //PARTICLES INFINITE LIFE
+                    ImGui::PushID(7);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldIsInfinite", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Is Infinite");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::Checkbox("Infinite", ps->GetIsInfinityLife());
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    if (!*ps->GetIsInfinityLife())
+                    {
+                        //PARTICLES LIFE LENGTH
+                        ImGui::PushID(8);
+                        ImGui::AlignTextToFramePadding();
+                        ImGui::TreeNodeEx("FieldLifeLength", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "LifeLength");
+                        ImGui::NextColumn();
+                        ImGui::SetNextItemWidth(-1);
+                        ImGui::SliderFloat("Life Length", ps->GetParticlesLifeLength(), 0.0f, 30.0f);
+                        ImGui::NextColumn();
+                        ImGui::PopID();
+                    }
+
+                    //GRAVITY MASS
+                    ImGui::PushID(9);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("FieldGravity", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Gravity Mass");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("Gravity Mass", ps->GetParticlesGravityMass(), -10.0f, 10.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    //SPEED
+                    ImGui::PushID(10);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("Speed", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Speed");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("Speed", ps->GetParticlesSpeed(), 0.0f, 10.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+
+                    //SCALE
+                    ImGui::PushID(11);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::TreeNodeEx("Scale", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Scale");
+                    ImGui::NextColumn();
+                    ImGui::SetNextItemWidth(-1);
+                    ImGui::SliderFloat("Scale", ps->GetParticlesScale(), 0.0f, 10.0f);
+                    ImGui::NextColumn();
+                    ImGui::PopID();
+                    ps->UpdateScale();
+
+                    ImGui::TreePop();
+                }
+                ImGui::PopID();
+            }
+        };
+
+        unsigned int isPS = 1;
+        // Iterate dummy objects with dummy members (all the same data)
+        for (int obj_i = 0; obj_i < psModels->size(); obj_i++)
+        {
+            std::string subName = "";
+            if (psModels->at(obj_i)->GetType() == ParticleSystemType::BILLBOARD)
+                subName = "BB_";
+            subName += std::to_string(isPS);
+            funcsPS::ShowPSObject(("ParticleSystem_" + subName).c_str(), obj_i, psModels->at(obj_i));
+            isPS++;
         }
 
         ImGui::Columns(1);
@@ -1099,6 +1248,11 @@ void GUISystem::SetModelInfoGui(std::vector<Model*>* models)
 void GUISystem::SetWaterModelInfoGui(std::vector<Water*>* models)
 {
     this->waterModels = models;
+}
+
+void GUISystem::SetParticleSystemInfoGui(std::vector<ParticleSystem*>* psModels)
+{
+    this->psModels = psModels;
 }
 
 

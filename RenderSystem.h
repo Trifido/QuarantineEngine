@@ -18,7 +18,9 @@
 #include "SkyBox.h"
 #include "Water.h"
 #include "ParticleSystem.h"
+#include "AnimatedModel.h"
 #include "GUISystem.h"
+#include "GodRay.h"
 
 #include <thread>
 #include <GLFW/glfw3.h>
@@ -36,9 +38,11 @@ private:
     std::vector<Model*> transparentModels;
     std::vector<Model*> internalModels;
     std::vector<Water*> fresnelModels;
+    std::vector<AnimatedModel*> animatedModels;
     std::vector<ParticleSystem*> particleSystems;
     std::vector<RenderVolume*> renderVolumes;
     std::vector<BoundingLight*> boundingModels;
+    std::vector<GodRay*> godRayModels;
     std::vector<Light*> shadowCastDirLights;
     std::vector<Light*> shadowCastOmniLights;
     std::vector<Light*> shadowCastSpotLights;
@@ -93,6 +97,8 @@ public:
     void AddCamera(Camera* cam);
     void AddModel(Model* model3D);
     void AddFresnelModel(Water* fresnelModel);
+    void AddAnimatedModel(AnimatedModel* animModel);
+    void AddGodRayModel(GodRay* godRay);
     void AddParticleSystem(ParticleSystem* system);
     void AddRenderVolume(RenderVolume* volume);
     void AddPreCookSkybox(Skybox* skyHDR);
@@ -116,6 +122,7 @@ public:
     void RenderClipPlane(glm::vec4 plane);
     void RenderFresnelModels();
     void RenderParticleSystems();
+    void RenderAnimatedModels();
     void ProcessBoundingModels();
     void PreRender();
     void PreRenderHDRSkybox();
