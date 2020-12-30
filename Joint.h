@@ -8,7 +8,7 @@
 
 #include "glm/glm.hpp"
 
-class Joint
+class CustomJoint
 {
 private:
     glm::mat4 animatedTransform;
@@ -17,11 +17,11 @@ private:
 public:
     unsigned int ID;
     std::string name;
-    std::list<Joint> children;
+    std::list<CustomJoint> children;
 
-    Joint();
-    Joint(unsigned int ID, std::string name, glm::mat4 bindLocalTransform);
-    inline void AddChild(Joint child) { children.push_back(child); }
+    CustomJoint();
+    CustomJoint(unsigned int ID, std::string name, glm::mat4 bindLocalTransform);
+    inline void AddChild(CustomJoint child) { children.push_back(child); }
     inline glm::mat4 GetJointTransform() { return animatedTransform; }
     inline void SetJointTransform(glm::mat4 transform) { animatedTransform = transform; }
     inline glm::mat4 GetInverseTransform() { return inverseBindTransform; }

@@ -9,7 +9,7 @@ Camera::Camera(float width, float height)
     lastY = HEIGHT / 2.0f;
     nearPlane = 0.1f;
     farPlane = 500.0f;
-    transform = new Transform();
+    transform = new CustomTransform();
 }
 
 void Camera::CameraController(float deltaTime)
@@ -113,7 +113,7 @@ void Camera::EditorRotate()
     }
 }
 
-void Camera::AttachTo(Transform* model)
+void Camera::AttachTo(CustomTransform* model)
 {
     transform->AttachTo(transform);
 }

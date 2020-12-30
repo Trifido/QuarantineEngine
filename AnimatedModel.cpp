@@ -352,7 +352,7 @@ AnimatedModel::AnimatedModel(std::string path)
     LoadModel(path);
 }
 
-AnimatedModel::AnimatedModel(std::vector<AnimatedMesh>* meshes, Joint root, int jointCount)
+AnimatedModel::AnimatedModel(std::vector<AnimatedMesh>* meshes, CustomJoint root, int jointCount)
 {
     this->meshes = meshes;
     this->rootJoint = root;
@@ -379,10 +379,10 @@ glm::mat4* AnimatedModel::GetJoinTransfoms()
     return joinMatrices;
 }
 
-void AnimatedModel::AddJointToArray(Joint headJoint, glm::mat4* matrices)
+void AnimatedModel::AddJointToArray(CustomJoint headJoint, glm::mat4* matrices)
 {
     matrices[headJoint.ID] = headJoint.GetJointTransform();
-    for(std::list<Joint>::iterator it = headJoint.children.begin(); it != headJoint.children.end(); it++)
+    for(std::list<CustomJoint>::iterator it = headJoint.children.begin(); it != headJoint.children.end(); it++)
         AddJointToArray(*it, matrices);
 }
 

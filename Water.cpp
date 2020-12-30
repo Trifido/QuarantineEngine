@@ -27,7 +27,7 @@ Water::Water()
     distortionUV = new Texture("./resources/cave/WATER/flowmap2.png");
     normalUV = new Texture("./resources/cave/WATER/waterNormal.png");
     waterShader = new Shader("shaders/waterShader.vert", "shaders/waterShader.frag");
-    transform = new Transform();
+    transform = new CustomTransform();
     tilingValue = 1;
     waveSpeed = 0.03f;
     transform->model = glm::translate(transform->model, glm::vec3(-12.210f, -0.5f, 35.970f));
@@ -38,7 +38,7 @@ Water::Water()
 Water::Water(std::string path)
 {
     waterShader = new Shader("shaders/waterShader.vert", "shaders/waterShader.frag");
-    transform = new Transform();
+    transform = new CustomTransform();
     loadModel(path);
 }
 
@@ -355,7 +355,7 @@ void Water::SetModelHierarchy()
 
     if (transform->parent != nullptr)
     {
-        Transform* parent = transform->parent;
+        CustomTransform* parent = transform->parent;
 
         while (parent != nullptr)
         {

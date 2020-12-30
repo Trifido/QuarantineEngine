@@ -66,6 +66,8 @@ using namespace gl;
 #include "Animator.h"
 #include "AnimatedModel.h"
 #include "GodRay.h"
+#include "PhysicSystem.h"
+#include "DemoLogic.h"
 
 // Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>

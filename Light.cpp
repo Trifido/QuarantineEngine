@@ -242,7 +242,7 @@ void Light::Init()
     outerCutOff = glm::cos(glm::radians(17.5f));
 
     near_plane = 0.1f;
-    far_plane = 20.0f;
+    far_plane = 60.0f;
     aspect = 1.0f;
     projDimension = glm::vec4(-10.0f, 10.0f, -10.0f, 10.0f);
     bias = 0.000005f;

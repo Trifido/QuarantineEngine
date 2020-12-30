@@ -15,7 +15,8 @@ enum ParticleSystemType
 {
     COMMON_PS = 1,
     VOLUMEN_PS = 2,
-    BILLBOARD = 3
+    BILLBOARD = 3,
+    BILLBOARD_ANIMATED = 4
 };
 
 struct ParticleLifeColor
@@ -82,7 +83,7 @@ private:
     std::map<float, ParticleLifeColor> colorLife;
     std::map<float, float> alphaLife;
 
-    Transform* transform;
+    CustomTransform* transform;
     Camera* camera;
     Texture* particleTexture;
     float* deltaTime;
@@ -105,6 +106,8 @@ private:
     std::list<Particle> MergeSort(std::list<Particle> mergeList);
     std::list<Particle> Merge(std::list<Particle> &left, std::list<Particle> &right);
 public:
+    bool isText = false;
+    bool isExplosion = false;
     Shader* particleShader;
 
     ParticleSystem();

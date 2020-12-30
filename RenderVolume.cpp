@@ -6,7 +6,7 @@ RenderVolume::RenderVolume()
     aabb_min = glm::vec3(-1.0f);
     aabb_max = glm::vec3(1.0f);
     radius = 1.0f;
-    transform = new Transform();
+    transform = new CustomTransform();
     matHandle.type = MaterialType::LIT;
     Shader* renderVolumeShader = new Shader("shaders/colliderShader.vert", "shaders/colliderShader.frag");
     matHandle.EditMaterial(MaterialComponent::SHADER1, renderVolumeShader);
@@ -31,7 +31,7 @@ RenderVolume::RenderVolume(RenderVolumeType typeVolume, NoiseType type_procedura
     }
 
     type = typeVolume;
-    transform = new Transform();
+    transform = new CustomTransform();
     matHandle.type = MaterialType::LIT;
     Shader* colliderShader = new Shader("shaders/rmVolumeTest.vert", "shaders/rmVolumeTest.frag");
     matHandle.EditMaterial(MaterialComponent::SHADER1, colliderShader);
@@ -356,7 +356,7 @@ void RenderVolume::SetHierarchy()
 
     if (transform->parent != nullptr)
     {
-        Transform* parent = transform->parent;
+        CustomTransform* parent = transform->parent;
 
         while (parent != nullptr)
         {

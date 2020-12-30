@@ -16,11 +16,11 @@ std::map<std::string, glm::mat4> Animator::CalculateCurrentAnimationPose()
     return InterpolatePoses(frames[0], frames[1], progression);
 }
 
-void Animator::ApplyPoseToJoints(std::map<std::string, glm::mat4> pose, Joint joint, glm::mat4 parentTransform)
+void Animator::ApplyPoseToJoints(std::map<std::string, glm::mat4> pose, CustomJoint joint, glm::mat4 parentTransform)
 {
     glm::mat4 currentLocalTransform = pose.at(joint.name);
     glm::mat4 currentTransform = glm::matrixCompMult(parentTransform, currentLocalTransform);//Matrix4f.mul(parentTransform, currentLocalTransform, null);
-    for (Joint childJoint : joint.children) {
+    for (CustomJoint childJoint : joint.children) {
         ApplyPoseToJoints(pose, childJoint, currentTransform);
     }
     currentTransform = glm::matrixCompMult(currentTransform, joint.GetInverseTransform());//Matrix4f.mul(currentTransform, joint.getInverseBindTransform(), currentTransform);
@@ -81,7 +81,7 @@ void Animator::DoAnimation(Animation anim)
     currentAnimation = anim;
 }
 
-void Animator::Update(Joint root)
+void Animator::Update(CustomJoint root)
 {
     IncreaseAnimationTime();
     std::map<std::string, glm::mat4> currentPose = CalculateCurrentAnimationPose();

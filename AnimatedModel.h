@@ -23,7 +23,7 @@ private:
     Skeleton skeleton;
     bool isAnim = false;
     std::vector<AnimatedMesh> *meshes;
-    Joint rootJoint;
+    CustomJoint rootJoint;
     int joinCount;
     Animator* animator;
     Animation* animation;
@@ -63,12 +63,12 @@ public:
 
     AnimatedModel();
     AnimatedModel(std::string path);
-    AnimatedModel(std::vector<AnimatedMesh>* meshes, Joint root, int jointCount);
+    AnimatedModel(std::vector<AnimatedMesh>* meshes, CustomJoint root, int jointCount);
     void Update();
     void DoAnimation(Animation* anim);
     glm::mat4* GetJoinTransfoms();
-    void AddJointToArray(Joint headJoint, glm::mat4* matrices);
-    inline Joint GetRootJoin() { return rootJoint; }
+    void AddJointToArray(CustomJoint headJoint, glm::mat4* matrices);
+    inline CustomJoint GetRootJoin() { return rootJoint; }
     void Render(std::vector<Light*> lights);
     void UpdateSkeleton();
     void SetDeltaTime(float* delta);

@@ -172,7 +172,7 @@ void GodRay::SetModelHierarchy()
 
     if (transform->parent != nullptr)
     {
-        Transform* parent = transform->parent;
+        CustomTransform* parent = transform->parent;
 
         while (parent != nullptr)
         {
@@ -191,21 +191,33 @@ void GodRay::DeleteGPUInfo()
 GodRay::GodRay()
 {
     godRayShader = new Shader("shaders/blending.vert", "shaders/blending.frag");
-    transform = new Transform();
+    transform = new CustomTransform();
     loadModel("./resources/cave/GODRAY/godray.obj");
+
+    godRayShader->setInt("colorTexture", 0);
+}
+
+GodRay::GodRay(std::string path)
+{
+    godRayShader = new Shader("shaders/blending.vert", "shaders/blending.frag");
+    transform = new CustomTransform();
+    loadModel(path);
 
     godRayShader->setInt("colorTexture", 0);
 }
 
 void GodRay::Render()
 {
-    for (unsigned int i = 0; i < meshes.size(); i++)
+    if (isActive)
     {
-        meshes.at(i).material->ptrShader->use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, meshes.at(i).material->textures.at(0).ID);
-        meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
-        meshes.at(i).Draw();
+        for (unsigned int i = 0; i < meshes.size(); i++)
+        {
+            meshes.at(i).material->ptrShader->use();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, meshes.at(i).material->textures.at(0).ID);
+            meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
+            meshes.at(i).Draw();
+        }
     }
 }
 

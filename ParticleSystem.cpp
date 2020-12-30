@@ -16,7 +16,7 @@ ParticleSystem::ParticleSystem()
 {
     type = ParticleSystemType::COMMON_PS;
     particleShader = new Shader("shaders/particleShader.vert", "shaders/particleShader.frag");
-    transform = new Transform();
+    transform = new CustomTransform();
     systemCenter = glm::vec3(0.0, 0.0, 0.0);
     gravityMass = 0.5f;
     speed = 15.0f;
@@ -42,7 +42,7 @@ ParticleSystem::ParticleSystem(ParticleSystemType type, std::string nameTexture,
 {
     this->type = type;
     particleTexture = new Texture(nameTexture, TypeTexture::DIFFUSE);
-    transform = new Transform();
+    transform = new CustomTransform();
     systemCenter = glm::vec3(0.0, 0.0, 0.0);
     gravityMass = 0.5f;
     speed = 15.0f;
@@ -66,6 +66,12 @@ ParticleSystem::ParticleSystem(ParticleSystemType type, std::string nameTexture,
             particles.push_back(Particle(systemCenter, glm::vec3(0.0), 0.0, 10, particleRotation, particleScale, isInfinity));
             instancedAttributes = new InstanceParticleAttr[1];
             particleShader = new Shader("shaders/billboardShader.vert", "shaders/billboardShader.frag");
+            break;
+        case ParticleSystemType::BILLBOARD_ANIMATED:
+            isInfinity = false;
+            particles.push_back(Particle(systemCenter, glm::vec3(0.0), 0.0, 1, particleRotation, particleScale, isInfinity));
+            instancedAttributes = new InstanceParticleAttr[1];
+            particleShader = new Shader("shaders/billboardShader.vert", "shaders/billboardShaderAnim.frag");
             break;
         case ParticleSystemType::VOLUMEN_PS:
             instancedAttributes = new InstanceParticleAttr[amount];
@@ -111,7 +117,7 @@ void ParticleSystem::UpdateParticleAttributes(int id, Particle& particleInstance
         instancedAttributes[id].blendFactorRow = glm::vec4(particleInstanced.GetBlendValueTextures(), numRowTexture, numColTexture, isColorLife);
         instancedAttributes[id].lifeColor = *particleInstanced.GetColor();
 
-        if (type != ParticleSystemType::BILLBOARD)
+        if (type != ParticleSystemType::BILLBOARD && type != ParticleSystemType::BILLBOARD_ANIMATED)
         {
             glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
             glBufferSubData(GL_ARRAY_BUFFER, (id * sizeof(InstanceParticleAttr)), sizeof(glm::vec4), &instancedAttributes[id].textureOffset);
@@ -205,7 +211,7 @@ void ParticleSystem::SetDeltaTime(float* delta)
 
 void ParticleSystem::Render()
 {
-    if (type != ParticleSystemType::BILLBOARD)
+    if (type != ParticleSystemType::BILLBOARD && type != ParticleSystemType::BILLBOARD_ANIMATED)
     {
         GenerateParticles();
 
@@ -438,7 +444,7 @@ void ParticleSystem::setupTexture()
 
 void ParticleSystem::UpdatePosition()
 {
-    if (type == ParticleSystemType::BILLBOARD)
+    if (type == ParticleSystemType::BILLBOARD || type == ParticleSystemType::BILLBOARD_ANIMATED)
     {
         std::list<Particle>::iterator it = particles.begin();
         it->SetPostion(systemCenter);
@@ -447,7 +453,7 @@ void ParticleSystem::UpdatePosition()
 
 void ParticleSystem::UpdateRotation()
 {
-    if (type == ParticleSystemType::BILLBOARD)
+    if (type == ParticleSystemType::BILLBOARD || type == ParticleSystemType::BILLBOARD_ANIMATED)
     {
         std::list<Particle>::iterator it = particles.begin();
         it->SetRotation(particleRotation);
@@ -456,7 +462,7 @@ void ParticleSystem::UpdateRotation()
 
 void ParticleSystem::UpdateScale()
 {
-    if (type == ParticleSystemType::BILLBOARD)
+    if (type == ParticleSystemType::BILLBOARD || type == ParticleSystemType::BILLBOARD_ANIMATED)
     {
         std::list<Particle>::iterator it = particles.begin();
         it->SetScale(particleScale);

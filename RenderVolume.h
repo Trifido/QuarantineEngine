@@ -26,7 +26,7 @@ public:
     const aiScene* scene;
     std::vector<aiNode*> ai_nodes;
     RenderVolumeType type;
-    Transform* transform;
+    CustomTransform* transform;
     Mesh meshCollider;
     MaterialHandle matHandle;
     float radius;

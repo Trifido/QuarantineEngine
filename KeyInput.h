@@ -4,6 +4,8 @@
 #include "Pivot.h"
 #include "Model.h"
 #include "IntersectionED.h"
+#include "RayCastSystem.h"
+#include "DemoLogic.h"
 
 class KeyInput
 {
@@ -21,6 +23,19 @@ public:
     {
         if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Space)))
             glfwSetWindowShouldClose(window, true);
+
+        //if (ImGui::IsKeyDown('F') || ImGui::IsKeyDown('f'))
+        //{
+        //    if (demo->modelWeapon != nullptr)
+        //        demo->modelWeapon->SetDemoType(DEMO::IS_APPEARED);
+        //}
+
+        //if (ImGui::IsKeyReleased('E') || ImGui::IsKeyReleased('e'))
+        //{
+        //    demo->UpdateText();
+        //    if(demo->modelWeapon != nullptr)
+        //        demo->modelWeapon->SetDemoType(DEMO::IS_NOTHING);
+        //}
     }
 
     void processMouseInput(GLFWwindow* window, Camera* cam, std::vector<Model*> sceneModels, Pivot* pivote)
@@ -55,6 +70,8 @@ public:
                         pivote->isRendered = pivote->CheckCollision(clickPos, ray);
                 }
             }
+
+
         }
 
         if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
@@ -104,6 +121,7 @@ public:
             distRay = dist;
         }
     }
+
 };
 
 

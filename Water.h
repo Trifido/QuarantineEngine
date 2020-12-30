@@ -33,7 +33,7 @@ private:
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TypeTexture typeName);
 public:
     Shader* waterShader;
-    Transform *transform;
+    CustomTransform *transform;
 
     Water();
     Water(std::string path);

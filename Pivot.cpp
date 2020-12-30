@@ -10,7 +10,7 @@ Pivot::Pivot()
     pivotModel->CAST_SHADOW = false;
     pivotModel->isSelectableModel = true;
     isRendered = false;
-    pivotModel->colliders.push_back(new Collider(ColliderType::BOX));
+    pivotModel->colliders.push_back(new CustomCollider(ColliderType::BOX));
  /*   pivotModel->colliders.push_back(new Collider(ColliderType::BOX));*/
     /*pivotModel->colliders.push_back(new Collider(ColliderType::BOX));*/
 

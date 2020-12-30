@@ -1,21 +1,21 @@
 #include "Collider.h"
 
-Collider::Collider()
+CustomCollider::CustomCollider()
 {
     type = ColliderType::BOX;
     aabb_min = glm::vec3(-1.0f);
     aabb_max = glm::vec3(1.0f);
-    transform = new Transform();
+    transform = new CustomTransform();
     matHandle.type = MaterialType::LIT;
     Shader *colliderShader = new Shader("shaders/colliderShader.vert","shaders/colliderShader.frag");
     matHandle.EditMaterial(MaterialComponent::SHADER1, colliderShader);
     matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::INTERNAL);
 }
 
-Collider::Collider(ColliderType typeCollider)
+CustomCollider::CustomCollider(ColliderType typeCollider)
 {
     type = typeCollider;
-    transform = new Transform();
+    transform = new CustomTransform();
     matHandle.type = MaterialType::LIT;
     Shader* colliderShader = new Shader("shaders/colliderShader.vert", "shaders/colliderShader.frag");
     matHandle.EditMaterial(MaterialComponent::SHADER1, colliderShader);
@@ -91,7 +91,7 @@ Collider::Collider(ColliderType typeCollider)
     }
 }
 
-void Collider::DrawCollider()
+void CustomCollider::DrawCollider()
 {
     //SetHierarchy();
     matHandle.shader->use();
@@ -112,7 +112,7 @@ void Collider::DrawCollider()
     
 }
 
-bool Collider::IsRayCollision(UIRay* ray)
+bool CustomCollider::IsRayCollision(UIRay* ray)
 {
     float distRay = FLT_MAX;
     glm::vec4 ray_eye = inverse(ray->PV * transform->model) * glm::vec4(ray->ray_dir, 1.0);
@@ -129,7 +129,7 @@ bool Collider::IsRayCollision(UIRay* ray)
     return (dist > 0.0f && dist < distRay);
 }
 
-float Collider::CheckCollider(glm::vec3 origin, glm::vec3 dir)
+float CustomCollider::CheckCollider(glm::vec3 origin, glm::vec3 dir)
 {
     float intersectionDist;
     float distancePoint = FLT_MAX;
@@ -157,7 +157,7 @@ float Collider::CheckCollider(glm::vec3 origin, glm::vec3 dir)
     return distancePoint;
 }
 
-void Collider::LoadMesh(std::string path)
+void CustomCollider::LoadMesh(std::string path)
 {
     Assimp::Importer importer;
     scene = importer.ReadFile(path, aiProcess_Triangulate);
@@ -173,7 +173,7 @@ void Collider::LoadMesh(std::string path)
     processNode(scene->mRootNode, scene);
 }
 
-void Collider::recursiveNodeProcess(aiNode* node)
+void CustomCollider::recursiveNodeProcess(aiNode* node)
 {
     ai_nodes.push_back(node);
 
@@ -181,7 +181,7 @@ void Collider::recursiveNodeProcess(aiNode* node)
         recursiveNodeProcess(node->mChildren[i]);
 }
 
-void Collider::processNode(aiNode* node, const aiScene* scene)
+void CustomCollider::processNode(aiNode* node, const aiScene* scene)
 {
     // process all the node's meshes (if any)
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
@@ -196,7 +196,7 @@ void Collider::processNode(aiNode* node, const aiScene* scene)
     }
 }
 
-void Collider::processMesh(aiMesh* mesh, const aiScene* scene)
+void CustomCollider::processMesh(aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -224,13 +224,13 @@ void Collider::processMesh(aiMesh* mesh, const aiScene* scene)
     meshCollider.MeshCollider(vertices, indices, matHandle);
 }
 
-void Collider::SetHierarchy()
+void CustomCollider::SetHierarchy()
 {
     transform->finalModelMatrix = transform->model;
 
     if (transform->parent != nullptr)
     {
-        Transform* parent = transform->parent;
+        CustomTransform* parent = transform->parent;
 
         while (parent != nullptr)
         {
@@ -240,7 +240,7 @@ void Collider::SetHierarchy()
     }
 }
 
-bool Collider::RaySphereIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir)
+bool CustomCollider::RaySphereIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir)
 {
     glm::vec3 m = ray_orig - transform->position;
     float b = glm::dot(m, ray_dir);
@@ -262,7 +262,7 @@ bool Collider::RaySphereIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir)
     return true;
 }
 
-float Collider::RayBoxOBBIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir)
+float CustomCollider::RayBoxOBBIntersection(glm::vec3 ray_orig, glm::vec3 ray_dir)
 {
     float tMin = 0.0f;
     float tMax = FLT_MAX;

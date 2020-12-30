@@ -4,7 +4,6 @@
 
 #include "HeadersRequeriments.h"
 #include "Transform.h"
-//#include "Model.h"
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
@@ -24,20 +23,21 @@ private:
     float pitch = 0.0f;
 public:
     float WIDTH, HEIGHT;
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    //glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraFront = glm::vec3(0.765475571f, -0.0854168385f, 0.637770593f);
     //glm::vec3 cameraFront = glm::vec3(0.0f, -0.5f, -1.0f);
-    glm::vec3 cameraPos = glm::vec3(0.0f, 3.0f, 5.0f);// 25.0f);
+    glm::vec3 cameraPos = glm::vec3(-32.4065971f, 0.972609758f, 25.2997189f);
     //glm::vec3 cameraPos = glm::vec3(0.0f, 15.0f, 15.0f);
     glm::mat4 view;
     glm::mat4 projection;
-    Transform* transform;
+    CustomTransform* transform;
     glm::mat4 MVP;
     glm::mat4 VP;
     Camera(float width, float height);
     void CameraController(float deltaTime);
     void EditorScroll();
     void EditorRotate();
-    void AttachTo(Transform* model);
+    void AttachTo(CustomTransform* model);
     float GetFOV() { return fov; }
     float* GetRawFOV() { return &fov; }
     float* GetRawNearPlane() { return &nearPlane; }

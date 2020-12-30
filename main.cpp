@@ -2,13 +2,18 @@
 
 #include <Mmsystem.h>
 #include <mciapi.h>
+#include <thread>
 //these two headers are already included in the <Windows.h> header
 #pragma comment(lib, "Winmm.lib")
 
+void PlayBSO()
+{
+    PlaySound("./resources/soundtrack/base.wav", NULL, SND_ASYNC);
+}
 
 int main(int, char**)
 {
-    //PlaySound("./resources/soundtrack/base.wav", NULL, SND_ASYNC);
+    std::thread first(PlayBSO);
 
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -78,9 +83,14 @@ int main(int, char**)
     //ImVec4* clear_color = new ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
     ImVec4* clear_color = new ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
+    //DEMO
+    DemoLogic* demo = new DemoLogic();
+    //PHYSIC SYSTEM
+    PhysicSystem physickernel;
     //RENDER SYSTEM
     RenderSystem renderkernel(window, clear_color);
-
+    renderkernel.AddPhysicSystem(&physickernel);
+    renderkernel.AddDemo(demo);
     ///TEXTURES
     std::vector<Texture> textures;
     //Texture texture1("resources/brickwall.jpg", TypeTexture::DIFFUSE, true);
@@ -108,12 +118,12 @@ int main(int, char**)
     //textures_parallax.push_back(parallaxAO);
 
 
-    //std::vector<Texture> textures_pbr;
-    //Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
-    //Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
-    //Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
-    //Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
-    //Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
+    std::vector<Texture> textures_pbr;
+    Texture pbrDiff("resources/PBR_Textures/rustedIron/rustediron2_basecolor.png", TypeTexture::DIFFUSE);
+    Texture pbrNorm("resources/PBR_Textures/rustedIron/rustediron2_normal.png", TypeTexture::NORMAL);
+    Texture pbrME("resources/PBR_Textures/rustedIron/rustediron2_metallic.png", TypeTexture::METALLIC);
+    Texture pbrRO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::ROUGHNESS);
+    Texture pbrAO("resources/PBR_Textures/rustedIron/rustediron2_roughness.png", TypeTexture::AO);
 
     //Texture pbrDiff("resources/PBR_Textures/ironKiwi/New_Graph_diffuse.jpg", TypeTexture::DIFFUSE);
     //Texture pbrNorm("resources/PBR_Textures/ironKiwi/New_Graph_normal.jpg", TypeTexture::NORMAL);
@@ -122,12 +132,12 @@ int main(int, char**)
     //Texture pbrBUMP("resources/PBR_Textures/ironKiwi/New_Graph_height.jpg", TypeTexture::HEIGHT);
     //Texture pbrAO("resources/PBR_Textures/ironKiwi/rustediron2_roughness.png", TypeTexture::AO);
 
-    //textures_pbr.push_back(pbrDiff);
-    //textures_pbr.push_back(pbrNorm);
-    //textures_pbr.push_back(pbrME);
-    //textures_pbr.push_back(pbrRO);
-    ////textures_pbr.push_back(pbrBUMP);
-    //textures_pbr.push_back(pbrAO);
+    textures_pbr.push_back(pbrDiff);
+    textures_pbr.push_back(pbrNorm);
+    textures_pbr.push_back(pbrME);
+    textures_pbr.push_back(pbrRO);
+    //textures_pbr.push_back(pbrBUMP);
+    textures_pbr.push_back(pbrAO);
 
     //std::vector<Texture> textures_pbr_floor;
     //Texture floor_pbrDiff("resources/materials/metal/Metal_Plate_013_basecolor.jpg", TypeTexture::DIFFUSE);
@@ -210,47 +220,50 @@ int main(int, char**)
 
     //DEMO
     //Platform
-    /*
+    /**/
     Model platform1("./resources/cave/PLATFORM/platform.obj");
     platform1.RotationTo(0.0f, glm::vec3(0.0, 1.0, 0.0));
     platform1.ScaleTo(glm::vec3(0.005f));
+    platform1.transform->model = glm::translate(platform1.transform->model, glm::vec3(0.0f, -100.5f, 0.0f));
     renderkernel.AddModel(&platform1);
     Model platform2("./resources/cave/PLATFORM/platform.obj");
     platform2.RotationTo(90.0f, glm::vec3(0.0, 1.0, 0.0));
     platform2.ScaleTo(glm::vec3(0.005f));
+    platform2.transform->model = glm::translate(platform2.transform->model, glm::vec3(0.0f, -100.5f, 0.0f));
     renderkernel.AddModel(&platform2);
     Model platform3("./resources/cave/PLATFORM/platform.obj");
     platform3.RotationTo(180.0f, glm::vec3(0.0, 1.0, 0.0));
     platform3.ScaleTo(glm::vec3(0.005f));
+    platform3.transform->model = glm::translate(platform3.transform->model, glm::vec3(0.0f, -100.5f, 0.0f));
     renderkernel.AddModel(&platform3);
     Model platform4("./resources/cave/PLATFORM/platform.obj");
     platform4.RotationTo(270.0f, glm::vec3(0.0, 1.0, 0.0));
     platform4.ScaleTo(glm::vec3(0.005f));
+    platform4.transform->model = glm::translate(platform4.transform->model, glm::vec3(0.0f, -100.5f, 0.0f));
     renderkernel.AddModel(&platform4);
 
     //Columns
     Model columns1("./resources/cave/COLUMNS/columns.obj");
     columns1.RotationTo(0.0f, glm::vec3(0.0, 1.0, 0.0));
     columns1.ScaleTo(glm::vec3(0.005f));
+    columns1.transform->model = glm::translate(columns1.transform->model, glm::vec3(0.0f, -100.5f, 0.0f));
     renderkernel.AddModel(&columns1);
     Model columns2("./resources/cave/COLUMNS/columns.obj");
     columns2.RotationTo(90.0f, glm::vec3(0.0, 1.0, 0.0));
     columns2.ScaleTo(glm::vec3(0.005f));
+    columns2.transform->model = glm::translate(columns2.transform->model, glm::vec3(0.0f, -100.5f, 0.0f));
     renderkernel.AddModel(&columns2);
     Model columns3("./resources/cave/COLUMNS/columns.obj");
     columns3.RotationTo(180.0f, glm::vec3(0.0, 1.0, 0.0));
     columns3.ScaleTo(glm::vec3(0.005f));
+    columns3.transform->model = glm::translate(columns3.transform->model, glm::vec3(0.0f, -100.5f, 0.0f));
     renderkernel.AddModel(&columns3);
     Model columns4("./resources/cave/COLUMNS/columns.obj");
     columns4.RotationTo(270.0f, glm::vec3(0.0, 1.0, 0.0));
     columns4.ScaleTo(glm::vec3(0.005f));
+    columns4.transform->model = glm::translate(columns4.transform->model, glm::vec3(0.0f, -100.5f, 0.0f));
     renderkernel.AddModel(&columns4);
-    
-    //Outside
-    Model columnsDestroyed("./resources/cave/COLUMNS_DESTROYED/outside.obj");
-    columnsDestroyed.ScaleTo(glm::vec3(0.005f));
-    renderkernel.AddModel(&columnsDestroyed);
-    
+
     //Dome
     Model dome1("./resources/cave/DOME/dome.obj");
     dome1.RotationTo(0.0f, glm::vec3(0.0, 1.0, 0.0));
@@ -261,13 +274,18 @@ int main(int, char**)
     dome2.ScaleTo(glm::vec3(0.005f));
     renderkernel.AddModel(&dome2);
     
+    /**/
+    //Outside
+    Model columnsDestroyed("./resources/cave/COLUMNS_DESTROYED/outside.obj");
+    columnsDestroyed.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&columnsDestroyed);
+    /**/
     //Rock Wall
     Model mainCave("./resources/cave/MAIN_CAVE/maincave.obj");
     mainCave.ScaleTo(glm::vec3(0.005f));
     renderkernel.AddModel(&mainCave);
     
     //Ground MainCave
-    
     std::vector<Texture> textures_pbr_floor;
     Texture floor_pbrDiff("./resources/cave/GROUND_CAVE/brown_mud_rocks_01_diff_2k.png", TypeTexture::DIFFUSE);
     Texture floor_pbrNorm("./resources/cave/GROUND_CAVE/brown_mud_rocks_01_nor_2k.png", TypeTexture::NORMAL);
@@ -283,16 +301,18 @@ int main(int, char**)
     textures_pbr_floor.push_back(floor_pbrHE);
 
     Model groundMainCave(floorVertices, 6, textures_pbr_floor);
+    groundMainCave.SetPositionOrientation(reactphysics3d::Vector3(0.0f, -1.080, -2.150));
+    groundMainCave.SetPhysicType(PhysicBodyType::RIGIDBODY_STATIC);
+    groundMainCave.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(24.f, 0.2f, 24.f));
     groundMainCave.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
     groundMainCave.matHandle.EditMaterial(MaterialComponent::P_DISPLACEMENT, -0.1f);
     groundMainCave.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
     groundMainCave.matHandle.EditMaterial(MaterialComponent::MAX_UV, 10.0f);
-    groundMainCave.transform->model = glm::translate(groundMainCave.transform->model, glm::vec3(0.0, -1.080, -2.150));
+    //groundMainCave.transform->model = glm::translate(groundMainCave.transform->model, glm::vec3(0.0, -1.080, -2.150));
     groundMainCave.ScaleTo(glm::vec3(2.670f, 1.0f, 2.080f));
     renderkernel.AddModel(&groundMainCave);
 
     //Ground river
-
     std::vector<Texture> textures_pbr_floor_river;
     Texture floor_river_pbrDiff("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_D.bmp", TypeTexture::DIFFUSE);
     Texture floor_river_pbrNorm("./resources/cave/GROUND_RIVER/MI_Cave_Rock_Flat_MI_Cave_Rock_Flat_N.bmp", TypeTexture::NORMAL);
@@ -302,25 +322,110 @@ int main(int, char**)
     textures_pbr_floor_river.push_back(floor_river_pbrRO);
 
     Model groundRiverCave(floorVertices, 6, textures_pbr_floor_river);
+    groundRiverCave.SetPositionOrientation(reactphysics3d::Vector3(-12.210f, -2.140f, 35.970f));
+    groundRiverCave.SetPhysicType(PhysicBodyType::RIGIDBODY_STATIC);
+    groundRiverCave.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(20.f, 0.001f, 20.f));
     groundRiverCave.matHandle.EditMaterial(MaterialComponent::BLOOM_BRIGHTNESS, 100.0f);
     groundRiverCave.matHandle.EditMaterial(MaterialComponent::MIN_UV, 0.0f);
     groundRiverCave.matHandle.EditMaterial(MaterialComponent::MAX_UV, 20.0f);
-    groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(-12.210f, -1.070f, 35.970f));
-    groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(0.0f, -1.070f, 0.0f));
+    //groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(-12.210f, -1.070f, 35.970f));
+    //groundRiverCave.transform->model = glm::translate(groundRiverCave.transform->model, glm::vec3(0.0f, -1.070f, 0.0f));
     groundRiverCave.ScaleTo(glm::vec3(3.210f, 1.0f, 1.740f));
     renderkernel.AddModel(&groundRiverCave);
-    */
+    
+    //BRICK WALL
+    Model brick1("./resources/cave/BRICK/brick.obj");
+    brick1.SetPositionOrientation(reactphysics3d::Vector3(1.130f, -2.010f, 22.520f), rp3d::Quaternion(0.0f, 0.85f, 0.0f, 1.0f));
+    brick1.SetPhysicType(PhysicBodyType::RIGIDBODY_DINAMIC);
+    brick1.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(1.1, 0.65, 1.3));
+    brick1.ScaleTo(glm::vec3(0.05f));
+    renderkernel.AddModel(&brick1);
+
+    Model brick2("./resources/cave/BRICK/brick.obj");
+    brick2.SetPositionOrientation(reactphysics3d::Vector3(4.870f, -2.010f, 22.6f), rp3d::Quaternion(0.0f, 0.85f, 0.0f, 1.0f));
+    brick2.SetPhysicType(PhysicBodyType::RIGIDBODY_DINAMIC);
+    brick2.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(1.1, 0.65, 1.3));
+    brick2.ScaleTo(glm::vec3(0.05f));
+    renderkernel.AddModel(&brick2);
+
+    Model brick3("./resources/cave/BRICK/brick.obj");
+    brick3.SetPositionOrientation(reactphysics3d::Vector3(1.77f, -0.72f, 21.920f), rp3d::Quaternion(0.0f, 0.85f, 0.0f, 1.0f));
+    brick3.SetPhysicType(PhysicBodyType::RIGIDBODY_DINAMIC);
+    brick3.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(1.1, 0.65, 1.3));
+    brick3.ScaleTo(glm::vec3(0.05f));
+    renderkernel.AddModel(&brick3);
+
+    Model brick4("./resources/cave/BRICK/brick.obj");
+    brick4.SetPositionOrientation(reactphysics3d::Vector3(3.920f, -0.72f, 22.520f), rp3d::Quaternion(0.0f, 0.85f, 0.0f, 1.0f));
+    brick4.SetPhysicType(PhysicBodyType::RIGIDBODY_DINAMIC);
+    brick4.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(1.1, 0.65, 1.3));
+    brick4.ScaleTo(glm::vec3(0.05f));
+    renderkernel.AddModel(&brick4);
+
+    Model brick5("./resources/cave/BRICK/brick.obj");
+    brick5.SetPositionOrientation(reactphysics3d::Vector3(2.520f, 1.f, 22.520f), rp3d::Quaternion(0.0f, 0.85f, 0.0f, 1.0f));
+    brick5.SetPhysicType(PhysicBodyType::RIGIDBODY_DINAMIC);
+    brick5.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(1.1, 0.65, 1.3));
+    brick5.ScaleTo(glm::vec3(0.05f));
+    renderkernel.AddModel(&brick5);
+
+    Model brick6("./resources/cave/BRICK/brick.obj");
+    brick6.SetPositionOrientation(reactphysics3d::Vector3(4.920f, 1.f, 22.520f), rp3d::Quaternion(0.0f, 0.85f, 0.0f, 1.0f));
+    brick6.SetPhysicType(PhysicBodyType::RIGIDBODY_DINAMIC);
+    brick6.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(1.1, 0.65, 1.3));
+    brick6.ScaleTo(glm::vec3(0.05f));
+    renderkernel.AddModel(&brick6);
+
+    Model brick7("./resources/cave/BRICK/brick.obj");
+    brick7.SetPositionOrientation(reactphysics3d::Vector3(3.820f, 1.7f, 22.520f), rp3d::Quaternion(0.0f, 0.85f, 0.0f, 1.0f));
+    brick7.SetPhysicType(PhysicBodyType::RIGIDBODY_DINAMIC);
+    brick7.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(1.1, 0.65, 1.3));
+    brick7.ScaleTo(glm::vec3(0.05f));
+    renderkernel.AddModel(&brick7);
     
     //Water river
-    //Water *waterPlane = new Water();
-    //renderkernel.AddFresnelModel(waterPlane);
-
+    Water *waterPlane = new Water();
+    *waterPlane->GetWaveSpeed() = 0.2f;
+    *waterPlane->GetTiling() = 20;
+    waterPlane->GetWaterColor()[0] = 7.f / 256.f;
+    waterPlane->GetWaterColor()[1] = 10.f / 256.f;
+    waterPlane->GetWaterColor()[2] = 7.f / 256.f;
+    *waterPlane->GetWaterColorFactor() = 0.316f;
+    *waterPlane->GetWaterRefractiveFactor() = 0.368f;
+    renderkernel.AddFresnelModel(waterPlane);
+    /**/
     //Particle System
-    //ParticleSystem* particleSystem = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/PARTICLE_SYSTEMS/fireHDR.jpg", 8, 4);
-    //renderkernel.AddParticleSystem(particleSystem);
-
+    ParticleSystem* text1 = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/TEXT/text0.png");
+    text1->isText = true;
+    text1->SetPosition(glm::vec3(10.39f, 0.92f, 32.2f));
+    renderkernel.AddParticleSystem(text1);
+    ParticleSystem* text2 = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/TEXT/text1.png");
+    text2->isText = true;
+    text2->SetPosition(glm::vec3(10.39f, 0.92f, 32.2f));
+    renderkernel.AddParticleSystem(text2);
+    ParticleSystem* text3 = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/TEXT/text2.png");
+    text3->isText = true;
+    text3->SetPosition(glm::vec3(-25.250f, 0.5f, 42.910));
+    renderkernel.AddParticleSystem(text3);
+    ParticleSystem* text4 = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/TEXT/text3.png");
+    text4->isText = true;
+    text4->SetPosition(glm::vec3(10.39f, 0.92f, 32.2f));
+    renderkernel.AddParticleSystem(text4);
+    ParticleSystem* text5 = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/TEXT/text4.png");
+    text5->isText = true;
+    text5->SetPosition(glm::vec3(10.39f, 0.92f, 32.2f));
+    renderkernel.AddParticleSystem(text5);
+    ParticleSystem* text6 = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/TEXT/text0.png");
+    text6->isText = true;
+    text6->SetPosition(glm::vec3(0.0f, 3.0f, 0.0f));
+    renderkernel.AddParticleSystem(text6);
+    ParticleSystem* text7 = new ParticleSystem(ParticleSystemType::BILLBOARD,"./resources/cave/TEXT/final.png");
+    text7->isText = true;
+    text7->SetPosition(glm::vec3(0.0f, 3.4f, 0.0f));
+    renderkernel.AddParticleSystem(text7);
+    
     //FOG
-    /*
+    /**/
     ParticleSystem* fog = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/fog.png", 2, 2);
     fog->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
     fog->SetRandomRotation(360.f);
@@ -330,33 +435,47 @@ int main(int, char**)
     fog->AddColorLife(ParticleLifeColor(50.0f, glm::vec4(1.f, 1.f, 1.f, 0.10f), true, true));
     fog->AddColorLife(ParticleLifeColor(100.f, glm::vec4(1.f, 1.f, 1.0f, 0.0f), true, true));
     renderkernel.AddParticleSystem(fog);
-    */
+    /**/
     //ANIMATION MODEL
     //AnimatedModel* animModel = new AnimatedModel("./resources/cave/ANIMATION_MODELS/model.dae");
     //Animation* Anim_Test_Walk = new Animation("Walk", glm::vec2(0, 0.8), 2);
     //animModel->AddAnimation(Anim_Test_Walk);
     //renderkernel.AddAnimatedModel(animModel);
 
-    //BOARD
-    //Model* board = new Model("./resources/cave/BOARD/boardPBR.obj");
-    //renderkernel.AddModel(board);
-
     //ARMS
-    //Model* arms = new Model("./resources/cave/ANIMATION_MODELS/arm/arms.obj");
-    //arms->matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::FPS);
-    //arms->transform->model = glm::rotate(arms->transform->model, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
-    //arms->transform->model = glm::rotate(arms->transform->model, glm::radians(-25.0f), glm::vec3(1.0, 0.0, 0.0));
-    //arms->transform->model = glm::translate(arms->transform->model, glm::vec3(0.0f, -0.3f, 0.2f));
-    //renderkernel.AddModel(arms);
-    //Model* arms = new Model("./resources/3DModels/shotgun/Quad_Shotgun.obj");
-    //arms->ScaleTo(glm::vec3(1.0f));
-    //renderkernel.AddModel(arms);
+    /**/
+    Model* arms = new Model("./resources/cave/ANIMATION_MODELS/arm/arms.obj");
+    arms->matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::FPS);
+    arms->SetDemoType(DEMO::IS_ARM);
+    arms->transform->model = glm::rotate(arms->transform->model, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
+    arms->transform->model = glm::rotate(arms->transform->model, glm::radians(-25.0f), glm::vec3(1.0, 0.0, 0.0));
+    arms->transform->model = glm::translate(arms->transform->model, glm::vec3(0.0f, -0.3f, 0.2f));
+    renderkernel.AddModel(arms);
+    
+    Model* armsWeapon = new Model("./resources/3DModels/shotgun/Quad_Shotgun.obj");
+    armsWeapon->SetDemoType(DEMO::IS_WEAPON);
+    armsWeapon->matHandle.EditMaterial(MaterialComponent::TYPE, MaterialType::FPS);
+    armsWeapon->transform->model = glm::rotate(armsWeapon->transform->model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    armsWeapon->transform->model = glm::translate(armsWeapon->transform->model, glm::vec3(0.3f, -0.2f, 0.3f));
+    renderkernel.AddModel(armsWeapon);
 
-/*
+    Model* weapon = new Model("./resources/3DModels/shotgun/Quad_Shotgun.obj");
+    weapon->SetDemoType(DEMO::IS_APPEARED);
+    weapon->transform->model = glm::translate(weapon->transform->model, glm::vec3(-7.21f, 0.5f, 44.53f));
+    renderkernel.AddModel(weapon);
+    /**/
+    //ARTIFACT
+    Model* artifact = new Model("./resources/cave/ARTIFACT/artifact.obj");
+    artifact->SetDemoType(DEMO::IS_ARTIFACT);
+    artifact->transform->model = glm::translate(artifact->transform->model, glm::vec3(-25.250f, -1.840, 42.910));
+    renderkernel.AddModel(artifact);
+
     //Brazier & Fire
+    /**/
     Model brazier("./resources/cave/BRAZIERS/braziers.obj");
     brazier.ScaleTo(glm::vec3(0.005f));
     renderkernel.AddModel(&brazier);
+    
     ParticleSystem* fireBrazier1 = new ParticleSystem(ParticleSystemType::COMMON_PS, "./resources/cave/PARTICLE_SYSTEMS/Sparks.png", 1, 1);
     fireBrazier1->SetPosition(glm::vec3(0.350f, -0.180f, 19.440f));
     fireBrazier1->SetScale(0.2f);
@@ -444,21 +563,41 @@ int main(int, char**)
     fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(30.0f, glm::vec4(1.f, 0.4472f, 0.1985f, 0.0f), true, false));
     fireBrazierBigFlame2->AddColorLife(ParticleLifeColor(100.f, glm::vec4(0.2205f, 0.0f, 0.0f, 0.0f), true, true));
     renderkernel.AddParticleSystem(fireBrazierBigFlame2);
-    */
+    /**/
     //Nature forest
-    //Model aspen("./resources/cave/NATURE/aspen.obj");
-    //aspen.ScaleTo(glm::vec3(0.005f));
-    //renderkernel.AddModel(&aspen);
-    //Model pines("./resources/cave/NATURE/pines.obj");
-    //pines.ScaleTo(glm::vec3(0.005f));
-    //renderkernel.AddModel(&pines);
-
+    /**/
+    Model aspen("./resources/cave/NATURE/aspen.obj");
+    aspen.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&aspen);
+    Model pines("./resources/cave/NATURE/pines.obj");
+    pines.ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(&pines);
+    
     //Sculpture
-    //Model sculpture_magic("./resources/cave/MAGIC_SCULPTURE/magic_sculpture.obj");
-    //sculpture_magic.RotationTo(-90.0f, glm::vec3(0.0, 1.0, 0.0));
-    //sculpture_magic.transform->model = glm::translate(sculpture_magic.transform->model, glm::vec3(0.0, 2.0, 0.0));
-    //sculpture_magic.ScaleTo(glm::vec3(0.005f));
-    //renderkernel.AddModel(&sculpture_magic);
+    Model *sculpture_magic = new Model("./resources/cave/MAGIC_SCULPTURE/magic_sculpture.obj");
+    sculpture_magic->RotationTo(-90.0f, glm::vec3(0.0, 1.0, 0.0));
+    sculpture_magic->transform->model = glm::translate(sculpture_magic->transform->model, glm::vec3(0.0, 2.0, 0.0));
+    sculpture_magic->ScaleTo(glm::vec3(0.005f));
+    sculpture_magic->SetDemoType(DEMO::IS_STATUE);
+    renderkernel.AddModel(sculpture_magic);
+    /**/
+    //Fallen lord
+    Model *fallenLord = new Model("./resources/cave/LORDFALLEN/lordFallen.obj");
+    fallenLord->ScaleTo(glm::vec3(0.005f));
+    renderkernel.AddModel(fallenLord);
+
+    //MAGIC BASE
+    GodRay* magicBase = new GodRay("./resources/cave/MAGIC_BASE/green.obj");
+    magicBase->ScaleTo(glm::vec3(0.5f));
+    magicBase->transform->model = glm::translate(magicBase->transform->model, glm::vec3(0.0f, -0.2f, 0.0f));
+    renderkernel.AddGodRayModel(magicBase);
+
+    GodRay* magicBaseG = new GodRay("./resources/cave/MAGIC_BASE/redBase.obj");
+    magicBaseG->transform->model = glm::translate(magicBaseG->transform->model, glm::vec3(-7.21f, -2.3f, 44.53f));
+    magicBaseG->ScaleTo(glm::vec3(0.5f));
+    renderkernel.AddGodRayModel(magicBaseG);
+    magicBaseG->isActive = false;
+    demo->magicBase = magicBaseG;
 
     //RAY MARCHING TECHNIQUE
     //Shader* rmShader = new Shader("shaders/rmclouds.vert", "shaders/rmclouds.frag");
@@ -467,9 +606,24 @@ int main(int, char**)
     //Material* rmMaterial = new Material(rmShader, noiseTextures);
 
     ///--CUBE   
-   // Model cubeModel(vertices, 36, textures_pbr);
-   // cubeModel.TranslationTo(glm::vec3(0.0f, 1.1f, 0.0f));
-   // renderkernel.AddModel(&cubeModel);
+    //Model cubeModel(vertices, 36, textures_pbr);
+    //cubeModel.SetPositionOrientation(reactphysics3d::Vector3(0.0f, 30.0f, 0.0f));
+    //cubeModel.SetPhysicType(PhysicBodyType::RIGIDBODY_DINAMIC);
+    //cubeModel.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(0.25f));
+    //renderkernel.AddModel(&cubeModel);
+
+    //Model cubeModel2(vertices, 36, textures_pbr);
+    //cubeModel2.SetPositionOrientation(reactphysics3d::Vector3(-5.0f, 0.0f, 0.0f));
+    //cubeModel2.SetPhysicType(PhysicBodyType::RIGIDBODY_STATIC);
+    //cubeModel2.SetCollider(ColliderShapeType::BOX_SHAPE, glm::vec3(30.f, 0.1f, 30.f));
+    //renderkernel.AddModel(&cubeModel2);
+
+    //Model cubeModel3(vertices, 36, textures_pbr);
+    //cubeModel3.SetPositionOrientation(reactphysics3d::Vector3(0.0f, 0.0f, 0.0f));
+    //cubeModel3.SetPhysicType(PhysicBodyType::RIGIDBODY_STATIC);
+    //cubeModel3.SetCollider(ColliderShapeType::MESH_SHAPE);
+    //renderkernel.AddModel(&cubeModel3);
+
    // cubeModel.isSelectableModel = true;
     //cubeModel.AddMaterial(rmMaterial);
    // cubeModel.ScaleTo(glm::vec3(4.0f, 4.0f, 4.0f));
@@ -582,29 +736,50 @@ int main(int, char**)
 
     // LIGHT
     
-    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(0.0f, 5.0f,-3.0f));//
-    //pointLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(0.01, -1.0, 0.01));
-    pointLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
-    pointLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
-    pointLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f); //glm::vec3(0.23, 1.0, 0.08));
+    Light* pointLight = new Light(TypeLight::POINTLIGHT, glm::vec3(1.86f, 5.0f, 0.0f));
+    pointLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(5.0f, 15.0f, 5.0f));
+    pointLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f));
+    pointLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 20.0f);
+    pointLight->EditLightComponent(LightComponent::LIGHT_FAR_EFFECT, 60.0f);
+    pointLight->SetFarPlane(60.0f);
+    //pointLight->GetFarplane() = 60.0f;
+    //pointLight->
     renderkernel.AddLight(pointLight);
+
+    Light* weaponLight = new Light(TypeLight::POINTLIGHT, glm::vec3(-7.f, -0.64f, 44.5f));//WEAPON LIGHT
+    weaponLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(0.0f));
+    weaponLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(0.0f));
+    //weaponLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 0.0f);
+    weaponLight->EditLightComponent(LightComponent::LIGHT_FAR_EFFECT, 40.0f);
+    //weaponLight->SetLinear(0.0f);
+    renderkernel.AddLight(weaponLight);
+    demo->AddWeaponLight(weaponLight);
+
+    Light* artifactLight = new Light(TypeLight::POINTLIGHT, glm::vec3(-25.250f, -1.840, 42.910));//ARTIFACT LIGHT
+    artifactLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 5.0f, 15.0f));
+    artifactLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 5.0f, 15.0f));
+    artifactLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 10.0f); 
+    artifactLight->SetLinear(0.0f);
+    renderkernel.AddLight(artifactLight);
+    artifactLight->isCastShadow = false;
+    demo->AddArtifactLight(artifactLight);
     
-    Light* spotLight = new Light(TypeLight::SPOTL, glm::vec3(5.0f, 0.5f, 0.0f));
-    spotLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-1.0, 0.0, 0.0));
-    spotLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
-    spotLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
-    spotLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 20.0f);
-    spotLight->EditLightComponent(LightComponent::LIGHT_CUTOFF, 25.0f);
-    spotLight->EditLightComponent(LightComponent::LIGHT_OUTERCUTOFF, 30.0f);
+    //Light* spotLight = new Light(TypeLight::SPOTL, glm::vec3(5.0f, 0.5f, 0.0f));
+    //spotLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-1.0, 0.0, 0.0));
+    //spotLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
+    //spotLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
+    //spotLight->EditLightComponent(LightComponent::LIGHT_LINEAR, 20.0f);
+    //spotLight->EditLightComponent(LightComponent::LIGHT_CUTOFF, 25.0f);
+    //spotLight->EditLightComponent(LightComponent::LIGHT_OUTERCUTOFF, 30.0f);
     //renderkernel.AddLight(spotLight);
 
-    //Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(25.0f, 25.0f, 25.0f));
-    //dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-0.5, -1.0, 0.0));
-    //dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(4.6, 20.0, 1.6));
-    //dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 15.0f, 15.0f)); //glm::vec3(0.23, 1.0, 0.08));
-    //renderkernel.AddLight(dirLight);
+    Light* dirLight = new Light(TypeLight::DIRL, glm::vec3(2.23f, 9.39f, 10.62f));
+    dirLight->EditLightComponent(LightComponent::LIGHT_DIRECTION, glm::vec3(-8.24f, 1.16f, -0.05));
+    dirLight->EditLightComponent(LightComponent::LIGHT_DIFFUSE, glm::vec3(6.f, 1.6f, 1.6f)); 
+    dirLight->EditLightComponent(LightComponent::LIGHT_SPECULAR, glm::vec3(15.0f, 10.0f, 10.0f));
+    renderkernel.AddLight(dirLight);
 
-    Texture* textureHDR = new Texture("resources/HDR/Desert_Highway/Road_to_MonumentValley_Ref.hdr",TypeTexture::HDR_SKYBOX);
+    Texture* textureHDR = new Texture("resources/HDR/Desert_Highway/101_hdrmaps_com_free.hdr",TypeTexture::HDR_SKYBOX);
     Skybox* skybox = new Skybox(true);
     skybox->SetHdrTexture(textureHDR);
     renderkernel.AddPreCookSkybox(skybox);
@@ -628,7 +803,7 @@ int main(int, char**)
     // Main loop
     renderkernel.StartRender();
 
-
+    first.join();
     return 0;
 }
 

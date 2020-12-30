@@ -4,14 +4,14 @@ Model::Model()
 {
     model_type = ModelType::REGULAR_M;
     matHandle.type = MaterialType::LIT;
-    transform = new Transform();
+    transform = new CustomTransform();
 }
 
 Model::Model(char* path)
 {
     model_type = ModelType::REGULAR_M;
     matHandle.type = MaterialType::LIT;
-    transform = new Transform();
+    transform = new CustomTransform();
     loadModel(path);
 }
 
@@ -90,10 +90,23 @@ void Model::DrawCastShadow(std::vector<Light*> lights, bool isOutline)
                         numSpot++;
                     }
                 }
-                
-                meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
-                if (meshes[i].material->type == MaterialType::NORMALS)
-                    meshes[i].material->ptrShader2->setMat4("model", transform->finalModelMatrix);
+
+                if (isCollider)
+                {
+                    physicTransform->getOpenGLMatrix(modelMatrix);
+                    transform->AssignPhysicMatrix(modelMatrix, scaleFactor);
+
+                    //transform->finalModelMatrix = glm::mat4(modelMatrix);
+                    //meshes[i].material->ptrShader->setMat4("model", modelMatrix);
+                    //if (meshes[i].material->type == MaterialType::NORMALS)
+                    //    meshes[i].material->ptrShader2->setMat4("model", modelMatrix);
+                }
+                //else
+                //{
+                    meshes[i].material->ptrShader->setMat4("model", transform->finalModelMatrix);
+                    if (meshes[i].material->type == MaterialType::NORMALS)
+                        meshes[i].material->ptrShader2->setMat4("model", transform->finalModelMatrix);
+               //}
             }
             meshes[i].Draw();
         }
@@ -319,6 +332,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
+    numVertices = mesh->mNumVertices * 3;
+    numFaces = mesh->mNumFaces;
+
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
@@ -328,6 +344,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
         vertex.Position = vector;
+
+        rawVertices.push_back(rp3d::Vector3(vector.x, vector.y, vector.z));
 
         if (existNormal)
         {
@@ -367,8 +385,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     {
         aiFace face = mesh->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; j++)
+        {
             indices.push_back(face.mIndices[j]);
+        }
     }
+    rawIndices = indices;
+
     // process material
     if (mesh->mMaterialIndex >= 0)
     {
@@ -401,70 +423,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         else
             bumpMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, TypeTexture::BUMP);
         textures.insert(textures.end(), bumpMaps.begin(), bumpMaps.end());
-        //AÑADIR MAS TIPOS DE TEXTURA
-    }
-    ///---ANIMATION---
-    /*
-    //ANIMATION ED
-    int boneArraysSize = mesh->mNumVertices * WEIGHTS_PER_VERTEX;
-    std::vector<int> boneIDs;
-    boneIDs.resize(boneArraysSize);
-    std::vector<float> boneWeights;
-    boneWeights.resize(boneArraysSize);
-
-    //ID & WEIGHTS
-    for (unsigned int i = 0; i < mesh->mNumBones; i++)
-    {
-        aiBone* aiBone = mesh->mBones[i];
-
-        for (int j = 0; j < aiBone->mNumWeights; j++)
-        {
-            aiVertexWeight weight = aiBone->mWeights[j];
-            unsigned int vertexStart = weight.mVertexId * WEIGHTS_PER_VERTEX;
-
-            for (int k = 0; k < WEIGHTS_PER_VERTEX; k++)
-            {
-                if (boneWeights.at(vertexStart + k) == 0)
-                {
-                    boneWeights.at(vertexStart + k) = weight.mWeight;
-                    boneIDs.at(vertexStart + k) = i;
-
-                    vertices.at(weight.mVertexId).Id[k] = i;
-                    vertices.at(weight.mVertexId).Weight[k] = weight.mWeight;
-                    break;
-                }
-            }
-        }
-
-        //Here we're just storing the bone information that we loaded
-        //with ASSIMP into the formats our Bone class will recognize.
-        std::string b_name = mesh->mBones[i]->mName.data;
-        glm::mat4 b_mat = glm::transpose(AiToGLMMat4(mesh->mBones[i]->mOffsetMatrix));
-
-        //BONE and Hierarchy
-
-        Bone bone(i, b_name, b_mat);
-        bone.node = FindAiNode(b_name);
-        bone.animNode = FindAiNodeAnim(b_name);
-
-        if (bone.animNode == nullptr)
-            std::cout << "No Animations were found for " + b_name << std::endl;
-
-        b_name = bone.name;
-        std::string parent_name = FindAiNode(b_name)->mParent->mName.data;
-        Bone* p_bone = FindBone(parent_name);
-        bone.parent_bone = p_bone;
-
-        //Finally, we push the Bone into our vector. Yay.
-        bones.push_back(bone);
-
-        if (p_bone == nullptr)
-            std::cout << "Parent Bone for " << b_name << " does not exist (is nullptr)" << std::endl;
     }
 
-   // if (meshes->size() > 0)
-   //     meshes->at(0).sceneLoaderSkeleton.Init(bones, globalInverseTransform);
-     */
+
+
     return Mesh(vertices, indices, textures, matHandle);
 }
 
@@ -500,6 +462,38 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
     return textures;
 }
 
+void Model::SetCollider(ColliderShapeType type)
+{
+    this->colliderType = type;
+    isCollider = true;
+}
+
+void Model::SetCollider(ColliderShapeType type, float radius)
+{
+    this->colliderType = type;
+    this->radius = radius;
+    isCollider = true;
+}
+
+void Model::SetCollider(ColliderShapeType type, glm::vec3 boxSize)
+{
+    this->colliderType = type;
+    this->boxSize = reactphysics3d::Vector3(boxSize.x, boxSize.y, boxSize.z);
+    isCollider = true;
+}
+
+void Model::SetCollider(ColliderShapeType type, glm::vec2 capsuleSize)
+{
+    this->colliderType = type;
+    this->capsuleSize = reactphysics3d::Vector2(capsuleSize.x, capsuleSize.y);
+    isCollider = true;
+}
+
+void Model::SetPositionOrientation(reactphysics3d::Vector3 position, reactphysics3d::Quaternion orientation)
+{
+    physicTransform = new reactphysics3d::Transform(position, orientation);
+}
+
 void Model::Rotation(float radians, glm::vec3 axis)
 {
     transform->model = glm::rotate(transform->model, (float)glfwGetTime() * glm::radians(radians), axis);
@@ -517,7 +511,10 @@ void Model::TranslationTo(glm::vec3 position)
 
 void Model::ScaleTo(glm::vec3 scale)
 {
-    transform->model = glm::scale(transform->model, scale);
+    if (isCollider)
+        scaleFactor = scale;
+    else
+        transform->model = glm::scale(transform->model, scale);
 }
 
 void Model::AttachModel(Model* modelParent)
@@ -537,7 +534,7 @@ void Model::SetModelHierarchy()
 
     if (transform->parent != nullptr)
     {
-        Transform* parent = transform->parent;
+        CustomTransform* parent = transform->parent;
 
         while (parent != nullptr)
         {
@@ -575,7 +572,7 @@ Model::Model(float rawData[], unsigned int numVertex, unsigned int offset, Model
 {
     this->model_type = model_type;
     matHandle.type = MaterialType::LIT;
-    transform = new Transform();
+    transform = new CustomTransform();
 
     if (model_type == ModelType::REGULAR_M)
     {
@@ -687,16 +684,20 @@ Model::Model(float rawData[], unsigned int numVertex, unsigned int offset, Model
 Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textImages)
 {
     matHandle.type = MaterialType::LIT;
-    transform = new Transform();
+    transform = new CustomTransform();
 
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
+    numVertices = numVertex * 3;
+    numFaces = numVertex / 3;
+
     const int NUMCOMP = 8;
+    const int OFFSET_RAW = 3;
     for (int i = 0; i < numVertex; i++)
     {
         unsigned int index = i * NUMCOMP;
-
+        unsigned int rawIndex = i * OFFSET_RAW;
         Vertex vertex;
         // process vertex positions, normals and texture coordinates
         glm::vec3 vector;
@@ -704,6 +705,11 @@ Model::Model(float rawData[], unsigned int numVertex, std::vector<Texture> textI
         vector.y = rawData[index + 1];
         vector.z = rawData[index + 2];
         vertex.Position = vector;
+
+        rawVertices.push_back(rp3d::Vector3(vector.x, vector.y, vector.z));
+        rawIndices.push_back(rawIndex);
+        rawIndices.push_back(rawIndex+1);
+        rawIndices.push_back(rawIndex+2);
 
         vector.x = rawData[index + 3];
         vector.y = rawData[index + 4];
@@ -860,6 +866,11 @@ void Model::ChangeIndexSystem(bool indexSystem)
 {
     for (int i = 0; i < meshes.size(); i++)
         meshes.at(i).ChangeIndexSystem(indexSystem);
+}
+
+void Model::SetDemoType(DEMO demo)
+{
+    demoAttribute = demo;
 }
 
 Bone* Model::FindBone(std::string name)

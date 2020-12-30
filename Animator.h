@@ -16,7 +16,7 @@ private:
 
     void IncreaseAnimationTime();
     std::map<std::string, glm::mat4> CalculateCurrentAnimationPose();
-    void ApplyPoseToJoints(std::map<std::string, glm::mat4> pose, Joint joint, glm::mat4 parentTransform);
+    void ApplyPoseToJoints(std::map<std::string, glm::mat4> pose, CustomJoint joint, glm::mat4 parentTransform);
     KeyFrame* GetPreviusNextFrames();
     float CalculateProgression(KeyFrame previus, KeyFrame next);
     std::map<std::string, glm::mat4> InterpolatePoses(KeyFrame previus, KeyFrame next, float time);
@@ -24,7 +24,7 @@ public:
     Animator() {}
     //Animator(AnimatedModel model);
     void DoAnimation(Animation anim);
-    void Update(Joint root);
+    void Update(CustomJoint root);
     inline void SetDeltaTime(float* deltaTime) { this->deltaTime = deltaTime; }
 };
 

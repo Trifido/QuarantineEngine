@@ -17,7 +17,6 @@ private:
     std::string directory;
     bool existTangent = false;
     bool existNormal = false;
-    Transform* transform;
     void loadModel(std::string path);
     void processNode(aiNode* node, const aiScene* scene);
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
@@ -25,8 +24,11 @@ private:
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, TypeTexture typeName);
     void DeleteGPUInfo();
 public:
+    bool isActive = true;
+    CustomTransform* transform;
     Shader* godRayShader;
     GodRay();
+    GodRay(std::string path);
     void SetModelHierarchy();
     void Render();
     void ScaleTo(glm::vec3 scale);

@@ -18,20 +18,20 @@ enum ColliderType
     MESH
 };
 
-class Collider
+class CustomCollider
 {
 public:
     const aiScene* scene;
     std::vector<aiNode*> ai_nodes;
     ColliderType type;
-    Transform *transform;
+    CustomTransform *transform;
     Mesh meshCollider;
     MaterialHandle matHandle;
     float radius;
     glm::vec3 aabb_min, aabb_max;
 
-    Collider();
-    Collider(ColliderType typeCollider);
+    CustomCollider();
+    CustomCollider(ColliderType typeCollider);
     void DrawCollider();
 
     bool IsRayCollision(UIRay *ray);

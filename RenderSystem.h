@@ -21,6 +21,9 @@
 #include "AnimatedModel.h"
 #include "GUISystem.h"
 #include "GodRay.h"
+#include "PhysicSystem.h"
+#include "RayCastSystem.h"
+#include "DemoLogic.h"
 
 #include <thread>
 #include <GLFW/glfw3.h>
@@ -28,6 +31,9 @@
 class RenderSystem
 {
 private:
+    DemoLogic* demo;
+    PhysicSystem* physicSystem;
+    RayCastSystem* raySystem;
     GUISystem* guiSystem;
     RenderType renderMode = RenderType::DEFERRED_RENDER;
     //RenderType renderMode = RenderType::FORWARD_QUALITY_RENDER;
@@ -65,6 +71,7 @@ private:
     unsigned int num_omni_cast_shadow;
     unsigned int num_spot_cast_shadow;
     float gamma;
+    unsigned int numRigidbodies = 0;
 
     void UpdateFBO();
 public:
@@ -92,6 +99,8 @@ public:
 
     void AddGlfWindow(GLFWwindow* window);
     void Clean();
+    void AddPhysicSystem(PhysicSystem* phySis);
+    void AddDemo(DemoLogic* demo);
     void AddLight(Light* lights);
     void AddLight(BoundingLight* lights);
     void AddCamera(Camera* cam);

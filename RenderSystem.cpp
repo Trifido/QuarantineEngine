@@ -15,6 +15,8 @@ RenderSystem::RenderSystem(GLFWwindow* window, ImVec4* clearColor)
     //Load Pivot Model
     pivot = new Pivot();
     this->AddModel(pivot->GetModel());
+    //DEMO
+    demo = new DemoLogic();
 }
 
 void RenderSystem::ComputeDeltaTime()
@@ -48,6 +50,18 @@ void RenderSystem::Clean()
 
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+void RenderSystem::AddPhysicSystem(PhysicSystem* phySis)
+{
+    physicSystem = phySis;
+    physicSystem->SetDeltaTime(&deltaTime);
+}
+
+void RenderSystem::AddDemo(DemoLogic* demo)
+{
+    this->demo = demo;
+    this->demo->AddDeltaTime(&deltaTime);
 }
 
 void RenderSystem::AddGlfWindow(GLFWwindow* window)
@@ -113,6 +127,47 @@ void RenderSystem::AddCamera(Camera* cam)
 void RenderSystem::AddModel(Model* model)
 {
     this->models.push_back(model);
+
+    if (model->GetPhysicType() == PhysicBodyType::COLLISION_BODY)
+        physicSystem->AddCollisionBody(model->physicTransform);
+    else
+    {
+        if (model->isCollider)
+        {
+            physicSystem->AddRigidBody(model->physicTransform, model->GetPhysicType());
+            switch (model->GetColliderType())
+            {
+            case ColliderShapeType::BOX_SHAPE:
+                physicSystem->AddCollider(model->GetColliderType(), model->boxSize);
+                break;
+            case ColliderShapeType::SPHERE_SHAPE:
+                physicSystem->AddCollider(model->GetColliderType(), model->radius);
+                break;
+            case ColliderShapeType::CAPSULE_SHAPE:
+                physicSystem->AddCollider(model->GetColliderType(), model->capsuleSize);
+                break;
+            case ColliderShapeType::MESH_SHAPE:
+                physicSystem->AddCollider(model->GetColliderType(), model->GetRawVertices(),
+                    model->GetRawIndices(), model->GetNumFaces(), model->GetNumVertices());
+                break;
+            case ColliderShapeType::NULL_SHAPE:
+            default:
+                break;
+            }
+        }
+    }
+    if (model->demoAttribute == DEMO::IS_APPEARED)
+    {
+        demo->modelWeapon = model;
+    }
+    else if (model->demoAttribute == DEMO::IS_ARTIFACT)
+    {
+        demo->modelArtifact = model;
+    }
+    else if (model->demoAttribute == DEMO::IS_ARM)
+    {
+        demo->armWeapon = model;
+    }
 }
 
 void RenderSystem::AddFresnelModel(Water* fresnelModel)
@@ -132,7 +187,10 @@ void RenderSystem::AddGodRayModel(GodRay* godRay)
 
 void RenderSystem::AddParticleSystem(ParticleSystem* system)
 {
-    this->particleSystems.push_back(system);
+    if(system->GetType() == ParticleSystemType::BILLBOARD && system->isText)
+        demo->AddBillboards(system);
+    else
+        this->particleSystems.push_back(system);
 }
 
 void RenderSystem::AddRenderVolume(RenderVolume* volume)
@@ -169,9 +227,11 @@ void RenderSystem::RenderDirectionalShadowMap()
         fboSystem->DirShadowPass(idLight);
         glViewport(0, 0, 4048, 4048);
         glClear(GL_DEPTH_BUFFER_BIT);
-               
+
+
         for (int idModel = 0; idModel < models.size(); idModel++)
-            models[idModel]->DrawShadow(shadowCastDirLights.at(idLight)->lightSpaceMatrix);
+            if (models.at(idModel)->demoAttribute != DEMO::IS_APPEARED)
+                models[idModel]->DrawShadow(shadowCastDirLights.at(idLight)->lightSpaceMatrix);
     }
     int idLightGeneral = this->shadowCastDirLights.size();
     for (int idLight = idLightGeneral; idLight < this->shadowCastSpotLights.size(); idLight++)
@@ -181,7 +241,8 @@ void RenderSystem::RenderDirectionalShadowMap()
         glClear(GL_DEPTH_BUFFER_BIT);
 
         for (int idModel = 0; idModel < models.size(); idModel++)
-            models[idModel]->DrawShadow(shadowCastSpotLights.at(idLight)->lightSpaceMatrix);
+            if (models.at(idModel)->demoAttribute != DEMO::IS_APPEARED)
+                models[idModel]->DrawShadow(shadowCastSpotLights.at(idLight)->lightSpaceMatrix);
     }
     glCullFace(GL_BACK);
 }
@@ -197,9 +258,12 @@ void RenderSystem::RenderOmnidirectionalShadowMap()
 
         for (int idModel = 0; idModel < models.size(); idModel++)
         {
-            if(models[idModel]->matHandle.type != MaterialType::EMISSIVE_LIT &&
-                models[idModel]->matHandle.type != MaterialType::BOUNDING_VOLUME)
-                models[idModel]->DrawShadow(shadowCastOmniLights.at(idLight)->lightSpaceMatrices, shadowCastOmniLights.at(idLight)->GetPosition(), shadowCastOmniLights.at(idLight)->GetFarplane());
+            if (models.at(idModel)->demoAttribute != DEMO::IS_APPEARED)
+            {
+                if (models[idModel]->matHandle.type != MaterialType::EMISSIVE_LIT &&
+                    models[idModel]->matHandle.type != MaterialType::BOUNDING_VOLUME)
+                    models[idModel]->DrawShadow(shadowCastOmniLights.at(idLight)->lightSpaceMatrices, shadowCastOmniLights.at(idLight)->GetPosition(), shadowCastOmniLights.at(idLight)->GetFarplane());
+            }
         }
     }
     glCullFace(GL_BACK);
@@ -210,15 +274,18 @@ void RenderSystem::RenderVolumeShadow()
     glDisable(GL_CULL_FACE);
     for (int i = 0; i < solidModels.size(); i++)
     {
-        //Comprobamos la jerarquía de los modelos 3D
-        solidModels[i]->SetModelHierarchy();
-
-        if (solidModels[i]->CAST_SHADOW)
+        if (solidModels.at(i)->demoAttribute != DEMO::IS_APPEARED)
         {
-            if (solidModels[i]->matHandle.type != MaterialType::EMISSIVE_LIT && solidModels[i]->matHandle.type != MaterialType::BOUNDING_VOLUME)
+            //Comprobamos la jerarquía de los modelos 3D
+            solidModels[i]->SetModelHierarchy();
+
+            if (solidModels[i]->CAST_SHADOW)
             {
-                glm::vec3 camViewLight = cameras[0]->view * glm::vec4(shadowCastOmniLights.at(0)->GetPosition(), 1.0);
-                solidModels[i]->DrawVolumeShadow(camViewLight);
+                if (solidModels[i]->matHandle.type != MaterialType::EMISSIVE_LIT && solidModels[i]->matHandle.type != MaterialType::BOUNDING_VOLUME)
+                {
+                    glm::vec3 camViewLight = cameras[0]->view * glm::vec4(shadowCastDirLights.at(0)->GetPosition(), 1.0);
+                    solidModels[i]->DrawVolumeShadow(camViewLight);
+                }
             }
         }
     }
@@ -231,7 +298,7 @@ void RenderSystem::RenderVolumeShadow()
         {
             if (outLineModels[i]->matHandle.type != MaterialType::EMISSIVE_LIT && outLineModels[i]->matHandle.type != MaterialType::BOUNDING_VOLUME)
             {
-                glm::vec3 camViewLight = cameras[0]->view * glm::vec4(shadowCastOmniLights.at(0)->GetPosition(), 1.0);
+                glm::vec3 camViewLight = cameras[0]->view * glm::vec4(shadowCastDirLights.at(0)->GetPosition(), 1.0);
                 outLineModels[i]->DrawVolumeShadow(camViewLight);
             }
         }
@@ -262,56 +329,59 @@ void RenderSystem::RenderSolidModels()
     glDisable(GL_CULL_FACE);
     for (int i = 0; i < solidModels.size(); i++)
     {
-        //Comprobamos la jerarquía de los modelos 3D
-        solidModels[i]->SetModelHierarchy();
-
-        //Añadimos el mapa de irradiancia
-        solidModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
-
-        if (solidModels[i]->CAST_SHADOW)
+        if (solidModels.at(i)->demoAttribute != DEMO::IS_APPEARED)
         {
-            for (int idLightD = 0; idLightD < LIMIT_DIR_CAST_SHADOW; idLightD++)
-            {
-                if (idLightD < this->shadowCastDirLights.size())
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightD), idLightD, TypeLight::DIRL);
-                }
-                else
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightD, TypeLight::DIRL);
-                }
-            }
+            //Comprobamos la jerarquía de los modelos 3D
+            solidModels[i]->SetModelHierarchy();
 
-            for (int idLightS = 0; idLightS < LIMIT_SPOT_CAST_SHADOW; idLightS++)
-            {
-                if (idLightS < this->shadowCastSpotLights.size())
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightS), idLightS, TypeLight::SPOTL);
-                }
-                else
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightS, TypeLight::SPOTL);
-                }
-            }
+            //Añadimos el mapa de irradiancia
+            solidModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
 
-            for (int idLightP = 0; idLightP < LIMIT_OMNI_CAST_SHADOW; idLightP++)
+            if (solidModels[i]->CAST_SHADOW)
             {
-                if (idLightP < this->shadowCastOmniLights.size())
+                for (int idLightD = 0; idLightD < LIMIT_DIR_CAST_SHADOW; idLightD++)
                 {
-                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLightP), idLightP, TypeLight::POINTLIGHT);
+                    if (idLightD < this->shadowCastDirLights.size())
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightD), idLightD, TypeLight::DIRL);
+                    }
+                    else
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightD, TypeLight::DIRL);
+                    }
                 }
-                else
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
-                }
-            }
 
-            solidModels[i]->matHandle.shader->setBool("isClipPlane", false);
-            solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
-        }
-        else
-        {
-            solidModels[i]->Draw();
+                for (int idLightS = 0; idLightS < LIMIT_SPOT_CAST_SHADOW; idLightS++)
+                {
+                    if (idLightS < this->shadowCastSpotLights.size())
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightS), idLightS, TypeLight::SPOTL);
+                    }
+                    else
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightS, TypeLight::SPOTL);
+                    }
+                }
+
+                for (int idLightP = 0; idLightP < LIMIT_OMNI_CAST_SHADOW; idLightP++)
+                {
+                    if (idLightP < this->shadowCastOmniLights.size())
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLightP), idLightP, TypeLight::POINTLIGHT);
+                    }
+                    else
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
+                    }
+                }
+
+                solidModels[i]->matHandle.shader->setBool("isClipPlane", false);
+                solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
+            }
+            else
+            {
+                solidModels[i]->Draw();
+            }
         }
     }
     glEnable(GL_CULL_FACE);
@@ -319,60 +389,67 @@ void RenderSystem::RenderSolidModels()
 
 void RenderSystem::RenderFPSModels()
 {
+    if (!demo->IS_GAME_RUN)
+        return;
+
     glDisable(GL_CULL_FACE);
 
     for (int i = 0; i < fpsModels.size(); i++)
     {
-        ////Comprobamos la jerarquía de los modelos 3D
-        fpsModels[i]->SetModelHierarchy();
-
-        //Añadimos el mapa de irradiancia
-        fpsModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
-
-        if (fpsModels[i]->CAST_SHADOW)
+        if ((demo->IS_WEAPON_IN_HAND && fpsModels.at(i)->demoAttribute == DEMO::IS_WEAPON) ||
+            (!demo->IS_WEAPON_IN_HAND && fpsModels.at(i)->demoAttribute == DEMO::IS_ARM))
         {
-            for (int idLight = 0; idLight < LIMIT_DIR_CAST_SHADOW; idLight++)
-            {
-                if (idLight < this->shadowCastDirLights.size())
-                {
-                    fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::DIRL);
-                }
-                else
-                {
-                    fpsModels[i]->matHandle.ActivateShadowMap(NULL, idLight, TypeLight::DIRL);
-                }
-            }
+            ////Comprobamos la jerarquía de los modelos 3D
+            fpsModels[i]->SetModelHierarchy();
 
-            for (int idLight = 0; idLight < LIMIT_SPOT_CAST_SHADOW; idLight++)
-            {
-                if (idLight < this->shadowCastSpotLights.size())
-                {
-                    fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::SPOTL);
-                }
-                else
-                {
-                    fpsModels[i]->matHandle.ActivateShadowMap(NULL, idLight, TypeLight::SPOTL);
-                }
-            }
+            //Añadimos el mapa de irradiancia
+            fpsModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
 
-            for (int idLight = 0; idLight < LIMIT_OMNI_CAST_SHADOW; idLight++)
+            if (fpsModels[i]->CAST_SHADOW)
             {
-                if (idLight < this->shadowCastOmniLights.size())
+                for (int idLight = 0; idLight < LIMIT_DIR_CAST_SHADOW; idLight++)
                 {
-                    fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLight), idLight, TypeLight::POINTLIGHT);
+                    if (idLight < this->shadowCastDirLights.size())
+                    {
+                        fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::DIRL);
+                    }
+                    else
+                    {
+                        fpsModels[i]->matHandle.ActivateShadowMap(NULL, idLight, TypeLight::DIRL);
+                    }
                 }
-                else
-                {
-                    fpsModels[i]->matHandle.ActivateShadowMap(NULL, idLight, TypeLight::POINTLIGHT);
-                }
-            }
 
-            fpsModels[i]->matHandle.shader->setBool("isClipPlane", false);
-            fpsModels[i]->DrawCastShadow(shadowCastGeneralLights);
-        }
-        else
-        {
-            fpsModels[i]->Draw();
+                for (int idLight = 0; idLight < LIMIT_SPOT_CAST_SHADOW; idLight++)
+                {
+                    if (idLight < this->shadowCastSpotLights.size())
+                    {
+                        fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLight), idLight, TypeLight::SPOTL);
+                    }
+                    else
+                    {
+                        fpsModels[i]->matHandle.ActivateShadowMap(NULL, idLight, TypeLight::SPOTL);
+                    }
+                }
+
+                for (int idLight = 0; idLight < LIMIT_OMNI_CAST_SHADOW; idLight++)
+                {
+                    if (idLight < this->shadowCastOmniLights.size())
+                    {
+                        fpsModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLight), idLight, TypeLight::POINTLIGHT);
+                    }
+                    else
+                    {
+                        fpsModels[i]->matHandle.ActivateShadowMap(NULL, idLight, TypeLight::POINTLIGHT);
+                    }
+                }
+
+                fpsModels[i]->matHandle.shader->setBool("isClipPlane", false);
+                fpsModels[i]->DrawCastShadow(shadowCastGeneralLights);
+            }
+            else
+            {
+                fpsModels[i]->Draw();
+            }
         }
     }
     glEnable(GL_CULL_FACE);
@@ -422,8 +499,11 @@ void RenderSystem::RenderOcclusionLightScattering()
 {
     for (int i = 0; i < solidModels.size(); i++)
     {
-        solidModels[i]->SetModelHierarchy();
-        solidModels[i]->DrawOcclusion(shadowCastGeneralLights);
+        if (solidModels.at(i)->demoAttribute != DEMO::IS_APPEARED)
+        {
+            solidModels[i]->SetModelHierarchy();
+            solidModels[i]->DrawOcclusion(shadowCastGeneralLights);
+        }
     }
 }
 
@@ -497,58 +577,61 @@ void RenderSystem::RenderClipPlane(glm::vec4 plane)
     glEnable(GL_CULL_FACE);
     for (int i = 0; i < solidModels.size(); i++)
     {
-        //Comprobamos la jerarquía de los modelos 3D
-        solidModels[i]->SetModelHierarchy();
-
-        //Añadimos el mapa de irradiancia
-        solidModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
-
-        solidModels[i]->matHandle.shader->setBool("isClipPlane", false);
-        solidModels[i]->matHandle.shader->setVec4("clip_plane", plane);
-
-        if (solidModels[i]->CAST_SHADOW)
+        if (solidModels.at(i)->demoAttribute != DEMO::IS_APPEARED)
         {
-            for (int idLightD = 0; idLightD < LIMIT_DIR_CAST_SHADOW; idLightD++)
-            {
-                if (idLightD < this->shadowCastDirLights.size())
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightD), idLightD, TypeLight::DIRL);
-                }
-                else
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightD, TypeLight::DIRL);
-                }
-            }
+            //Comprobamos la jerarquía de los modelos 3D
+            solidModels[i]->SetModelHierarchy();
 
-            for (int idLightS = 0; idLightS < LIMIT_SPOT_CAST_SHADOW; idLightS++)
-            {
-                if (idLightS < this->shadowCastSpotLights.size())
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightS), idLightS, TypeLight::SPOTL);
-                }
-                else
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightS, TypeLight::SPOTL);
-                }
-            }
+            //Añadimos el mapa de irradiancia
+            solidModels[i]->matHandle.ActivateIrradianceMap(fboSystem->GetSkyboxRender(1), fboSystem->GetPrefilterRender(), fboSystem->GetSkyboxRender(2));
 
-            for (int idLightP = 0; idLightP < LIMIT_OMNI_CAST_SHADOW; idLightP++)
-            {
-                if (idLightP < this->shadowCastOmniLights.size())
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLightP), idLightP, TypeLight::POINTLIGHT);
-                }
-                else
-                {
-                    solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
-                }
-            }
+            solidModels[i]->matHandle.shader->setBool("isClipPlane", false);
+            solidModels[i]->matHandle.shader->setVec4("clip_plane", plane);
 
-            solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
-        }
-        else
-        {
-            solidModels[i]->Draw();
+            if (solidModels[i]->CAST_SHADOW)
+            {
+                for (int idLightD = 0; idLightD < LIMIT_DIR_CAST_SHADOW; idLightD++)
+                {
+                    if (idLightD < this->shadowCastDirLights.size())
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightD), idLightD, TypeLight::DIRL);
+                    }
+                    else
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightD, TypeLight::DIRL);
+                    }
+                }
+
+                for (int idLightS = 0; idLightS < LIMIT_SPOT_CAST_SHADOW; idLightS++)
+                {
+                    if (idLightS < this->shadowCastSpotLights.size())
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetDirRender(idLightS), idLightS, TypeLight::SPOTL);
+                    }
+                    else
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightS, TypeLight::SPOTL);
+                    }
+                }
+
+                for (int idLightP = 0; idLightP < LIMIT_OMNI_CAST_SHADOW; idLightP++)
+                {
+                    if (idLightP < this->shadowCastOmniLights.size())
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(fboSystem->GetOmniRender(idLightP), idLightP, TypeLight::POINTLIGHT);
+                    }
+                    else
+                    {
+                        solidModels[i]->matHandle.ActivateShadowMap(NULL, idLightP, TypeLight::POINTLIGHT);
+                    }
+                }
+
+                solidModels[i]->DrawCastShadow(shadowCastGeneralLights);
+            }
+            else
+            {
+                solidModels[i]->Draw();
+            }
         }
     }
     glDisable(GL_CULL_FACE);
@@ -616,6 +699,13 @@ void RenderSystem::RenderParticleSystems()
     {
         particleSystems.at(i)->Render();
     }
+
+    //if(!demo->IS_WEAPON_IN_HAND)
+    demo->GetCurrentText()->Render();
+
+    if (demo->IS_WALL_DESTROY)
+        demo->vfx->Render();
+
     glEnable(GL_CULL_FACE);
 }
 
@@ -702,6 +792,15 @@ void RenderSystem::PreRender()
     //SET REFLECTIVE MATERIALS
     SetAmbientReflectiveMaterials();
 
+    for (unsigned int i = 0; i < models.size(); i++)
+    {
+        if (models.at(i)->GetPhysicType() != PhysicBodyType::COLLISION_BODY)
+        {
+            models.at(i)->physicTransform = physicSystem->GetTransform(numRigidbodies);
+            numRigidbodies++;
+        }
+    }
+
     //SORTING MODELS
     for (unsigned int i = 0; i < models.size(); i++)
     {
@@ -785,6 +884,17 @@ void RenderSystem::PreRender()
         particleSystems.at(i)->SetDeltaTime(&deltaTime);
     }
 
+    for (unsigned int i = 0; i < demo->texts.size(); i++)
+    {
+        uboSytem->SetUniformBlockIndex(demo->texts.at(i)->particleShader->ID, "Matrices");
+        demo->texts.at(i)->AddCamera(cameras.at(0));
+        demo->texts.at(i)->SetDeltaTime(&deltaTime);
+    }
+
+    uboSytem->SetUniformBlockIndex(demo->vfx->particleShader->ID, "Matrices");
+    demo->vfx->AddCamera(cameras.at(0));
+    demo->vfx->SetDeltaTime(&deltaTime);
+
     for (unsigned int i = 0; i < animatedModels.size(); i++)
     {
         uboSytem->SetUniformBlockIndex(animatedModels.at(i)->matHandle.shader->ID, "Matrices");
@@ -863,6 +973,10 @@ void RenderSystem::PreRender()
     { 
         PreRenderHDRSkybox();
     }
+
+    //Preparamos el sistema de físicas
+    raySystem = new RayCastSystem(physicSystem, cameras.at(0));
+    demo->AddRayPhysicSystem(raySystem);
 }
 
 void RenderSystem::SetRenderMode()
@@ -1039,7 +1153,7 @@ void RenderSystem::ForwardRender()
     }
     else
     {
-    /*
+    /**/
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -1076,9 +1190,10 @@ void RenderSystem::ForwardRender()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         RenderClipPlane(glm::vec4(0, -1, 0, guiSystem->clipPlaneH));
+        RenderTransparentModels();
 
         glDisable(GL_CLIP_DISTANCE0);
-    */    
+    /**/    
         fboSystem->MRTPass();
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color->x, clear_color->y, clear_color->z, clear_color->w);
@@ -1088,9 +1203,9 @@ void RenderSystem::ForwardRender()
         RenderFPSModels();
         //RenderAnimatedModels();
         RenderFresnelModels();
-        RenderParticleSystems();
         RenderSkyBox();
         RenderTransparentModels();
+        RenderParticleSystems();
         
         ///MULTISAMPLING 
         fboSystem->MultisamplingPass();
@@ -1183,26 +1298,67 @@ void RenderSystem::StartRender()
 {
     while (!glfwWindowShouldClose(window) && !guiSystem->isShutDown())
     {
+        //DEMO
+        demo->UpdateDemoLogic();
+
         //ANIMATION
         ComputeDeltaTime();
         GetWindowSize(window, &width, &height);
 
+        //UPDATE PHYSICS
+        physicSystem->Update();
+
         //glm::vec3 tempPos = lights.at(0)->GetPosition();
-        glm::vec3 tempPos = glm::vec3(0.0, 0.0, 0.0);
         glm::vec3 tempPos2 = glm::vec3(0.0, 1.0, 0.0);
-        tempPos.x = sin(glfwGetTime() * 0.5) * 0.1;
+        glm::vec3 tempPosStatue = glm::vec3(0.0, 1.0, 0.0);
+        glm::vec3 tempPos = glm::vec3(1.0, 0.0, 0.0);
+
+        tempPos.x = sin(glfwGetTime() * 20.0) * 0.01;
         tempPos2.y = sin(glfwGetTime() * 0.9) * 0.0001;
+        tempPosStatue.y = sin(glfwGetTime() * 2.0f) * 5.f;
 
         for (int i = 0; i < fpsModels.size(); i++)
         {
-            glm::vec3 newPosition = fpsModels.at(i)->transform->position;
-            newPosition += tempPos2;
-            fpsModels.at(i)->transform->model = glm::translate(fpsModels.at(i)->transform->model, newPosition);
+            if (!demo->activeShootAnimation)
+            {
+                glm::vec3 newPosition = fpsModels.at(i)->transform->position;
+                newPosition += tempPos2;
+                fpsModels.at(i)->transform->model = glm::translate(fpsModels.at(i)->transform->model, newPosition);
+            }
+            else
+            {
+                glm::vec3 newPosition = fpsModels.at(i)->transform->position;
+                newPosition += tempPos;
+                fpsModels.at(i)->transform->model = glm::translate(fpsModels.at(i)->transform->model, newPosition);
+            }
+        }
+        //ANIMATE WEAPON
+        if (demo->modelWeapon != nullptr)
+        {
+            if (demo->modelWeapon->demoAttribute == DEMO::IS_NOTHING)
+            {
+                glm::vec3 tempPosW = glm::vec3(0.0, 1.0, 0.0);
+                tempPosW.y = sin(glfwGetTime() * 0.7) * 0.01;
+
+                glm::vec3 newPosition = demo->modelWeapon->transform->position;
+                newPosition += tempPosW;
+                demo->modelWeapon->transform->model = glm::rotate(demo->modelWeapon->transform->model, glm::radians(deltaTime * 20.0f), glm::vec3(0.0, 1.0, 0.0));
+                demo->modelWeapon->transform->model = glm::translate(demo->modelWeapon->transform->model, newPosition);
+            }
         }
 
-       /* models[1]->TranslationTo(tempPos);
-        models[2]->TranslationTo(tempPos2);*/
-        //lights.at(0)->EditLightComponent(LightComponent::LIGHT_POSITION, tempPos);
+        for (unsigned int i = 0; i < models.size(); i++)
+        {
+            if (models.at(i)->demoAttribute == DEMO::IS_STATUE)
+            {
+                glm::vec3 newPosition = models.at(i)->transform->position;
+                newPosition += tempPosStatue;
+                models.at(i)->transform->model = glm::translate(models.at(i)->transform->model, newPosition);
+            }
+        }
+
+        godRayModels.at(0)->transform->model = glm::rotate(godRayModels.at(0)->transform->model, glm::radians(deltaTime * 20.0f), glm::vec3(0.0, 1.0, 0.0));
+        godRayModels.at(1)->transform->model = glm::rotate(godRayModels.at(1)->transform->model, glm::radians(deltaTime * -20.0f), glm::vec3(0.0, 1.0, 0.0));
 
         //Set GPU instances
         for (int i = 0; i < models.size(); i++)

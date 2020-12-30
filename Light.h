@@ -83,6 +83,7 @@ public:
     void inline SetOuterCutOff(float newout) { outerCutOff = newout; }
     void inline SetLinear(float newLinear) { linear = newLinear; }
     void inline SetQuadratic(float newQuad) { quadratic = newQuad; }
+    void inline SetFarPlane(float farPlane) { this->far_plane = farPlane; }
     void EditLightComponent(LightComponent lc, glm::vec3 value);
     void EditLightComponent(LightComponent lc, glm::vec4 value);
     void EditLightComponent(LightComponent lc, float value);
